@@ -113,22 +113,93 @@ __END__;
 
 =head1 NAME
 
-SDL::Cdrom - a SDL perl extension
+SDL::Cdrom - a SDL perl extension for managing CD-ROM drives
 
 =head1 SYNOPSIS
 
-  $cdrom = new SDL::Cdrom 0;
+	use SDL::Cdrom;
+	$cdrom = SDL::Cdrom->new(0);
+	$cdrom->play();
+
+=head1 EXPORTS
+
+C<SDL::Cdrom> exports by default only one symbol: C<CD_NUM_DRIVES>.
 
 =head1 DESCRIPTION
 
-to be rewritten
-	
-=head1 AUTHOR
+=head1 METHODS
 
-David J. Goehrig
+=head2 new()
+
+	use SDL::Cdrom;
+	my $drive => SDL::Cdrom->new($id);
+
+Create a new SDL::Cdrom object. The passed $id is the number of the drive,
+whereas 0 is the first drive etc.
+
+=head2 CD_NUM_DRIVES()
+
+Returns the number of CD-ROM drives present.
+
+=head2 name()
+
+	my $name = $drive->name();
+
+Returns the system dependent name of the CD-ROM device.
+
+=head2 status()
+
+Return the status of the drive.
+
+=head2 play()
+
+	$drive->play ($start,$length,$fs,$fl);
+
+Play a track.
+
+=head2 pause()
+
+Pause the playing.
+
+=head2 resume()
+
+Resume the playing.
+
+=head2 stop()
+
+Stop the playing.
+
+=head2 eject()
+
+Eject the medium in the drive.
+
+=head2 id()
+
+Return the ID of the drive.
+
+=head2 num_tracks()
+
+Return the number of tracks on the medium.
+
+=head2 track()
+
+	$drive->track($number);
+
+=head2 current()
+
+Return the current played track number.
+
+=head2 current_frame()
+
+Return the current frame.
+
+=head1 AUTHORS
+
+ David J. Goehrig
+ Documentation by Tels <http://bloodgate.com/>.
 
 =head1 SEE ALSO
 
-perl(1) SDL::Mixer(3) SDL::App(3).
+See perl(1), L<SDL::Mixer> and L<SDL::App>.
 
 =cut

@@ -1,6 +1,9 @@
+#ifndef SDL_PERL_DEFINES_H
+#define SDL_PERL_DEFINES_H
 
 #ifdef HAVE_TLS_CONTEXT
 PerlInterpreter *parent_perl = NULL;
+extern PerlInterpreter *parent_perl;
 #define GET_TLS_CONTEXT parent_perl =  PERL_GET_CONTEXT;
 #define ENTER_TLS_CONTEXT \
         PerlInterpreter *current_perl = PERL_GET_CONTEXT; \
@@ -14,3 +17,4 @@ PerlInterpreter *parent_perl = NULL;
 #define LEAVE_TLS_CONTEXT       /* TLS context not enabled */
 #endif
 
+#endif

@@ -8,6 +8,7 @@
 package SDL::Font;
 use strict;
 use SDL;
+use SDL::Surface;
 
 use vars qw(@ISA $CurrentFont );
 	    

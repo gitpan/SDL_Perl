@@ -112,7 +112,7 @@ sub InitGL
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();						# Reset The Projection Matrix
    
-   glPerspective(45.0, $Width/$Height, 0.1, 100.0);		# Calculate The Aspect Ratio Of The Window
+   gluPerspective(45.0, $Width/$Height, 0.1, 100.0);		# Calculate The Aspect Ratio Of The Window
    
    glMatrixMode(GL_MODELVIEW);
   }

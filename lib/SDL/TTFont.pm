@@ -64,6 +64,26 @@ sub print {
 		SDL::GetError(), "\n" unless ($$self{-surface});
 }
 
+sub width {
+        my ($self,@text) = @_;
+        SDL::TTFSizeText($$self{-font},join(" ",@text));
+}
+
+sub height {
+        my ($self) = @_;
+        SDL::TTFFontHeight($$self{-font});
+}
+
+sub ascent {
+        my ($self) = @_;
+        SDL::TTFFontAscent($$self{-font});
+}
+
+sub descent {
+        my ($self) = @_;
+        SDL::TTFFontDescent($$self{-font});
+}
+
 sub normal {
 	my ($self) = @_;
 	SDL::TTFSetFontStyle($$self{-font},SDL::TTF_STYLE_NORMAL());

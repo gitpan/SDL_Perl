@@ -1,4 +1,3 @@
-#!/usr/bin/env perl
 #
 #	SDL::FontTool	-	format agnostic font tool
 #

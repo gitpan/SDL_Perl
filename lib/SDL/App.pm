@@ -102,7 +102,8 @@ sub new {
 sub title ($;$) {
 	my $self = shift;
 	my ($title,$icon);
-	if (@_) { $title = shift; 
+	if (@_) { 
+		$title = shift; 
 		$icon = shift || $title;
 		SDL::WMSetCaption($title,$icon);
 	}
@@ -125,9 +126,7 @@ sub error {
 
 sub warp ($$$) {
 	my $self = shift;
-	my $x = shift;
-	my $y = shift;
-	SDL::WarpMouse($x,$y);
+	SDL::WarpMouse(@_);
 }
 
 sub fullscreen ($) {
@@ -142,7 +141,7 @@ sub iconify ($) {
 
 sub grab_input ($$) {
 	my ($self,$mode) = @_;
-	SDL::GrabInput($mode);
+	SDL::WMGrabInput($mode);
 }
 
 sub loop ($$) {
@@ -151,8 +150,8 @@ sub loop ($$) {
 	while ( $event->wait() ) {
 		if ( ref($$href{$event->type()}) eq "CODE" ) {
 			&{$$href{$event->type()}}($event);
+			$self->sync();
 		}
-		$self->sync();
 	}
 }
 

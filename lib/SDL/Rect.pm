@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#
 #	Rect.pm
 #
 #	A package for manipulating SDL_Rect *
@@ -33,46 +33,22 @@ sub DESTROY {
 
 sub x {
 	my $self = shift;
-	
-	if (@_) { 
-		my $x = shift; 
-		return SDL::RectX($self->{-rect},$x);
-	} else {
-		return SDL::RectX($self->{-rect});
-	}
+	return SDL::RectX($self->{-rect},@_);
 }
 
 sub y {
 	my $self = shift;
-	
-	if (@_) { 
-		my $y = shift; 
-		return SDL::RectY($self->{-rect},$y);
-	} else {
-		return SDL::RectY($self->{-rect});
-	}
+	return SDL::RectY($self->{-rect},@_);
 }
 
 sub width {
 	my $self = shift;
-
-	if (@_) { 
-		my $d = shift; 
-		return SDL::RectW($self->{-rect},$d);
-	} else {
-		return SDL::RectW($self->{-rect});
-	}
+	return SDL::RectW($self->{-rect},@_);
 }
 
 sub height {
 	my $self = shift;
-	
-	if (@_) { 
-	        my $d = shift; 
-		return SDL::RectH($self->{-rect},$d);
-	} else {
-		return SDL::RectH($self->{-rect});
-	}
+	return SDL::RectH($self->{-rect},@_);
 }
 
 1;

@@ -223,8 +223,7 @@ sub set_color_key {
 		$pixel = $pixel->pixel($$self{-surface}) 
 			if (ref($pixel) && $pixel->isa("SDL::Color"));
 	} else {
-		my ($x,$y) = @_;
-		$pixel = $self->pixel($x,$y);
+		$pixel = $self->pixel(@_);
 	}	
 	return SDL::SetColorKey($$self{-surface},$flag,$pixel);
 }
@@ -238,6 +237,22 @@ sub display_format {
 	my $self = shift;
 	my $tmp = SDL::DisplayFormat ($$self{-surface});
 	SDL::FreeSurface ($$self{-surface});
+	$$self{-surface} = $tmp;
+	return $self;
+}
+
+sub rgb {
+	my $self = shift;
+	my $tmp = SDL::ConvertRGB($$self{-surface});
+	SDL::FreeSurface($$self{-surface});
+	$$self{-surface} = $tmp;
+	return $self;
+}
+
+sub rgba {
+	my $self = shift;
+	my $tmp = SDL::ConvertRGBA($$self{-surface});
+	SDL::FreeSurface($$self{-surface});
 	$$self{-surface} = $tmp;
 	return $self;
 }
@@ -490,6 +505,14 @@ C<alpha> takes a value from 0x00 to 0xff.
 
 C<SDL::Surface::display_format> converts the surface to the same format as the
 current screen.
+
+=head2 rgb ()
+C<SDL::Surface::rgb> converts the surface to a 24 bit rgb format regardless of the 
+initial format.
+
+=head2 rgba ()
+C<SDL::Surface::rgba> converts the surface to a 32 bit rgba format regarless of the
+initial format.
 
 =head2 print (x,y,text...)
 

@@ -122,7 +122,7 @@ sdl_perl_audio_callback ( void* data, Uint8 *stream, int len )
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
-	XPUSHs(sv_2mortal(newSViv((unsigned int)stream)));
+	XPUSHs(sv_2mortal(newSViv(PTR2IV(stream))));
 	XPUSHs(sv_2mortal(newSViv(len)));
 	PUTBACK;
 
@@ -197,7 +197,7 @@ sdl_perl_console_callback(ConsoleInformation *console, char *Parameters)
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
-	XPUSHs(sv_2mortal(newSViv((unsigned int)console)));
+	XPUSHs(sv_2mortal(newSViv(PTR2IV(console))));
 	XPUSHs(sv_2mortal(newSVpv(Parameters,0)));
 	PUTBACK;
 
@@ -2370,7 +2370,7 @@ ListModes ( format, flags )
 			av_push(RETVAL,newSVpv("none",0));
 		} else {
 			for (;*mode;mode++) {
-				av_push(RETVAL,newSViv((unsigned int)*mode));
+				av_push(RETVAL,newSViv(PTR2IV(*mode)));
 			}
 		}
 	OUTPUT:
@@ -2735,6 +2735,58 @@ DisplayFormatAlpha ( surface )
 	OUTPUT:
 		RETVAL
 
+SDL_Surface*
+ConvertRGB ( surface )
+	SDL_Surface * surface
+	CODE:
+		SDL_PixelFormat fmt;
+		fmt.palette = NULL;
+		fmt.BitsPerPixel = 24;
+		fmt.BytesPerPixel = 3;
+		fmt.Rmask = 0x000000ff;
+		fmt.Gmask = 0x0000ff00;
+		fmt.Bmask = 0x00ff0000;
+		fmt.Amask = 0x00000000;
+		fmt.Rloss = 0;
+		fmt.Gloss = 0;
+		fmt.Bloss = 0;
+		fmt.Aloss = 0;
+		fmt.Rshift = 0;
+		fmt.Gshift = 8;
+		fmt.Bshift = 16;
+		fmt.Ashift = 24;
+		fmt.colorkey = 0;
+		fmt.alpha = 0;
+		RETVAL = SDL_ConvertSurface(surface,&fmt,surface->flags);
+	OUTPUT:
+		RETVAL
+
+SDL_Surface* 
+ConvertRGBA ( surface )
+	SDL_Surface * surface
+	CODE:
+		SDL_PixelFormat fmt;
+		fmt.palette = NULL;
+		fmt.BitsPerPixel = 32;
+		fmt.BytesPerPixel = 4;
+		fmt.Rmask = 0x000000ff;
+		fmt.Gmask = 0x0000ff00;
+		fmt.Bmask = 0x00ff0000;
+		fmt.Amask = 0xff000000;
+		fmt.Rloss = 0;
+		fmt.Gloss = 0;
+		fmt.Bloss = 0;
+		fmt.Aloss = 0;
+		fmt.Rshift = 0;
+		fmt.Gshift = 8;
+		fmt.Bshift = 16;
+		fmt.Ashift = 24;
+		fmt.colorkey = 0;
+		fmt.alpha = 0;
+		RETVAL = SDL_ConvertSurface(surface,&fmt,surface->flags);
+	OUTPUT:
+		RETVAL
+
 int
 BlitSurface ( src, src_rect, dest, dest_rect )
 	SDL_Surface *src
@@ -3003,8 +3055,8 @@ LoadWAV ( filename, spec )
 		RETVAL = newAV();
 		temp = SDL_LoadWAV(filename,spec,&buf,&len);
 		if ( ! temp ) goto error;
-		av_push(RETVAL,newSViv((Uint32)temp));
-		av_push(RETVAL,newSViv((Uint32)buf));
+		av_push(RETVAL,newSViv(PTR2IV(temp)));
+		av_push(RETVAL,newSViv(PTR2IV(buf)));
 		av_push(RETVAL,newSViv(len));
 error:
 	OUTPUT:

@@ -1,6 +1,6 @@
 #	Timer.pm
 #
-#	A package for manipulating SDL_Color *
+#	A package for manipulating SDL_Timer *
 #
 #	Copyright (C) 2002 David J. Goehrig
 
@@ -59,11 +59,11 @@ __END__;
 
 =head1 NAME
 
-SDL::Timer - a SDL perl extension
+SDL::Timer - a SDL perl extension to handle timers
 
 =head1 SYNOPSIS
 
-  $rect = new SDL::Timer { print "tick"; 4000; } -delay => 4000;
+  $timer = new SDL::Timer { print "tick"; 4000; } -delay => 4000;
 
 =head1 DESCRIPTION
 

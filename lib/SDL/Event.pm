@@ -385,18 +385,216 @@ SDL::Event - a SDL perl extension
 
 =head1 SYNOPSIS
 
- $event = new SDL::Event;
+ use SDL::Event;
+ my $event = new SDL::Event;             # create a new event
+ while ($event->wait()) {
+ 	my $type = $event->type();      # get event type
+ 	# ... handle event
+ 	exit if $type == SDL_QUIT;
+ }
+ 
+=head1 EXPORTS
+
+C<SDL::Event> exports the following symbols by default:
+ 
+       SDL_IGNORE              SDL_ENABLE
+       SDL_QUERY               SDL_ACTIVEEVENT
+       SDL_KEYDOWN             SDL_KEYUP
+       SDL_MOUSEMOTION         SDL_MOUSEBUTTONDOWN
+       SDL_MOUSEBUTTONUP       SDL_QUIT
+       SDL_SYSWMEVENT          SDL_APPMOUSEFOCUS
+       SDL_APPINPUTFOCUS       SDL_APPACTIVE
+       SDL_PRESSED             SDL_RELEASED
+       SDLK_BACKSPACE          SDLK_TAB
+       SDLK_CLEAR              SDLK_RETURN
+       SDLK_PAUSE              SDLK_ESCAPE
+       SDLK_SPACE              SDLK_EXCLAIM
+       SDLK_QUOTEDBL           SDLK_HASH
+       SDLK_DOLLAR             SDLK_AMPERSAND
+       SDLK_QUOTE              SDLK_LEFTPAREN
+       SDLK_RIGHTPAREN         SDLK_ASTERISK
+       SDLK_PLUS               SDLK_COMMA
+       SDLK_MINUS              SDLK_PERIOD
+       SDLK_SLASH              SDLK_0
+       SDLK_1                  SDLK_2
+       SDLK_3                  SDLK_4
+       SDLK_5                  SDLK_6
+       SDLK_7                  SDLK_8
+       SDLK_9                  SDLK_COLON
+       SDLK_SEMICOLON          SDLK_LESS
+       SDLK_EQUALS             SDLK_GREATER
+       SDLK_QUESTION           SDLK_AT
+       SDLK_LEFTBRACKET        SDLK_BACKSLASH
+       SDLK_RIGHTBRACKET       SDLK_CARET
+       SDLK_UNDERSCORE         SDLK_BACKQUOTE
+
+       SDLK_a                  SDLK_b
+       SDLK_c                  SDLK_d
+       SDLK_e                  SDLK_f
+       SDLK_g                  SDLK_h
+       SDLK_i                  SDLK_j
+       SDLK_k                  SDLK_l
+       SDLK_m                  SDLK_n
+       SDLK_o                  SDLK_p
+       SDLK_q                  SDLK_r
+       SDLK_s                  SDLK_t
+       SDLK_u                  SDLK_v
+       SDLK_w                  SDLK_x
+       SDLK_y                  SDLK_z
+       SDLK_DELETE             SDLK_KP0
+       SDLK_KP1                SDLK_KP2
+       SDLK_KP3                SDLK_KP4
+       SDLK_KP5                SDLK_KP6
+       SDLK_KP7                SDLK_KP8
+       SDLK_KP9                SDLK_KP_PERIOD
+       SDLK_KP_DIVIDE          SDLK_KP_MULTIPLY
+       SDLK_KP_MINUS           SDLK_KP_PLUS
+       SDLK_KP_ENTER           SDLK_KP_EQUALS
+       SDLK_UP                 SDLK_DOWN
+       SDLK_RIGHT              SDLK_LEFT
+       SDLK_INSERT             SDLK_HOME
+       SDLK_END                SDLK_PAGEUP
+
+       SDLK_PAGEDOWN           SDLK_F1
+       SDLK_F2                 SDLK_F3
+       SDLK_F4                 SDLK_F5
+       SDLK_F6                 SDLK_F7
+       SDLK_F8                 SDLK_F9
+       SDLK_F10                SDLK_F11
+       SDLK_F12                SDLK_F13
+       SDLK_F14                SDLK_F15
+       SDLK_NUMLOCK            SDLK_CAPSLOCK
+       SDLK_SCROLLOCK          SDLK_RSHIFT
+       SDLK_LSHIFT             SDLK_RCTRL
+       SDLK_LCTRL              SDLK_RALT
+       SDLK_LALT               SDLK_RMETA
+       SDLK_LMETA
+
+For instance, C<SDLK_F12> means the key F12, C<SDLK_KP9> means the
+key labeled '9' on the keypad (KP). Check for SDL_KEYDOWN for whether a key
+was pressed or not.
 
 =head1 DESCRIPTION
 
-to be rewritten
+C<SDL::Event> offers an object-oriented approach to SDL events. By creating
+an instance of SDL::Event via new() you can wait for events, and then determine
+the type of the event and take an appropriate action.
+
+=head1 EXAMPLE
+
+Here is an example of a simple event handler loop routine.
+See also L<SDL::App::loop>.
+
+       sub loop {
+               my ($self,$href) = @_;
+               my $event = new SDL::Event;
+               while ( $event->wait() ) {
+                       # ... insert here your event handling like:
+                       if ( ref($$href{$event->type()}) eq "CODE" ) {
+                               &{$$href{$event->type()}}($event);
+                               $self->sync();
+                       }
+               }
+       }
+
+=head1 METHODS
+
+=head2 new()
+
+Create a new event object.
+
+=head2 type()
+
+Returns the type of the event, see list of exported symbols for which are
+available.
+
+=head2 pump()
+
+=head2 poll()
+
+=head2 wait()
+
+Waits for an event end returns then. Always returns true.
+
+=head2 set()
+
+       $event->set($type,$state);
+
+Set type and state of the event.
+
+=head2 set_unicode()
+
+       $event->set_unicode($toggle);
+
+Toggle unicode on the event.
+
+=head2 set_key_repeat()
+
+       $event->set_key_repeat($delay,$interval);
+
+Sets the delay and intervall of the key repeat rate (e.g. when a user
+holds down a key on the keyboard).
+
+=head2 active_gain()
+
+=head2 active_state()
+
+=head2 key_state()
+
+=head2 key_sym()
+
+=head2 key_name()
+
+=head2 key_mod()
+
+=head2 key_unicode()
+
+=head2 key_scancode()
+
+=head2 motion_state()
+
+=head2 motion_x()
+
+       my $dist = $event->motion_x();
+
+Returns the motion of the mouse in X direction as an absolute value.
+
+=head2 motion_y()
+
+       my $dist = $event->motion_y();
+
+Returns the motion of the mouse in Y direction as an absolute value.
+
+=head2 motion_xrel()
+
+       my $rel_dist = $event->motion_xrel();
+
+Returns the motion of the mouse in X direction as a relative value.
+
+=head2 motion_yrel()
+
+       my $rel_dist = $event->motion_xrel();
+
+Returns the motion of the mouse in Y direction as a relative value.
+
+=head2 button_state()
+
+Returns the state of the mouse buttons.
+
+=head2 button_x()
+
+=head2 button_y()
+
+=head2 button()
 
 =head1 AUTHOR
 
-David J. Goehrig
+ David J. Goehrig
+ Documentation by Tels <http://bloodgate.com/>
 
 =head1 SEE ALSO
 
-perl(1) SDL::App(3).
+  perl(1) and L<SDL::App>.
 
 =cut
+

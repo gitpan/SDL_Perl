@@ -9,19 +9,21 @@ use AutoLoader 'AUTOLOAD';
 use SDL_perl;
 
 @ISA = qw(Exporter DynaLoader);
-@EXPORT = qw( in verify );
+@EXPORT = qw( in verify &NULL );
 
-$VERSION = '1.18.1';
+$VERSION = '1.19.2';
 
 print "$VERSION" if (defined($ARGV[0]) && ($ARGV[0] eq '--SDLperl'));
 
 $SDL::DEBUG=1;
 
+sub NULL {
+	return 0;
+}
+
 sub in {
-	my ($k,$h,@t) = @_;
-	return 0 unless ( defined $h );
-	return 1 if ( $k eq $h );
-	in ($k,@t);
+	my ($k,@t) = @_;
+	(scalar grep { defined $_ && $_ eq $k } @t) <=> 0;
 } 
 
 sub verify (\%@) {

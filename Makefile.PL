@@ -15,5 +15,6 @@
 #
 
 for (keys %OS ) {
-	require "$OS{$_}" && last if ($^O =~ /$_/);
+	my $k = lc($_);
+	require "$OS{$k}" && last if ($^O =~ /$k/);
 }

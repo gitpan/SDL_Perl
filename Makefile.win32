@@ -8,7 +8,7 @@ use ExtUtils::MakeMaker;
 
 use vars qw/ $sdl_cflags $sdl_libs @dirs $inc_flags
 	$sdl_image $sdl_mixer $sdl_ttf $sdl_net 
-	$png $jpeg $gl $glu $smpeg $gfx /;
+	$png $jpeg $gl $glu $smpeg $gfx $sound /;
 
 #
 # Windows configuration detection
@@ -17,43 +17,32 @@ use vars qw/ $sdl_cflags $sdl_libs @dirs $inc_flags
 
 if ($^O eq "MSWin32") {
 
-	my $sdlperl_home = "..\\sdl";
-
-	if (exists($ENV{SDLPERL_HOME})) {
-		$sdlperl_home=$ENV{SDLPERL_HOME};
-	} else {
-		warn "Warning: Using default SDLPERL_HOME value of: $sdlperl_home\n";
-	}
-
-	my $sdlperl_inc_home = $sdlperl_home."\\include";
-	my $sdlperl_lib_home = $sdlperl_home."\\lib";
-
 	warn "Warning: Env var INCLUDE should be set."  unless exists $ENV{INCLUDE};
-	warn "Warning: Env var LIB should be set."  unless exists $ENV{INCLUDE};
+	warn "Warning: Env var LIB should be set."  unless exists $ENV{LIB};
 
-	my @incDirs=  map { '"' . $_ .'"' } split ';', $ENV{INCLUDE};
-	push @incDirs, $sdlperl_inc_home;
+	my @incDirs = grep {$_} map {$_} split ';', $ENV{INCLUDE};
+	my @libdirs = grep {$_} map {$_} split ';', $ENV{LIB};
 
-	my @libDirs = ($sdlperl_lib_home);
-	$ENV{LIB}=$ENV{LIB}.";". join ";", @libDirs;
+	my $glVendor = $ENV{SDL_GL_VENDOR} || "MS";
+	
+	my $mesagl = ( $glVendor eq "MESA" ? 1 : ( $glVendor eq "MS" ? 0 : 
+		die "Unrecognized SDL_GL_VENDOR: $glVendor\n" ) );
+
+	my ($glLib,$gluLib,$glVendorFlags) = ( $mesagl ?
+		( '-lmesagl', '-lmesaglu -losmesa', '-DOPENGL_VENDOR_MESA -DCOMMON_OGL_SUPPORT') :
+		( '-lopengl', '-glu32', '-DOPENGL_VENDOR_MS -DCOMMON_OGL_SUPPORT');
 
 	@dirs=@incDirs;
+	$sdl_libs = '-lsdl';
+	my @dllDirs = (@libDirs, split ';', '"' . $ENV{PATH} . '"');
 
-	$sdl_cflags = join " ", map { "-I$_" } @incDirs;
-	$sdl_libs = "-lsdl";
-	map { $sdl_libs.=" -L$_"} @libDirs;
-
-	my @dllDirs=  @libDirs;
-	push @dllDirs , split ';', '"' .$ENV{PATH} . '"';
-
-	print "Scanning DLL Dirs:";
 	for ( @dllDirs ) {
-		print "\t$_";
 		$png = '-DHAVE_PNG' if -e "$_/libpng1.dll";
 		$jpeg = '-DHAVE_JPEG' if -e "$_/jpeg.dll";
-		$gl = '-DHAVE_GL' if -e "$_/gl.dll";
-		$glu = '-DHAVE_GLU' if -e "$_/glu.dll";
+		$gl = '-DHAVE_GL $glVendorFlags' if -e "$_/gl.h";
+		$sound = '-DHAVE_SDL_SOUND' if -e "$_/SDL_sound.h";
 	}
+	
 
 } else {
 
@@ -82,6 +71,7 @@ for ( @dirs ) {
 	$glu = '-DHAVE_GLU' if -e "$_/glu.h";	
 	$smpeg = '-DHAVE_SMPEG' if -e "$_/smpeg.h";
 	$gfx = '-DHAVE_SDL_GFX' if -e "$_/SDL_gfxPrimitives.h";
+	$sound = '-DHAVE_SDL_SOUND' if -e "$_/SDL_sound.h";
 }
 
 sub found_mod {
@@ -98,6 +88,7 @@ found_mod ("OpenGL",$gl);
 found_mod ("GLUT",$glu);
 found_mod ("SMPEG",$smpeg);
 found_mod ("SDL_gfx",$gfx);
+found_mod ("SDL_sound",$sound);
 
 
 #
@@ -114,12 +105,14 @@ my %options = (
 			($sdl_mixer) ? '-lSDL_mixer' : "", 
 			($sdl_net) ? '-lSDL_net' : "",
 			($sdl_ttf) ? '-lSDL_ttf' : "",
-			($gl) ? '' : "", 
-			($glu) ? '' : "", 
+			($gl) ? $glLib : "", 
+			($glu) ? $gluLib : "", 
 			($smpeg) ? '-lsmpeg' : "",
+			($gfx) ? '-lsdl_gfx' : "",
+			($sound) ? '-lsdl_sound' : "",
 			)
 			],  
-    'DEFINE'	=> "$sdl_image $png $jpeg $sdl_mixer $sdl_net $sdl_ttf $gl $glu $smpeg", 
+    'DEFINE'	=> "$sdl_image $png $jpeg $sdl_mixer $sdl_net $sdl_ttf $gl $glu $smpeg $gfx $sound", 
     'INC'	=> "$inc_flags $sdl_cflags",
     'OBJECT'	=> ($sdl_image ? 'SFont.o' : "" ) . " SDL_perl.o " . ($gl ? 'OpenGL.o' : "" ),
 );

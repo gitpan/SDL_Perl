@@ -2,7 +2,6 @@
 
 use strict;
 use ExtUtils::MakeMaker;
-use Getopt::Long;
 
 #
 # Configure SDL proper
@@ -11,32 +10,27 @@ use Getopt::Long;
 use vars qw/ $sdl_cflags $sdl_libs @dirs $inc_flags %ext @defs /;
 
 #
-# Configuration detection of Linux / Unix
+# Configuration detection of NetBSD Unix
 #
 
-$sdl_cflags = `sdl-config --cflags`;
-chomp($sdl_cflags);
-$sdl_libs = "-L/usr/X11R6/lib " . `sdl-config --libs`;
-$sdl_libs =~ s/-Wl,-rpath,\S*lib//; # suppress the insanity
+chomp ($sdl_cflags = "-I/usr/X11R6/include " . `sdl-config --cflags`);
+chomp ($sdl_libs = `sdl-config --libs`);
+$sdl_libs =~ s/-Wl,-rpath,(\/usr\/pkg)*\/lib//g;	# -rpath is obsolete, 
+							# use -R instead
 
 #
 # Search paths
 #
 
 @dirs=(
-	'/usr/local/include/SDL', 
-	'/usr/local/include',
-	'/usr/local/include/smpeg',
-	'/usr/include/SDL',
-	'/usr/include',
-	'/usr/include/smpeg',
-	'/usr/local/include/GL',
-	'/usr/local/include/gl',
-	'/usr/include/GL', 
-	'/usr/include/gl', 
+	'/usr/pkg/include',
+	'/usr/pkg/include/SDL', 
+	'/usr/pkg/include/smpeg',
+	'/usr/X11R6/include',
+	'/usr/X11R6/include/GL', 
 );
 
-$inc_flags = "-ggdb " . $ENV{DEBUG};
+$inc_flags = $ENV{'DEBUG'} . ' ' . $ENV{'CFLAGS'};
 
 #
 # Registed extensions
@@ -66,23 +60,9 @@ for $e ( keys %ext ) {
 		$ext{$e}{exists} ||= -e "$d/$ext{$e}{test}" 
 	}
 }
-
-my $usage;
-for $e ( keys %ext ) {
-	$usage .= "\n\t-$e disables $e support";
-}
-
-for $e ( @ARGV ) {
-	my $o;
-	($o = $e) =~ s/^-*//g;
-	if (exists $ext{$o}) {
-		print "Disabling $o\n";
-		$ext{$o}{exists} = 0;
-	}
-}
 	
 sub found_mod {
-	printf "%-24s%s\n", "Enabled $_[0]",  ( $_[1] ? "yes" : "no" );
+	printf "%-24s%s\n", "Found $_[0]",  ( $_[1] ? "yes" : "no" );
 }
 
 for $e ( sort keys %ext ) {
@@ -95,7 +75,7 @@ for $e ( sort keys %ext ) {
 
 if  ( $ext{GLU}{exists} ) {
 	print "Detecting GLU Version\n";
-	system ("gcc -o detect detect.c -lGLU -lGL $sdl_libs");
+	system ("gcc -o detect detect.c $sdl_cflags -lGLU -lGL $sdl_libs");
 	my $version = `./detect` * 10;
 	push @defs, "-DHAVE_GLU_VERSION=$version";
 	system ("rm detect");
@@ -114,7 +94,7 @@ my %options = (
 			)
 		],  
     'DEFINE'	=> join ( " ", @defs, map { $ext{$_}{exists} ? "-D$ext{$_}{inc}" : '' } sort keys %ext),
-    'INC'	=> "$inc_flags $sdl_cflags " . join(" ", map { "-I$_" } @dirs),
+    'INC'	=> "$inc_flags $sdl_cflags",
     'OBJECT'	=> (	
 			 ($ext{SDL_image}{exists} ? 'SFont.o ' : "") .
 			 'SDL_perl.o ' .

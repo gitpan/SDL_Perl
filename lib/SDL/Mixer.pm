@@ -130,7 +130,7 @@ sub fade_in_channel ($$$$$;$) {
 }
 
 sub fade_in_music ($$$$) {
-	my ($self,$music,$loops,$ms,$ms) = @_;
+	my ($self,$music,$loops,$ms) = @_;
 	return SDL::MixFadeInMusic($music->{-data},$loops,$ms);
 }
 
@@ -242,17 +242,238 @@ SDL::Mixer - a SDL perl extension
 				-channels => MIX_DEFAULT_CHANNELS,
 				-size => 4096;
 
+=head1 EXPORTS
+
+SDL::Mixer exports the following symbols by default:
+
+	MIX_MAX_VOLUME
+	MIX_DEFAULT_FREQUENCY
+	MIX_DEFAULT_FORMAT
+	MIX_DEFAULT_CHANNELS
+	MIX_NO_FADING
+	MIX_FADING_OUT
+	MIX_FADING_IN
+	AUDIO_U8
+	AUDIO_S8
+	AUDIO_U16
+	AUDIO_S16
+	AUDIO_U16MSB
+	AUDIO_S16MSB
+
 =head1 DESCRIPTION
 
-to be rewritten
+SDL::Mixer allows you access to the SDL mixer library, enablig sound and
+music volume setting, playing, pausing and resuming, as well as fading
+the sound and music in and out.
 
-=head1 AUTHOR 
+=head1 METHODS
+  
+=head2 new()
 
-David J. Goehrig
+	$mixer = SDL::Mixer->new(	-frequency => MIX_DEFAULT_FREQUENCY,
+					-format    => MIX_DEFAULT_FORMAT,
+					-channels  => MIX_DEFAULT_CHANNELS,
+					-size      => 4096);
+
+Creates a new SDL::Mixer object. C<$size> is the buffer size in bytes.
+
+=head2 query_spec()
+
+	my $specs = SDL::Mixer::query_spec();
+
+Returns a hash reference, containing the following keys and their respective
+values:
+
+	-status
+	-frequency
+	-channels
+	-format
+
+=head2 reserve_channels
+
+	$mixer->reserve_channels(4);
+
+Reserve so many channels.
+
+=head2 allocate_channels()
+
+	$mixer->reserve_channels(2);
+
+Allocate so many channels.
+
+=head2 group_channel()
+
+	$mixer->group_channel($channel,$group);
+
+Group the channel number C<$channel> into group C<$group>.
+
+=head2 group_channels()
+
+	$mixer->group_channels ($from, $to, $group);
+
+=head2 group_available()
+
+	$mixer->group_available($group);
+
+Return true when the group is available.
+
+=head2 group_count
+
+	$mixer = $self->group_count($group);
+
+=head2 group_oldest()
+
+	$mixer->group_oldest($group);
+
+=head2 group_newer()
+
+	$mixer->group_newer($group);
+
+=head2 play_channel()
+
+	$mixer->play_channel($channel,$chunk,$loops,$ticks);
+
+=head2 play_music()
+
+	$mixer->play_music($music,$loops);
+
+Play C<$music> C<$loop> times.
+
+=head2 fade_in_channel()
+
+	$mixer->fade_in_channel($channel,$chunk,$loops,$ms,$ticks);
+
+=head2 fade_in_music()
+
+	$mixer->fade_in_music($music,$loops,$ms);
+
+=head2 channel_volume()
+
+	$mixer->channel_volume($channel,$volume);
+
+=head2 mucis_volume()
+
+	$mixer->music_volume($volume);
+	
+Set the volume for the music.
+
+=head2 halt_channel()
+
+	$mixer->halt_channel($channel);
+	
+=head2 halt_group()
+
+	$mixer->halt_group($group);
+
+=head2 halt_music()
+
+	$mixer->halt_music();
+
+=head2 channel_expire()
+
+	$mixer->channel_expire($channel,$ticks);
+
+=head2 fade_out_channel()
+
+	$mixer->fade_out_channel($channel,$ms);
+
+Fade the channel number C<$channel> in C<$ms> ms out.
+
+=head2 fade_out_group()
+	
+	$mixer->fade_out_group($group,$ms);
+
+Fade the channel group C<$group> in C<$ms> ms out.
+
+=head2 fade_out_music()
+	
+	$mixer->fade_out_music($ms);
+
+Fade the music in C<$ms> ms out.
+
+=head2 fading_music()
+
+	if ($mixer->fading_music())
+	  {
+	  ...
+	  }
+
+Return true when the music is currently fading in or out.
+
+=head2 fading_channel()
+
+	if ($mixer->fading_channel($channel))
+	  {
+	  ...
+	  }
+
+Return true when the channel number C<$channel> is currently fading in or out.
+
+=head2 pause()
+
+	$mixer->pause($channel);
+
+Pause the channel C<$channel>.
+
+=head2 resume()
+
+	$mixer->resume($channel);
+
+Resume the channel C<$channel>.
+
+=head2 paused()
+
+	if ($mixer->paused($channel))
+	  {
+	  ...
+	  }
+
+Return true when the channel is currently paused.
+
+=head2 pause_music()
+
+	$mixer->pause_music();
+
+Pause the music play.
+
+=head2 resume_music()
+	
+	$mixer->resume_music();
+
+Resume the music play.
+
+=head2 rewind_music()
+
+	$mixer->rewind_music();
+
+=head2 music_paused()
+
+	if ($mixer->music_paused())
+	  {
+	  ...
+	  }
+
+Return true when the music is currently paused.
+
+=head2 playing()
+
+	$mixer->playing($channel);
+
+Return true when the channel is currently playing.
+
+=head2 playing_music ()
+
+	$mixer->playing_music();
+
+Return true when the music is currently playing.
+
+=head1 AUTHORS 
+
+David J. Goehrig, basic doc added by Tels <http://bloodgate.com>.
 
 =head1 SEE ALSO
 
-perl(1) SDL::Music(3) SDL::Sound(3)
+perl(1), L<SDL::Music> and L<SDL::Sound>.
 
 =cut
 

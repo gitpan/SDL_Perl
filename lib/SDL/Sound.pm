@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#
 #	Sound.pm
 #
 #	a SDL_mixer data module

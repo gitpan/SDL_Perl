@@ -24,6 +24,10 @@
 #define HAVE_TLS_CONTEXT
 #endif
 
+#ifndef GL_ALL_CLIENT_ATTRIB_BITS  
+#define GL_ALL_CLIENT_ATTRIB_BITS 0xFFFFFFF
+#endif /* GL_ALL_CLIENT_BITS */  
+
 #include "defines.h"
 
 SV* sdl_perl_nurbs_error_hook;
@@ -80,7 +84,7 @@ sdl_perl_nurbs_multi_callback ( GLfloat *vec, void *cb )
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
-	XPUSHs(sv_2mortal(newSViv((int)vec)));
+	XPUSHs(sv_2mortal(newSViv(PTR2IV(vec))));
 	PUTBACK;
 
 	call_sv(cmd,G_VOID);
@@ -228,11 +232,12 @@ sdl_perl_tess_vertex_callback ( double *vd,  void *cb )
 }
 
 void
-sdl_perl_tess_combine_callback ( GLdouble *coords, void *vd, GLfloat *weight, 
+sdl_perl_tess_combine_callback ( GLdouble coords[3], double *vd[4], GLfloat weight[4], 
 	GLdouble **out, void *cb )
 {
         SV *cmd;
 	double *data;
+	int width;
         ENTER_TLS_CONTEXT
 	dSP;
 
@@ -242,26 +247,24 @@ sdl_perl_tess_combine_callback ( GLdouble *coords, void *vd, GLfloat *weight,
         SAVETMPS;
         PUSHMARK(SP);
 	XPUSHs(sv_2mortal(newSViv(GLU_TESS_COMBINE)));
+	XPUSHs(sv_2mortal(newSVpvn((char*)coords,sizeof(GLdouble)*3)));
+	XPUSHs(sv_2mortal(newSVpvn((char*)vd,sizeof(GLdouble*)*4)));
+	XPUSHs(sv_2mortal(newSVpvn((char*)weight,sizeof(GLfloat)*4)));
         PUTBACK;
-
-	Perl_croak(aTHX_ "sdl_perl_tess_combine_callback not yet implemented");
 
         if ( 1 != call_sv(cmd,G_SCALAR) ) {
 		Perl_croak(aTHX_ "sdl_perl_tess_combine_callback failed");
 	}
 
 	data = (double*)POPp;
-	*out = (double*)malloc(sizeof(double)*6);
-	memcpy(out,data,sizeof(double)*6);
+	width = (int)POPi;
+	*out = (double*)malloc(sizeof(double)*width);
+	memcpy(*out,data,sizeof(double)*width);
 
         FREETMPS;
         LEAVE;
         LEAVE_TLS_CONTEXT
 }
-
-
-
-
 
 MODULE = SDL::OpenGL		PACKAGE = SDL::OpenGL
 PROTOTYPES : DISABLE
@@ -977,6 +980,168 @@ CopyColorTable ( target, internalFormat, x, y, width )
 	Uint32 width
 	CODE:
 		glCopyColorTable(target,internalFormat,x,y,width);
+
+void
+ColorSubTable ( target, start, count, format, type, data )
+	Uint32 target
+	Uint32 start
+	Uint32 count
+	Uint32 format
+	Uint32 type
+	char *data
+	CODE:
+		glColorSubTable(target,start,count,format,type,data);
+
+void
+CopyColorSubTable ( target, start, x, y, count )
+	Uint32 target
+	Uint32 start
+	Sint32 x
+	Sint32 y
+	Uint32 count
+	CODE:
+		glCopyColorSubTable(target,start,x,y,count);
+
+void
+ConvolutionFilter2D ( target, internalFormat, width, height, format, type, image )
+	Uint32 target
+	Uint32 internalFormat
+	Uint32 width
+	Uint32 height
+	Uint32 format
+	Uint32 type
+	char *image
+	CODE:
+		glConvolutionFilter2D(target,internalFormat,width,height,format,type,image);
+
+void
+CopyConvolutionFilter2D ( target, internalFormat, x, y, width, height )
+	Uint32 target
+	Uint32 internalFormat
+	Sint32 x
+	Sint32 y
+	Uint32 width
+	Uint32 height
+	CODE:
+		glCopyConvolutionFilter2D(target,internalFormat,x,y,width,height);
+
+void
+SeparableFilter2D ( target, internalFormat, width, height, format, type, row, column )
+	Uint32 target
+	Uint32 internalFormat
+	Uint32 width
+	Uint32 height
+	Uint32 format
+	Uint32 type
+	char *row
+	char *column
+	CODE:
+		glSeparableFilter2D(target,internalFormat,width,height,format,type,row,column);
+
+void
+ConvolutionFilter1D ( target, internalFormat, width, format, type, image )
+	Uint32 target
+	Uint32 internalFormat
+	Uint32 width
+	Uint32 format
+	Uint32 type
+	char *image
+	CODE:
+		glConvolutionFilter1D(target,internalFormat,width,format,type,image);
+
+void
+CopyConvolutionFilter1D ( target, internalFormat, x, y, width )
+	Uint32 target
+	Uint32 internalFormat
+	Sint32 x
+	Sint32 y
+	Uint32 width
+	CODE:
+		glCopyConvolutionFilter1D(target,internalFormat,x,y,width);
+
+void
+ConvolutionParameter ( target, pname, ... )
+	Uint32 target
+	Uint32 pname
+	CODE:
+		Uint32 pi;
+		GLfloat pv[4];
+		switch(pname) {	
+		case GL_CONVOLUTION_BORDER_MODE:
+			if ( items != 3 ) 
+				Perl_croak(aTHX_ "Usage: ConvolutionParameter(target,pname,...)");
+			pi = SvIV(ST(2));
+			glConvolutionParameteri(target,pname,pi);
+			break;
+		case GL_CONVOLUTION_FILTER_SCALE:
+		case GL_CONVOLUTION_FILTER_BIAS:
+			if ( items != 6 ) 
+				Perl_croak(aTHX_ "Usage: ConvolutionParameter(target,pname,...)");
+			pv[0] = (GLfloat)SvNV(ST(2));
+			pv[1] = (GLfloat)SvNV(ST(3));
+			pv[2] = (GLfloat)SvNV(ST(4));
+			pv[3] = (GLfloat)SvNV(ST(5));
+			glConvolutionParameterfv(target,pname,pv);
+			break;
+		default:
+			Perl_croak(aTHX_ "ConvolutionParameter invalid parameter");
+			break;
+		}
+
+void 
+Histogram ( target, width, internalFormat, sink )
+	Uint32 target
+	Uint32 width
+	Uint32 internalFormat
+	GLboolean sink
+	CODE:
+		glHistogram(target,width,internalFormat,sink);
+
+void
+GetHistogram ( target, reset, format, type, values )
+	Uint32 target 
+	GLboolean reset
+	Uint32 format
+	Uint32 type
+	char *values
+	CODE:
+		glGetHistogram(target,reset,format,type,values);
+
+void
+ResetHistogram ( target )
+	Uint32 target
+	CODE:
+		glResetHistogram(target);
+
+void
+Minmax ( target, internalFormat, sink )
+	Uint32 target
+	Uint32 internalFormat
+	GLboolean sink
+	CODE:
+		glMinmax(target,internalFormat,sink);
+
+void
+GetMinmax ( target, reset, format, type, values )
+	Uint32 target
+	GLboolean reset
+	Uint32 format
+	Uint32 type
+	char *values
+	CODE:
+		glGetMinmax(target,reset,format,type,values);
+
+void
+ResetMinmax ( target )
+	Uint32 target
+	CODE:
+		glResetMinmax(target);
+
+void
+BlendEquation ( mode )
+	Uint32 mode
+	CODE:
+		glBlendEquation(mode);
 
 void
 TexImage2D ( target, level, internalFormat, width, height, border, format, type, data )
@@ -1744,43 +1909,43 @@ NurbsCallback ( obj, which, cb )
 		switch(which) {
 			case GLU_ERROR:
 				sdl_perl_nurbs_error_hook = cb;
-				gluNurbsCallback(obj,GLU_ERROR,sdl_perl_nurbs_error_callback);
+				gluNurbsCallback(obj,GLU_ERROR,(GLvoid*)sdl_perl_nurbs_error_callback);
 				break;
 			case GLU_NURBS_BEGIN:
 			case GLU_NURBS_BEGIN_DATA:
 				gluNurbsCallbackData(obj,(void*)cb);
 				gluNurbsCallback(obj,GLU_NURBS_BEGIN_DATA,
-					sdl_perl_nurbs_being_callback);	
+					(GLvoid*)sdl_perl_nurbs_being_callback);	
 				break;
 			case GLU_NURBS_TEXTURE_COORD:
 			case GLU_NURBS_TEXTURE_COORD_DATA:
 				gluNurbsCallbackData(obj,(void*)cb);
 				gluNurbsCallback(obj,GLU_NURBS_TEXTURE_COORD_DATA,
-					sdl_perl_nurbs_multi_callback);	
+					(GLvoid*)sdl_perl_nurbs_multi_callback);	
 				break;
 			case GLU_NURBS_COLOR:
 			case GLU_NURBS_COLOR_DATA:
 				gluNurbsCallbackData(obj,(void*)cb);
 				gluNurbsCallback(obj,GLU_NURBS_COLOR_DATA,
-					sdl_perl_nurbs_multi_callback);	
+					(GLvoid*)sdl_perl_nurbs_multi_callback);	
 				break;
 			case GLU_NURBS_NORMAL:
 			case GLU_NURBS_NORMAL_DATA:
 				gluNurbsCallbackData(obj,(void*)cb);
 				gluNurbsCallback(obj,GLU_NURBS_NORMAL_DATA,
-					sdl_perl_nurbs_multi_callback);	
+					(GLvoid*)sdl_perl_nurbs_multi_callback);	
 				break;
 			case GLU_NURBS_VERTEX:
 			case GLU_NURBS_VERTEX_DATA:
 				gluNurbsCallbackData(obj,(void*)cb);
 				gluNurbsCallback(obj,GLU_NURBS_VERTEX_DATA,
-					sdl_perl_nurbs_multi_callback);	
+					(GLvoid*)sdl_perl_nurbs_multi_callback);	
 				break;
 			case GLU_NURBS_END:
 			case GLU_NURBS_END_DATA:
 				gluNurbsCallbackData(obj,(void*)cb);
 				gluNurbsCallback(obj,GLU_NURBS_END_DATA,
-					sdl_perl_nurbs_end_callback);	
+					(GLvoid*)sdl_perl_nurbs_end_callback);	
 				break;
 			default:
 				Perl_croak(aTHX_ "SDL::OpenGL::NurbsCallback - invalid type");
@@ -1947,40 +2112,104 @@ TessCallback ( tess, type )
 			case GLU_TESS_BEGIN:
 			case GLU_TESS_BEGIN_DATA:
 				gluTessCallback(tess,GLU_TESS_BEGIN_DATA,
-					sdl_perl_tess_begin_callback);	
+					(GLvoid*)sdl_perl_tess_begin_callback);	
 				break;
 	
 			case GLU_TESS_EDGE_FLAG:
 			case GLU_TESS_EDGE_FLAG_DATA:
 				gluTessCallback(tess,GLU_TESS_EDGE_FLAG_DATA,
-					sdl_perl_tess_edge_flag_callback);	
+					(GLvoid*)sdl_perl_tess_edge_flag_callback);	
 				break;
 
 			case GLU_TESS_VERTEX:
 			case GLU_TESS_VERTEX_DATA:
 				gluTessCallback(tess,GLU_TESS_VERTEX_DATA,
-					sdl_perl_tess_vertex_callback);	
+					(GLvoid*)sdl_perl_tess_vertex_callback);	
 				break;
 
 			case GLU_TESS_END:
 			case GLU_TESS_END_DATA:
 				gluTessCallback(tess,GLU_TESS_END_DATA,
-					sdl_perl_tess_end_callback);	
+					(GLvoid*)sdl_perl_tess_end_callback);	
 				break;
 
 			case GLU_TESS_COMBINE:
 			case GLU_TESS_COMBINE_DATA:
 				gluTessCallback(tess,GLU_TESS_COMBINE_DATA,
-					sdl_perl_tess_combine_callback);	
+					(GLvoid*)sdl_perl_tess_combine_callback);	
 				break;
 
 			case GLU_TESS_ERROR:
 			case GLU_TESS_ERROR_DATA:
 				gluTessCallback(tess,GLU_TESS_ERROR_DATA,
-					sdl_perl_tess_error_callback);	
+					(GLvoid*)sdl_perl_tess_error_callback);	
 				break;
-
 		}
+
+void
+TessProperty ( tessobj, property, value )
+	GLUtesselator *tessobj
+	Uint32 property
+	double value
+	CODE:
+		gluTessProperty(tessobj,property,value);
+
+double
+GetTessProperty ( tessobj, property )
+	GLUtesselator *tessobj
+	Uint32 property
+	CODE:
+		gluGetTessProperty(tessobj,property,&RETVAL);
+	OUTPUT:
+		RETVAL
+
+void
+TessNormal ( tessobj, x, y, z )
+	GLUtesselator *tessobj
+	double x
+	double y
+	double z
+	CODE:
+		gluTessNormal(tessobj,x,y,z);
+
+void
+TessBeginPolygon ( tessobj, cb )
+	GLUtesselator *tessobj
+	SV *cb
+	CODE:
+		gluTessBeginPolygon(tessobj,cb);
+
+void
+TessEndPolygon ( tessobj ) 
+	GLUtesselator *tessobj
+	CODE:
+		gluTessEndPolygon(tessobj);
+
+void
+TessBeginContour ( tessobj )
+	GLUtesselator *tessobj
+	CODE:
+		gluTessBeginContour(tessobj);
+
+void
+TessEndContour ( tessobj )
+	GLUtesselator *tessobj
+	CODE:
+		gluTessEndContour(tessobj);
+
+void
+DeleteTess ( tessobj )
+	GLUtesselator *tessobj
+	CODE:
+		gluDeleteTess(tessobj);
+
+void
+TessVertex ( tessobj, coords, vd ) 
+	GLUtesselator *tessobj
+	char *coords
+	char *vd
+	CODE:
+		gluTessVertex(tessobj,(GLdouble*)coords,vd);
 	
 #endif
 
@@ -4493,6 +4722,146 @@ GL_POST_COLOR_MATRIX_COLOR_TABLE ()
 		RETVAL
 
 GLenum
+GL_PROXY_COLOR_TABLE ()
+	CODE:
+		RETVAL = GL_PROXY_COLOR_TABLE;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_PROXY_POST_CONVOLUTION_COLOR_TABLE ()
+	CODE:
+		RETVAL = GL_PROXY_POST_CONVOLUTION_COLOR_TABLE;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_PROXY_POST_COLOR_MATRIX_COLOR_TABLE ()
+	CODE:
+		RETVAL = GL_PROXY_POST_COLOR_MATRIX_COLOR_TABLE;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_CONVOLUTION_1D ()
+	CODE:
+		RETVAL = GL_CONVOLUTION_1D;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_CONVOLUTION_2D ()
+	CODE:
+		RETVAL = GL_CONVOLUTION_2D;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_SEPARABLE_2D ()
+	CODE:
+		RETVAL = GL_SEPARABLE_2D;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_CONVOLUTION_BORDER_MODE ()
+	CODE:
+		RETVAL = GL_CONVOLUTION_BORDER_MODE;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_CONVOLUTION_FILTER_SCALE ()
+	CODE:
+		RETVAL = GL_CONVOLUTION_FILTER_SCALE;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_CONVOLUTION_FILTER_BIAS ()
+	CODE:
+		RETVAL = GL_CONVOLUTION_FILTER_BIAS;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_REDUCE ()
+	CODE:
+		RETVAL = GL_REDUCE;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_CONSTANT_BORDER ()
+	CODE:
+		RETVAL = GL_CONSTANT_BORDER;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_REPLICATE_BORDER ()
+	CODE:
+		RETVAL = GL_REPLICATE_BORDER;
+	OUTPUT:
+		RETVAL
+
+GLenum 
+GL_HISTOGRAM ()
+	CODE:
+		RETVAL = GL_HISTOGRAM;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_PROXY_HISTOGRAM ()
+	CODE:
+		RETVAL = GL_PROXY_HISTOGRAM;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_MINMAX ()
+	CODE:
+		RETVAL = GL_MINMAX;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_MIN ()
+	CODE:
+		RETVAL = GL_MIN;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_MAX ()
+	CODE:
+		RETVAL = GL_MAX;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_FUNC_ADD ()
+	CODE:
+		RETVAL = GL_FUNC_ADD;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_FUNC_SUBTRACT ()
+	CODE:
+		RETVAL = GL_FUNC_SUBTRACT;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GL_FUNC_REVERSE_SUBTRACT ()
+	CODE:
+		RETVAL = GL_FUNC_REVERSE_SUBTRACT;
+	OUTPUT:
+		RETVAL
+
+GLenum
 GL_COLOR_TABLE_SCALE ()
 	CODE:
 		RETVAL = GL_COLOR_TABLE_SCALE;
@@ -4745,6 +5114,62 @@ GLenum
 GLU_MAP1_TRIM_3 ()
 	CODE:
 		RETVAL = GLU_MAP1_TRIM_3;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GLU_TESS_BOUNDARY_ONLY ()
+	CODE:
+		RETVAL = GLU_TESS_BOUNDARY_ONLY;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GLU_TESS_TOLERANCE ()
+	CODE:
+		RETVAL = GLU_TESS_TOLERANCE;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GLU_TESS_WINDING_RULE ()
+	CODE:
+		RETVAL = GLU_TESS_WINDING_RULE;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GLU_TESS_WINDING_ODD ()
+	CODE:
+		RETVAL = GLU_TESS_WINDING_ODD;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GLU_TESS_WINDING_NONZERO ()
+	CODE:
+		RETVAL = GLU_TESS_WINDING_NONZERO;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GLU_TESS_WINDING_POSITIVE ()
+	CODE:
+		RETVAL = GLU_TESS_WINDING_POSITIVE;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GLU_TESS_WINDING_NEGATIVE ()
+	CODE:
+		RETVAL = GLU_TESS_WINDING_NEGATIVE;
+	OUTPUT:
+		RETVAL
+
+GLenum
+GLU_TESS_WINDING_ABS_GEQ_TWO ()
+	CODE:
+		RETVAL = GLU_TESS_WINDING_ABS_GEQ_TWO;
 	OUTPUT:
 		RETVAL
 

@@ -9,6 +9,7 @@ Makefile.PL
 Makefile.linux
 Makefile.win32
 Makefile.freebsd
+Makefile.netbsd
 SDL.pm
 SDL_perl.pm
 SDL_perl.xs
@@ -16,8 +17,10 @@ SDL_perl.spec
 OpenGL.xs
 SFont.c
 SFont.h
+configure
 defines.h
 detect.c
+setenv.bat
 test.pl
 typemap
 lib/SDL/App.pm
@@ -27,6 +30,7 @@ lib/SDL/Cursor.pm
 lib/SDL/Event.pm
 lib/SDL/Font.pm
 lib/SDL/FontTool.pm
+lib/SDL/GraphicTool.pm
 lib/SDL/Mixer.pm
 lib/SDL/Music.pm
 lib/SDL/OpenGL.pm
@@ -46,9 +50,11 @@ test/graywin.pl
 test/loopwave.pl
 test/testconsole.pl
 test/testfonttool.pl
+test/testgraphictool.pl
 test/testgfxprim.pl
 test/testgfxroto.pl
 test/testjoystick.pl
+test/testmenu.pl
 test/testshell.pl
 test/testsprite.pl
 test/testtimer.pl
@@ -63,6 +69,8 @@ test/OpenGL/tutorial/lesson03.pl
 test/OpenGL/tutorial/lesson04.pl
 test/OpenGL/tutorial/lesson05.pl
 test/OpenGL/tutorial/lesson06.pl
+test/OpenGL/tutorial/lesson07.pl
+test/OpenGL/tutorial/lesson08.pl
 test/OpenGL/tutorial/Data/crate.png
 test/OpenGL/tutorial/Data/cube.bmp
 test/OpenGL/tutorial/Data/glass.bmp
@@ -78,3 +86,5 @@ test/data/icon.bmp
 test/data/LargeFont.bmp
 test/data/logo.png
 test/data/sample.wav
+test/data/highlight.png
+test/data/menu.png

@@ -31,5 +31,7 @@ tutorial/lesson03.pl	Color Triangle and Square
 tutorial/lesson04.pl	Rotating Triangle and Square
 tutorial/lesson05.pl	Rotating Pyramid and Cube
 tutorial/lesson06.pl	Rotating Textured Cube
+tutorial/lesson07.pl	Lighting and Filters Cube
+tutorial/lesson08.pl	Blending (aka transperancy) Cube
 
 

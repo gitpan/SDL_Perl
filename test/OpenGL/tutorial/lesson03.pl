@@ -41,7 +41,8 @@ sub main
 			    -flags => $vidmode_flags,			
 			    -width => $arg_screen_width,
 			    -height =>$arg_screen_height,
-			    -r => 8, -g => 8, -b => 8, -opengl => 1,
+			     -d => 16,
+			     -opengl => 1,
 			  );
    
    SDL::ShowCursor(0);   
@@ -98,7 +99,7 @@ sub InitGL
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();						# Reset The Projection Matrix
    
-   glPerspective(45.0, $Width/$Height, 0.1, 100.0);		# Calculate The Aspect Ratio Of The Window
+   gluPerspective(45.0, $Width/$Height, 0.1, 100.0);		# Calculate The Aspect Ratio Of The Window
    
    glMatrixMode(GL_MODELVIEW);
   }

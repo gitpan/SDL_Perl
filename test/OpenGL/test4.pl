@@ -8,8 +8,7 @@ use SDL::App;
 use SDL::Event;
 use SDL::OpenGL;
 
-my $app = new SDL::App	-w => 800, -h => 600, -d => 24, 
-			-gl => 1, -r => 8, -g => 8, -b => 8;
+my $app = new SDL::App	-w => 800, -h => 600, -d => 16, -gl => 1;
 
 my @points = (  [-1.5, -1.5,  4.0 ], [-0.5, -1.5,  2.0 ],
 		[-0.5, -1.5, -1.0 ], [ 1.5, -1.5,  2.0 ],

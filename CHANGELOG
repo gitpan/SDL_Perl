@@ -1,5 +1,82 @@
 Revision history for Perl extension SDL_perl.
 
+* Dec 30 2002	David J. Goehrig <dave@sdlperl.org>
+	- Cleaned SDL::App a little more
+
+* Dec 29 2002	Tels <http://www.bloodgate.com>
+	- Patched SDL::Font includes
+	- Optimized SDL::Rect
+
+* Dec 28 2002	Tels <http://www.bloodgate.com>
+	- Removed miscelaneous typos
+	- Rewrote utility function SDL::in
+
+* Dec 25 2002	Tels <http://www.bloodgate.com>
+	- Patched SDL::Timer documentation
+	- Patched SDL::Event documentation
+	- Patched SDL::Cdrom documentation
+	- Patched mail address in Readme
+
+* Dec 20 2002   Michael Lamertz <mike@perl-ronin.de>
+	 - Fixed wrong spelling of XS call to SDL::App::grab_input function
+
+* Oct 14 2002	David J. Goehrig <dave@sdlperl.org>
+	- Altered usage message printing behavior for Guillaume
+	- Added Guillaume Cottenceau's <gc@mandrakesoft.com>
+	64 bit support patch.
+	- Patch release SDL_perl-1.19.1
+
+* Oct 13 2002	David J. Goehrig <dave@sdlperl.org>
+	- Added ConvertRGB and ConvertRGBA functions, useful
+	for creating OpenGL textures from arbitrary images.
+	- Updated documentation for SDL::Cursor
+
+* Oct 11 2002	David J. Goehrig <dave@sdlperl.org>
+	- Added library disable configure options for linux
+	- Released SDL_perl-1.19.0
+
+* Sept 28 2002	David J. Goehrig <dave@sdlperl.org>
+	- Fixed some prototypes (OpenGL happier on Debian)
+
+* Sept 5 2002	David J. Goehrig <dave@sdlperl.org>
+	- Optimizaiton in SDL::App::loop, 
+	now syncs app only if action called
+	- Added test/testmenu.pl (precursor to a menu class)
+
+* Sept 4 2002	Russell Valentine <russ_allegro@yahoo.com>
+	- Added SDL::GraphicTool and testgraphictool.pl
+
+* Aug 31 2002   David J. Goehrig <dave@sdlperl.org>
+	- Removed redundant variable in SDL::Mixer::fade_in_music
+	Thanks to Peter BARABAS <z0d@artifact.hu> for finding it
+
+* Aug 30 2002   David J. Goehrig <dave@sdlperl.org>
+	- Altered examples to use 16 bit color
+	- Fixed OpenGL/tutorial gluPerspective bugs
+
+* Jun 14 2002	David J. Goehrig <dave@sdlperl.org>
+	- Finished color table and convolution support
+	- Added more GLUtesselator support
+
+* Jun 10 2002	David J. Goehrig <dave@sdlperl.org>
+	- Added configure script, gnuish build environemnt
+
+* Jun 8 2002	David J. Goehrig <dave@sdlperl.org>
+	- Applied Wayne Keenan's win32 build patches
+
+* Jun 5 2002	David J. Goehrig <dave@sdlperl.org>
+	- Simply defines GL_ALL_CLIENT_ATTRIB_BITS 0xffffffff
+	- SDL::TTFont added font metric query methods
+
+* Jun  4 2002	David J. Goehrig <dave@sdlperl.org>
+	- Fixed GL_ALL_CLIENT_BITS Mesa bug again... 
+	It appears to have disappeared after 1.17.2,
+	Thanks Seemant Kulleen & Chris Moeller for
+	pointing it out.
+
+* May 28 2002	David J. Goehrig <dave@sdlperl.org>
+	- Added tutorials 7 & 8 to test/OpenGL/tutorial
+
 * May 27 2002	David J. Goehrig <dave@sdlperl.org>
 	- Fixed SDL::OpenGL::TexCoordPointer
 

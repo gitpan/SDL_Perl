@@ -1,17 +1,27 @@
 #!/usr/bin/perl -w
-
+#
+# Copyright (C) 2003 Tels
+# Copyright (C) 2004 David J. Goehrig
+#
 # basic testing of SDL::Mixer
 
-use Test::More tests => 3;
-use strict;
-use vars qw/@INC/;
+BEGIN {
+	unshift @INC, 'blib/lib','blib/arch';
+}
 
-BEGIN
-  {
-  unshift @INC, ('../lib', '..');	# unfortunately, SDL.pm is not in lib/
-  chdir 't' if -d 't';
-  use_ok( 'SDL::Mixer' ); 
-  }
+use strict;
+use SDL;
+use SDL::Config;
+
+use Test::More;
+
+if ( SDL::Config->has('SDL_mixer') ) {
+	plan ( tests => 3 );
+} else {
+	plan ( skip_all => 'SDL_mixer support not compiled' );
+}
+
+use_ok( 'SDL::Mixer' ); 
   
 can_ok ('SDL::Mixer', qw/
 	new
@@ -51,7 +61,7 @@ can_ok ('SDL::Mixer', qw/
 	/);
 
 # these are exported by default, so main:: should know them:
-
+SDL::Init(SDL_INIT_AUDIO);
 my $mixer = SDL::Mixer->new();
-is (ref($mixer), 'SDL::Mixer', 'new was ok');
+isa_ok($mixer, 'SDL::Mixer');
 

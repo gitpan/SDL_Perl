@@ -2,6 +2,5 @@ BUGS and Outstanding Issues
 
 - MacOS X build screwed possibly
 - Win32 build screwed definitely
-- Haven't confirmed GL stuff working
 - RPM spec file needs fixing
 

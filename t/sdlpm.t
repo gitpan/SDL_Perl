@@ -1,15 +1,22 @@
 #!/usr/bin/perl -w
+#
+# Copyright (C) 2003 Tels
+# Copyright (C) 2004 David J. Goehrig
+#
+# basic testing of SDL
 
-use Test::More tests => 9;
+BEGIN {
+	unshift @INC, 'blib/lib','blib/arch';
+}
+
 use strict;
-use vars qw/@INC/;
+use SDL::Config;
 
-BEGIN
-  {
-  unshift @INC, ('../lib', '..');	# unfortunately, SDL.pm is not in lib/
-  chdir 't' if -d 't';
-  use_ok( 'SDL' ); 
-  }
+use Test::More;
+
+plan ( tests => 9 );
+
+use_ok( 'SDL' ); 
   
 can_ok ('SDL', qw/in verify/);
 

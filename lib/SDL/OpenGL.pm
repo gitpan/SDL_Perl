@@ -2,6 +2,8 @@
 #
 #	A simplified OpenGL wrapper
 #
+# Copyright (C) 2002, 2003, 2004 David J. Goehrig
+#
 
 package SDL::OpenGL;
 
@@ -16,20 +18,18 @@ use vars qw(
 use SDL;
 use SDL::OpenGL::Constants;
 
-BEGIN {
-	for ( keys %SDL::OpenGL:: ) {
-		if (/^gl/) {
-			push @EXPORT,$_;
-		}
-	}
-
-	# export all GL constants
-	for (@SDL::OpenGL::Constants::EXPORT) {
-		push @EXPORT, $_;
-	}
-};
-
 bootstrap SDL::OpenGL;
+for ( keys %SDL::OpenGL:: ) {
+	if (/^gl/) {
+		push @EXPORT,$_;
+	}
+}
+
+# export all GL constants
+for (@SDL::OpenGL::Constants::EXPORT) {
+	push @EXPORT, $_;
+}
+
 
 1;
 

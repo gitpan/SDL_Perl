@@ -1,3 +1,7 @@
+#
+# Copyright (C) 2004 David J. Goehrig
+#
+
 package SDL;
 
 use strict;
@@ -12,7 +16,6 @@ use SDL::Constants;
 BEGIN {
 	@ISA = qw(Exporter DynaLoader);
 	@EXPORT = qw( in verify &NULL );
-
 	# reexport all SDL constants
 	for (@SDL::Constants::EXPORT) {
 		push @EXPORT,$_;
@@ -20,7 +23,7 @@ BEGIN {
 };
 
 
-$VERSION = '2.0.5';
+$VERSION = '2.1.0';
 
 print "$VERSION" if (defined($ARGV[0]) && ($ARGV[0] eq '--SDLperl'));
 

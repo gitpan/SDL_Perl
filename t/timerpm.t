@@ -1,31 +1,36 @@
 #!/usr/bin/perl -w
-
+#
+# Copyright (C) 2003 Tels
+# Copyright (C) 2004 David J. Goehrig
+#
 # basic testing of SDL::Timer
 
-use Test::More tests => 4;
-use strict;
-use vars qw/@INC/;
+BEGIN {
+	unshift @INC, 'blib/lib','blib/arch';
+}
 
-BEGIN
-  {
-  unshift @INC, ('../lib', '..');	# unfortunately, SDL.pm is not in lib/
-  chdir 't' if -d 't';
-  use_ok( 'SDL::Timer' ); 
-  }
+use strict;
+use SDL;
+use SDL::Config;
+
+use Test::More;
+
+plan ( tests => 4 );
+
+use_ok( 'SDL::Timer' ); 
   
 can_ok ('SDL::Timer', qw/
 	new run stop
 	/);
 
-use SDL;
-
 my $fired = 0;
 
 SDL::Init(SDL_INIT_TIMER);
 
-my $timer = SDL::Timer->new( sub { $fired++ }, -delay => 30, -times => 1);
+my $timer = new SDL::Timer 
+	sub { $fired++ }, -delay => 30, -times => 1;
 
-is (ref($timer), 'SDL::Timer', 'new went ok');
+isa_ok($timer, 'SDL::Timer');
 
 SDL::Delay(100);
 is ($fired, 1,'timer fired once');

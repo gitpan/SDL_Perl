@@ -1,21 +1,28 @@
 #!/usr/bin/perl -w
-
+#
+# Copyright (C) 2003 Tels
+# Copyright (C) 2004 David J. Goehrig
+#
 # basic testing of SDL::Color
 
-use Test::More tests => 10;
-use strict;
-use vars qw/@INC/;
+BEGIN {
+	unshift @INC, 'blib/lib','blib/arch';
+}
 
-BEGIN
-  {
-  unshift @INC, ('../lib', '..');	# unfortunately, SDL.pm is not in lib/
-  chdir 't' if -d 't';
-  use_ok( 'SDL::Color' ); 
-  }
+use strict;
+
+use Test::More;
+
+plan ( tests => 10 );
+
+use_ok( 'SDL::Color' ); 
   
 can_ok ('SDL::Color', qw/
-	new r g b pixel
-	/);
+	new 
+	r 
+	g 
+	b 
+	pixel /);
 
 # some basic tests:
 

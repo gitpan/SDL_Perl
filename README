@@ -1,19 +1,39 @@
-README for SDL_Perl-2.0.5
+README for SDL_Perl-2.1.0
 
-What's New in 2.0.5:
+What's New in 2.1.0:
 
-SDL Perl 2.0.5 marks the first significant improvement
-over the old 1.x.x branch.  In addition to some fundamental
-structural improvements, SDL Perl 2.0.5 is faster.  With
-the terrific support of the development community 2.0.5
-now supports a new build system, enhanced support for OpenGL,
-and more SDL goodness.
+SDL Perl 2.1.0 brings a bit more stability to the SDL Perl 2.x.x
+branch.  In addition to working OpenGL support, smarter tests,
+and a few minor bug fixes, SDL Perl 2.1.0 greatly improves the
+SMPEG video support.  
+
+The 2.x.x branch brings support for SDL-1.2.x, faster internals,
+and lower memory requirements.  The build system has also been
+modified to use the new Module::Build system.  
 
 WARNING This version is API incompatible with SDL Perl 1.x.x WARNING
 
 Unfortunately, these changes mean that apps built for earlier
 versions of SDL Perl will require some modifications.  Please
 contact us with any bugs at sdl-devel@perl.org.
+
+Prerequisites:
+
+SDL Perl recommends installing the following libraries available
+from http://www.libsdl.org/ prior to installing:
+
+	SDL-1.2.6
+	smpeg-0.4.4
+	SDL_image-1.2.2
+	SDL_gfx-2.0.3
+	SDL_mixer-1.2.5
+	SDL_net-1.2.4
+	SDL_ttf-2.0.5
+
+Additionally the following Perl modules should be installed:
+
+	Module-Build-0.22
+	Test-Simple-0.47
 
 Installation:
 
@@ -55,5 +75,5 @@ keeps projects like this going.
 Enjoy,
 
 David J. Goehrig <dgoehrig@cpan.org>
-6 Feb 2004
+23 Feb 2004
 

@@ -59,7 +59,7 @@ take over the full screen, the size of the window, the bit depth of your
 colors, and whether to use hardware acceleration.  For now, we'll build
 something really simple.
 
-=head3 Initialization
+=head2 Initialization
 
 SDL::App makes it easy to initialize video and create a surface.  Here's how to
 ask for a windowed surface with 640x480x16 resolution:

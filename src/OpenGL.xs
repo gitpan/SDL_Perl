@@ -1,6 +1,6 @@
 // SDL::OpenGL
 //
-//
+// Copyright (C) 2002,2003,2004 David J. Goehrig
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -2028,6 +2028,7 @@ gluNurbsCallback ( obj, which, cb )
 				sdl_perl_nurbs_error_hook = cb;
 				gluNurbsCallback(obj,GLU_ERROR,(GLvoid*)sdl_perl_nurbs_error_callback);
 				break;
+#ifdef GLU_NURBS_BEGIN
 			case GLU_NURBS_BEGIN:
 			case GLU_NURBS_BEGIN_DATA:
 				gluNurbsCallbackData(obj,(void*)cb);
@@ -2064,6 +2065,7 @@ gluNurbsCallback ( obj, which, cb )
 				gluNurbsCallback(obj,GLU_NURBS_END_DATA,
 					(GLvoid*)sdl_perl_nurbs_end_callback);	
 				break;
+#endif
 			default:
 				Perl_croak(aTHX_ "SDL::OpenGL::NurbsCallback - invalid type");
 		}
@@ -2213,6 +2215,7 @@ gluProject ( objx, objy, objz, mm, pm, vp )
 	OUTPUT:
 		RETVAL
 
+#ifdef GLUtesselator
 GLUtesselator*
 gluNewTess ()
 	CODE:
@@ -2328,5 +2331,6 @@ gluTessVertex ( tessobj, coords, vd )
 	CODE:
 		gluTessVertex(tessobj,(GLdouble*)coords,vd);
 	
+#endif
 #endif
 

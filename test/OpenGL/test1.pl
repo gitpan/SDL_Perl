@@ -5,6 +5,7 @@ use SDL::App;
 use SDL::Surface;
 use SDL::Event;
 use SDL::OpenGL;
+use SDL::OpenGL::Constants;
 
 #for ( keys %main:: ) {
 #	print "$_\n";
@@ -66,7 +67,7 @@ sub InitView {
 	glLoadIdentity();
 
 	if ( @_ ) {
-		glPerspective(45.0,4/3,0.1,100.0);
+		gluPerspective(45.0,4/3,0.1,100.0);
 	} else {
 		glFrustum(-0.1,0.1,-0.075,0.075,0.175,100.0);
 	}

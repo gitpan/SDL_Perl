@@ -1,22 +1,31 @@
 #!/usr/bin/perl -w
-
+#
+# Copyright (C) 2003 Tels
+# Copyright (C) 2004 David J. Goehrig
+#
 # basic testing of SDL::Tool::Graphic
 
-use Test::More tests => 3;
-use strict;
-use vars qw/@INC/;
+BEGIN {
+	unshift @INC, 'blib/lib','blib/arch';
+}
 
-BEGIN
-  {
-  unshift @INC, ('../lib', '..');	# unfortunately, SDL.pm is not in lib/
-  chdir 't' if -d 't';
-  use_ok( 'SDL::Tool::Graphic' ); 
-  }
+use strict;
+use SDL::Config;
+
+use Test::More;
+
+if ( SDL::Config->has('SDL_gfx') ) {
+	plan ( tests => 3 );
+} else {
+	plan ( skip_all => 'SDL_gfx support not compiled' );
+}
+
+use_ok( 'SDL::Tool::Graphic' ); 
   
 can_ok ('SDL::Tool::Graphic', qw/
 	new zoom rotoZoom
 	/);
 
 my $gtool = SDL::Tool::Graphic->new();
-is (ref($gtool), 'SDL::Tool::Graphic', 'new was ok');
+isa_ok ($gtool, 'SDL::Tool::Graphic');
 

@@ -2,7 +2,10 @@
 //
 // SFont bitmap font support
 //
-//	
+// SFont library code by Karl Bartel <karlb@gmx.net>       
+//
+// SFont.xs Copyright (C) 2004 David J. Goehrig
+//
 
 #include "EXTERN.h"
 #include "perl.h"

@@ -1,23 +1,36 @@
 #!/usr/bin/perl -w
-
+#
+# Copyright (C) 2003 Tels
+# Copyright (C) 2004 David J. Goehrig
+#
 # basic testing of SDL::Tool::Font
 
-use Test::More tests => 2;
-use strict;
-use vars qw/@INC/;
+BEGIN {
+	unshift @INC, 'blib/lib','blib/arch';
+}
 
-BEGIN
-  {
-  unshift @INC, ('../lib', '..');	# unfortunately, SDL.pm is not in lib/
-  chdir 't' if -d 't';
-  use_ok( 'SDL::Tool::Font' ); 
-  }
+use strict;
+use SDL::Config;
+
+use Test::More;
+
+if ( SDL::Config->has('SDL_image') 
+	&& SDL::Config->has('SDL_ttf') ) {
+	plan ( tests => 2 );
+} else {
+	plan ( skip_all => 
+		( SDL::Config->has('SDL_image') 
+			? '' 
+			: ' SDL_image support not compiled')
+		. ( SDL::Config->has('SDL_ttf') 
+			? ''
+			: ' SDL_ttf support not compiled'));
+}
+
+use_ok( 'SDL::Tool::Font' ); 
   
 can_ok ('SDL::Tool::Font', qw/
-	new print
+	new 
+	print
 	/);
-
-# does not work
-#my $fonttool = SDL::Tool::Font->new();
-#is (ref($fonttool), 'SDL::Tool::Font', 'new was ok');
 

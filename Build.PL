@@ -1,4 +1,8 @@
 #! perl -w
+#
+# Copyright (C) 2003 chromatic 
+# Copyright (C) 2004 David J. Goehrig
+#
 
 use strict;
 

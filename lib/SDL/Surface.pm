@@ -26,7 +26,7 @@ sub new {
 	if ( defined($options{-name}) && $options{-name} ne "" && exists $SDL::{IMGLoad} ) {		
 	   $self = \SDL::IMGLoad($options{-name});	
 	} else {
-		my $f = $options{-flags}  	|| $options{-fl} 	|| SDL_ANYFORMAT();
+		my $f = $options{-flags}  	|| $options{-fl} 	|| SDL::SDL_ANYFORMAT();
 		my $w = $options{-width} 	|| $options{-w}		|| 1;
 		my $h = $options{-height} 	|| $options{-h}		|| 1;	
 		my $d = $options{-depth} 	|| $options{-d}		|| 8;
@@ -199,7 +199,7 @@ sub set_colors {
 
 sub set_color_key {
 	die "SDL::Surface::set_color_key requires a SDL::Color object"
-		unless !$SDL::DEBUG || $_[2]->isa('SDL::Color');
+		unless !$SDL::DEBUG || (ref($_[2]) && $_[2]->isa('SDL::Color'));
 	SDL::SetColorKey(${$_[0]},$_[1],${$_[2]});
 }
 

@@ -26,6 +26,7 @@ sub new {
 				-red_accum_size -ras -blue_accum_size -bas 
 				-green_accum_sizee -gas -alpha_accum_size -aas
 				-double_buffer -db -buffer_size -bs -stencil_size -st
+				-asyncblit
 		/ ) if ($SDL::DEBUG);
 
 	SDL::Init(SDL_INIT_EVERYTHING());
@@ -36,7 +37,7 @@ sub new {
 	my $w = $options{-width} 	|| $options{-w}		|| 800;
 	my $h = $options{-height} 	|| $options{-h}		|| 600;
 	my $d = $options{-depth} 	|| $options{-d}		|| 16;
-	my $f = $options{-flags} 	|| $options{-f}		|| SDL_ANYFORMAT();
+	my $f = $options{-flags} 	|| $options{-f}		|| SDL::SDL_ANYFORMAT();
 	my $r = $options{-red_size}	|| $options{-r}		|| 5;
 	my $g = $options{-green_size}	|| $options{-g}		|| 5;
 	my $b = $options{-blue_size}	|| $options{-b}		|| 5;
@@ -45,13 +46,17 @@ sub new {
 	my $gas = $options{-green_accum_size}	|| $options{-gas}		|| 0;
 	my $bas = $options{-blue_accum_size}	|| $options{-bas}		|| 0;
 	my $aas = $options{-alpha_accum_size}	|| $options{-aas}		|| 0;
-	my $db = $options{-double_buffer} 	|| $options{-db}		|| 1; 
+	my $db = $options{-double_buffer} 	|| $options{-db}		|| 0;
+ 
 	my $bs = $options{-buffer_size}		|| $options{-bs}		|| 0;
 	my $st	= $options{-stencil_size}	|| $options{-st}		|| 0;
+	my $async = $options{-asyncblit} || 0;
 
-	$f |= SDL_OPENGL() if ($options{-gl} || $options{-opengl});
-	$f |= SDL_FULLSCREEN() if ($options{-fullscreen} || $options{-full});
-	$f |= SDL_RESIZABLE() if ($options{-resizeable});
+	$f |= SDL::SDL_OPENGL() if ($options{-gl} || $options{-opengl});
+	$f |= SDL::SDL_FULLSCREEN() if ($options{-fullscreen} || $options{-full});
+	$f |= SDL::SDL_RESIZABLE() if ($options{-resizeable});
+	$f |= SDL::SDL_DOUBLEBUF() if ($db); 
+	$f |= SDL::SDL_ASYNCBLIT() if ($async);
 
 	if ($f & SDL_OPENGL()) { 
 		$SDL::App::USING_OPENGL = 1;
@@ -89,7 +94,7 @@ sub new {
 sub resize ($$$) {
 	my ($self,$w,$h) = @_;
 	my $flags = SDL::SurfaceFlags($$self);
-	if ( $flags & SDL_RESIZABLE()) {
+	if ( $flags & SDL::SDL_RESIZABLE()) {
 		my $bpp = SDL::SurfaceBitsPerPixel($$self);
 		$self = \SDL::SetVideoMode($w,$h,$bpp,$flags);
 	}

@@ -1,5 +1,21 @@
 Revision history for Perl extension SDL_perl.
 
+* Feb 23 2004	David J. Goehrig <dgoehrig@cpan.org>
+	- fixed OpenGL exporting & bootstrapping
+	- added ifdefs in OpenGL for NURBS and GLUTesslator
+	- updated the test scripts to use SDL::Config 
+	- added OpenGL test
+	- modified SDL::Config->has to use grep instead
+	- fixed SDL::Cdrom::status
+	- added tests for SDL::Video and SDL::MPEG
+	- fixed gluPerspective in test1.pl & test2.pl
+	- moved SDL::OpenGL::Cube code into test2.pl
+	- released SDL_Perl-2.1.0
+
+* Feb 7 2004	David J. Goehrig <dgoehrig@cpan.org>
+	- added more SMPEG support
+	- added SDL::Video.pm and SDL::MPEG
+
 * Feb 6 2004	David J. Goehrig <dgoehrig@cpan.org>
 	- removed old build stuff
 	- added SDL::GetAppState

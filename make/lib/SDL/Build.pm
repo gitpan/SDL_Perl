@@ -1,3 +1,8 @@
+#
+# Copyright (C) 2004 chromatic
+# Copyright (C) 2004 David J. Goehrig
+#
+
 package SDL::Build;
 
 use strict;
@@ -181,14 +186,7 @@ sub write_sdl_config
 	sub has
 	{
 		my ($class, $define) = @_;
-
-		while (my ($name, $subsystems) =  each %$sdl_config)
-		{
-			next unless exists $subsystems->{ $define };
-			return $subsystems->{ $define } ? 1 : 0;
-		}
-
-		return;
+		scalar grep { exists $$sdl_config{$_}{$define} } keys %$sdl_config;
 	}
 
 	1;

@@ -1,3 +1,8 @@
+//
+// Copyright (C) 2004 David J. Goehrig
+//
+//
+
 #ifndef SDL_PERL_DEFINES_H
 #define SDL_PERL_DEFINES_H
 

@@ -1,21 +1,25 @@
 #!/usr/bin/perl -w
-
+#
+# Copyright (C) 2003 Tels
+# Copyright (C) 2004 David J. Goehrig
+#
 # basic testing of SDL::Music
 
-use Test::More tests => 2;
-use strict;
-use vars qw/@INC/;
+BEGIN {
+	unshift @INC, 'blib/lib','blib/arch';
+}
 
-BEGIN
-  {
-  unshift @INC, ('../lib', '..');	# unfortunately, SDL.pm is not in lib/
-  chdir 't' if -d 't';
-  use_ok( 'SDL::Music' ); 
-  }
+use strict;
+use SDL::Config;
+
+use Test::More;
+
+plan ( tests => 2 );
+
+use_ok( 'SDL::Music' ); 
   
 can_ok ('SDL::Music', qw/
 	new
 	/);
 
-# does not work
-#my $music = SDL::Music->new();
+

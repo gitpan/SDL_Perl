@@ -1,20 +1,27 @@
 #!/usr/bin/perl -w
-
+#
+# Copyright (C) 2003 Tels
+# Copyright (C) 2004 David J. Goehrig
+#
 # basic testing of SDL::Palette
 
-use Test::More tests => 2;
-use strict;
-use vars qw/@INC/;
+BEGIN {
+	unshift @INC, 'blib/lib','blib/arch';
+}
 
-BEGIN
-  {
-  unshift @INC, ('../lib', '..');	# unfortunately, SDL.pm is not in lib/
-  chdir 't' if -d 't';
-  use_ok( 'SDL::Palette' ); 
-  }
+use strict;
+
+use Test::More;
+
+plan ( tests => 2 );
+
+use_ok( 'SDL::Palette' ); 
   
 can_ok ('SDL::Palette', qw/
 	new
-	size red green blue color
-	/);
+	size
+	red 
+	green 
+	blue 
+	color /);
 

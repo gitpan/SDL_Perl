@@ -1,22 +1,28 @@
 #!/usr/bin/perl -w
-
+#
+# Copyright (C) 2003 Tels
+# Copyright (C) 2004 David J. Goehrig
+#
 # basic testing of SDL::Rect
 
-use Test::More tests => 15;
-use strict;
-use vars qw/@INC/;
+BEGIN {
+	unshift @INC, 'blib/lib','blib/arch';
+}
 
-BEGIN
-  {
-  unshift @INC, ('../lib', '..');	# unfortunately, SDL.pm is not in lib/
-  chdir 't' if -d 't';
-  use_ok( 'SDL::Rect' ); 
-  }
+use strict;
+
+use Test::More;
+
+plan ( tests => 15 );
+
+use_ok( 'SDL::Rect' ); 
   
 can_ok ('SDL::Rect', qw/
 	new
-	x y width height
-	/);
+	x 
+	y 
+	width 
+	height /);
 
 my $rect = SDL::Rect->new();
 

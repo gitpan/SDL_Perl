@@ -42,7 +42,7 @@ sub name ($) {
 
 sub status ($) {
 	my $self = shift;
-	return SDL::sdlpl::sdl_cd_status($$self);
+	return SDL::CDstatus($$self);
 }
 
 sub play ($$$;$$) {

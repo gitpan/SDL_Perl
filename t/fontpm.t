@@ -1,23 +1,27 @@
 #!/usr/bin/perl -w
-
+#
+# Copyright (C) 2003 Tels
+# Copyright (C) 2004 David J. Goehrig
+#
 # basic testing of SDL::Font
 
-use Test::More tests => 2;
+BEGIN {
+	unshift @INC, 'blib/lib','blib/arch';
+}
+
 use strict;
-use vars qw/@INC/;
+use SDL::Config;
 
-BEGIN
-  {
-  unshift @INC, ('../lib', '..');	# unfortunately, SDL.pm is not in lib/
-  chdir 't' if -d 't';
-  use_ok( 'SDL::Font' ); 
-  }
+use Test::More;
+
+if ( SDL::Config->has('SDL_image') ) {
+	plan ( tests => 2 );
+} else {
+	plan ( skip_all => 'SDL_image support not compiled' );
+}
+
+use_ok( 'SDL::Font' ); 
   
-can_ok ('SDL::Font', qw/
-	new use
-	/);
+can_ok ('SDL::Font', qw/ new use /);
 
-# does not work
-#my $font = SDL::Font->new();
-#is (ref($font), 'SDL::Font', 'new was ok');
 

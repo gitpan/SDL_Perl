@@ -1,0 +1,9 @@
+155d154
+< #- sdlpl-1.12 is bugged for SDL::Surface::display_format :-(
+158,161c157
+< 	my $tmp = SDL::sdlpl::sdl_display_format($surface->{-surface});
+< 	SDL::sdlpl::sdl_free_surface($surface->{-surface});
+< 	$surface->{-surface} = $tmp;
+< 	return $surface;
+---
+> 	return $surface->display_format();

@@ -1,0 +1,13 @@
+TODO for SDLperl-1.13
+
+
+As of Sat Mar  9 2002
+
+	o Add OO SDL_net support and UDP packet internals
+	o Add OO SDL_ttf support
+	o Write some serious examples
+	o Write better documentation
+	o Port OpenGL wrapper code from the other code base
+	o Port OpenAL wrapper code from the other code base 
+
+

@@ -1,0 +1,49 @@
+#!/usr/bin/env perl
+
+undef $/;
+open FP, "< $ARGV[0]" or die "Couldn't read $ARGV[0]\n";
+my $text =  <FP>;
+close FP;
+
+$/ = "";
+
+my @xsubs = split "\n\n", $text;
+my @mysubs;
+my %args;
+
+for (@xsubs) 
+{
+	my @lines = split "\n", $_;
+
+	for $i ( 0 .. @lines ) {
+		if ( $lines[$i] =~ /^([^\s].*)\((.*)\)/ ) {
+			push @mysubs, $1;
+			$args{$1} = $2 || "";
+			last;
+		}
+	}
+}
+
+for (@mysubs) {
+
+	my $old_sub;
+
+	if ( uc($_) eq $_ ) {
+		$old_sub = lc(join("_","sdl",$_));
+	} else {
+		$old_sub = lc(join("_","sdl",split(/(?=[A-Z])/,$_)));
+	}
+
+	$old_sub =~ s/r_g_b_a/rgba/;
+	$old_sub =~ s/r_g_b/rgb/;
+	$old_sub =~ s/g_l_/gl/;
+	$old_sub =~ s/o_k/ok/;	
+	$old_sub =~ s/w_m_/wm_/;
+	$old_sub =~ s/c_d_/cd_/;
+	$old_sub =~ s/s_d_l_k_/sdlk_/;
+	$old_sub =~ s/w_a_v/wav/;
+	$old_sub =~ s/i_m_g_/img/;
+	$old_sub =~ s/c_v_t/cvt/;
+
+	printf "sub %-32s { SDL::%-32s (%s) };\n", $old_sub, $_, ($args{$_} ? "\@_" : "") ;
+}

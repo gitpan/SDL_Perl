@@ -1,0 +1,53 @@
+README for SDL_perl-1.14
+
+What's New in 1.14
+
+	o OO API works with new low-level API
+	o Preliminary low level support for SDL_ttf and SDL_net
+	o A semi-complete backwards compatability layer for SDL::sdlpl
+
+What was New in 1.13
+	o low-level api changes to better reflect SDL's API in perl
+	o Joysticks supported 
+	o more complete SDL Init/Quit subsystems support
+	o Fewer mandatory library dependencies
+	o automatic detection and configuration for optional libraries
+
+Installation:
+
+As root (or using sudo on the last step).
+
+	perl Makefile.PL
+	make
+	make install
+
+This should install it to your /usr/local/lib/perl5/ tree.
+The perl script Makefile.PL will attempt to search for 
+the standard place you may have installed SDL and its
+supplemental libraries.  I promise I will eventually provide
+user specified config options in the next release, promise.
+
+Developer Documentation and Stuff:
+
+Documentation is pretty sparse in this release, and that is
+because I'm in the process of rewriting it.  As the documentation
+project moves along, I hope to post the updates to the website
+
+	http://www.sdlperl.org/docs/
+
+Stay tuned for future documentation.
+
+Contributing:
+
+Anyone wishing to contribute modules, sprite engines, and anything
+else that others might find useful, please email me at
+
+	dave@cthulhu-burger.org
+
+I am always more than happy to take patches, bug reports, and
+helpful suggestions.  It is feedback, both good and poor, that
+keeps projects like this going.
+
+Enjoy,
+
+David J. Goehrig	Sun Mar 10 2002

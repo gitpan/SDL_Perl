@@ -1,0 +1,59 @@
+Revision history for Perl extension SDL_perl.
+
+* Mar  9 2002	David J. Goehrig <dave@cthulhu-burger.org>
+
+	- Generated sdlpl compatability layer ( known to be buggy )
+	- Bug fixes in OO modules, frozen-bubble now runs under 1.14
+	- Added patches directory to contain fixes for other people's programs 
+	- Added some Set/GetClipRect support
+	- More Documentation 
+	- Began SDL_ttf support
+	- Began SDL_net support
+
+* Feb 28 2002	David J. Goehrig <dave@cthulhu-burger.org>
+
+	- Fixed-up OO modules to use new API
+	- Added AddTimer and RemoveTimer Support
+	- Added Joystick Support
+	- Added full Init/Quit support for subsystems
+	- Began Documentation Rewrite
+	- Began 1.12 compatability layer
+
+* Feb 26 2002	David J. Goehrig <dave@cthulhu-burger.org>
+
+	- Altered API / Simplified namespace 
+	- Removed SDL_Image, SDL_Mixer, and OpenGL dependencies
+	- Added extension autodetection to config process
+
+* Jan 28 2002	Guillaume Cottenceau <gc@mandrakesoft.com>
+
+	- Fixed a deallocation bug in Sound.pm 
+
+* Jan 22 2002	Guillaume Cottenceau <gc@mandrakesoft.com>
+
+	- Fixed a deallocation bug in Music.pm
+
+* Dec 18 2000	David J. Goehrig 
+
+	- Removed clipping fuctions 
+	- Updated Readme
+	- Moved more to sourceforge
+
+* Aug  5 2000	Wayne Keenan
+
+	- Open GL support
+	- OpenGL Glut like Application framework
+	- more video flags 
+	- creating Surface from pre-allocated memory 
+	- BMP screen dump
+	- added state dumpers as an debugging aid
+	- bug fixes
+
+* May 26 2000	David J. Goehrig
+
+	- Added SFont support.
+
+* May 22 2000	David J. Goehrig
+
+	- Finished the first release
+

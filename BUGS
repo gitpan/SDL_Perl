@@ -1,0 +1,10 @@
+BUGS and Recurring errors
+
+- DisplayFormat segfaults
+
+	A common condition is that DisplayFormat returns a surface
+	and attempts to free the old one.  Under certain circumstances
+	this results in a segfault.  It may have to do with shared
+	data structures.
+
+

@@ -1,10 +1,6 @@
-BUGS and Recurring errors
+BUGS and Outstanding Issues 
 
-- DisplayFormat segfaults
-
-	A common condition is that DisplayFormat returns a surface
-	and attempts to free the old one.  Under certain circumstances
-	this results in a segfault.  It may have to do with shared
-	data structures.
-
-
+- Need to document OO layer and where C layer differs from SDL proper
+- Need to fix UNICODE support, for True Type Fonts
+- Need to find more BUGS
+- Nvidia driver conflict, theading?

@@ -33,7 +33,7 @@ sub DESTROY {
 sub use ($) {
 	my $self = shift;
 	$CurrentFont = $self;
-	if ( $self->{-type} eq 'sfont' ) {
+	if ( $self->isa('SDL::Font')) {
 		SDL::UseFont($self->{-surface});
 	}	
 }

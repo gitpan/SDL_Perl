@@ -6,15 +6,30 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 require Exporter;
 require DynaLoader;
 use AutoLoader 'AUTOLOAD';
+use SDL_perl;
 
 @ISA = qw(Exporter DynaLoader);
-@EXPORT = qw(
-	
-);
+@EXPORT = qw( in verify );
 
-$VERSION = '1.14';
+$VERSION = '1.18.1';
 
-bootstrap SDL $VERSION;
+print "$VERSION" if (defined($ARGV[0]) && ($ARGV[0] eq '--SDLperl'));
+
+$SDL::DEBUG=1;
+
+sub in {
+	my ($k,$h,@t) = @_;
+	return 0 unless ( defined $h );
+	return 1 if ( $k eq $h );
+	in ($k,@t);
+} 
+
+sub verify (\%@) {
+	my ($options,@valid_options) = @_;
+	for (keys %$options) {
+		die "Invalid option $_\n" unless in ($_, @valid_options);
+	}
+}
 
 1;
 __END__
@@ -694,9 +709,17 @@ This function will release an opened CD.
 
 =head2 SetColors 
 
-=head2 MapRGB 
+=head2 MapRGB (surface,r,g,b)
 
-=head2 MapRGBA 
+C<SDL::MapRGB> translates the composite red (r), green (g), blue (b)
+colors according to the given surface to a interger color value.  This
+integer can be used in functions like C<SDL::FillRect>, and is not
+the same as the format independent Color object returned by C<SDL::NewColor>.
+
+=head2 MapRGBA (surface,r,g,b,a)
+
+C<SDL::MapRGBA> works as C<SDL::MapRGB> but takes an additional alpha (a)
+component for semi-transperant colors.
 
 =head2 GetRGB 
 
@@ -718,7 +741,10 @@ This function will release an opened CD.
 
 =head2 BlitSurface 
 
-=head2 FillRect 
+=head2 FillRect(surface,rect,color)
+	
+C<SDL::FillRect> draws a solid rectangle of color on the given surface.
+If the rectangle is NULL, the entire surface will be painted.
 
 =head2 WMSetCaption 
 
@@ -962,8 +988,8 @@ David J. Goehrig, Wayne Keenan, Guillaume Cottenceau
 
 =head1 SEE ALSO
 
-perl(1) SDL::App(3) SDL::Surface(3) SDL::Event(3) SDL::Rect(3) 
-SDL::Palette(3) SDL::Mixer(3) SDL::Cdrom(3)
+	perl(1) SDL::App(3) SDL::Surface(3) SDL::Event(3) SDL::Rect(3) 
+	SDL::Palette(3) SDL::Mixer(3) SDL::Cdrom(3)
 
 =cut
 

@@ -12,6 +12,9 @@ sub new {
 	my $class = ref($proto) || $proto;
 	my $self = {};
 	my %options = @_;
+
+	verify (%options, qw/ -data -mask -x -y /) if $SDL::DEBUG;
+
 	$self->{-data} = $options{-data};
 	$self->{-mask} = $options{-mask};
 	$self->{-x} = $options{-x};
@@ -19,7 +22,7 @@ sub new {
 	$self->{-cursor} = SDL::NewCursor($self->{-data},$self->{-mask},
 				$self->{-x},$self->{-y});
 	bless $self, $class;
-	return $self;
+	$self;
 }
 
 sub DESTROY ($) {
@@ -38,12 +41,12 @@ sub use ($) {
 }
 
 sub get () {
-	return SDL::GetCursor();
+	SDL::GetCursor();
 }
 
 sub show ($;$) {
 	my ($self,$toggle) = @_;
-	return SDL::ShowCursor($toggle);
+	SDL::ShowCursor($toggle);
 }
 
 1;

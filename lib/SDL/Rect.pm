@@ -3,7 +3,7 @@
 #
 #	A package for manipulating SDL_Rect *
 #
-#	David J. Goehrig Copyright (C) 2000,2002
+#	Copyright (C) 2000,2001,2002 David J. Goehrig
 
 package SDL::Rect;
 use strict;
@@ -14,10 +14,13 @@ sub new {
 	my $class = ref($proto) || $proto;
 	my $self = {};
 	my %options = @_;
-	my $x = $options{-x} || 0;
-	my $y = $options{-y} || 0;
-	my $w = $options{-width} || 0;
-	my $h = $options{-height} || 0;
+
+	verify (%options, qw/ -x -y -width -height -w -h / ) if $SDL::DEBUG;
+
+	my $x = $options{-x} 		|| 0;
+	my $y = $options{-y} 		|| 0;
+	my $w = $options{-width}	|| $options{-w}		|| 0;
+	my $h = $options{-height}	|| $options{-h}		|| 0;
 	$self->{-rect} = SDL::NewRect($x,$y,$w,$h);
 	bless $self,$class;
 	return $self;

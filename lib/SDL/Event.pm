@@ -2,7 +2,7 @@
 #
 #	A package for handling SDL_Event *
 #
-#	David J. Goehrig Copyright (C) 2000,2002
+#	Copyright (C) 2000,2001,2002 David J. Goehrig
 #
 #	see the file COPYING for terms of use
 #

@@ -41,11 +41,6 @@ sub name ($) {
 	return SDL::CDName($self->{-cdrom});
 }
 
-sub track_listing ($) {
-	my $self = shift;
-	return SDL::CDTrackListing($self->{-cdrom});
-}
-
 sub status ($) {
 	my $self = shift;
 	return SDL::sdlpl::sdl_cd_status($self->{-cdrom});

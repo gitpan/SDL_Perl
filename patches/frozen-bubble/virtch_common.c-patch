@@ -1,4 +1,0 @@
-351c351
-< 		if (Samples[handle])
----
-> 		if (Samples && Samples[handle])

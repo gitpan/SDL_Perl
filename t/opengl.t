@@ -35,6 +35,7 @@ can_ok('main', qw/
 	glEvalMesh2
 	glFrontFace
 	glFrustum 
+	glGet
 	glLight
 	glLoadIdentity
 	glMap1

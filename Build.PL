@@ -131,7 +131,7 @@ my $build   = SDL::Build->new(
 	},
 	build_recommends     =>
 	{
-		'Pod::ToDemo'  => '',
+		'Pod::ToDemo'  => '0.20',
 	},
 	xs_files             => \%xs,
 	dist_author	     => 'David J. Goehrig <DGOEHRIG@cpan.org>',

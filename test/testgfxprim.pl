@@ -22,8 +22,12 @@ use SDL::Event;
 use SDL::Surface;
 use SDL::Color;
 use SDL::Rect;
+use SDL::Config;
 
 use vars qw/ $app $app_rect $background $event $sprite $sprite_rect $videoflags /;
+
+die "Your system is not configured with SDL_gfx support!\n"
+	unless (SDL::Config->has('SDL_gfx'));
 
 ## User tweakable settings (via cmd-line)
 my %settings = (

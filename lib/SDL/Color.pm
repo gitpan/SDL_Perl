@@ -2,7 +2,7 @@
 #
 #	A package for manipulating SDL_Color *
 #
-#	Copyright (C) 2003 David J. Goehrig
+#	Copyright (C) 2002,2003,2004 David J. Goehrig
 
 package SDL::Color;
 
@@ -90,6 +90,33 @@ SDL::Color - a SDL perl extension
 
 C<SDL::Color> is a wrapper for display format independent color
 representations, with the same interface as L<SDL::Color>.  
+
+=head2 new ( -color => )
+
+C<SDL::Color::new> with a C<-color> option will construct a new object
+referencing the passed SDL_Color*.
+
+=head2 new (-r => , -g => , -b => )
+
+C<SDL::Color::new> with C<-r,-g,-b> options will construct both a SDL_Color
+structure, and the associated object with the specified vales.
+
+=head2 new (-pixel =>, -surface =>)
+
+C<SDL::Color::new> with C<-pixel,-surface> options will generate a SDL_Color*
+with the r,g,b values associated with the integer value passed by C<-pixel>
+for the given C<-surface>'s format.
+
+=head2 r ( [ red ] ), g( [ green ] ), b( [ blue ] )
+
+C<SDL::Color::r, SDL::Color::g, SDL::Color::b> are accessor methods for
+the red, green, and blue components respectively.  The color value can be set
+by passing a byte value (0-255) to each function.
+
+=head2 pixel ( surface )
+
+C<SDL::Color::pixel> takes a C<SDL::Surface> object and r,g,b values, and
+returns the integer representation of the closest color for the given surface.
 
 =head1 AUTHOR
 

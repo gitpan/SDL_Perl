@@ -1,13 +1,6 @@
 package SDL::Tutorial::Animation;
 
-use Pod::ToDemo;
-
-return 1 if defined caller();
-
-Pod::ToDemo::write_demo( shift, "#!$^X\n" . <<'END_HERE' );
-use strict;
-use warnings;
-
+use Pod::ToDemo <<'END_HERE';
 use SDL::App;
 use SDL::Rect;
 use SDL::Color;
@@ -105,6 +98,7 @@ sub draw_undraw_rect
 }
 END_HERE
 
+1;
 __END__
 
 =head1 NAME
@@ -117,7 +111,7 @@ SDL::Tutorial::Animation
 	$ perldoc SDL::Tutorial::Animation
 
 	# to create a demo animation program based on this tutorial
-	$ perl -MSDL::Tutorial::Animation sdl_anim.pl
+	$ perl -MSDL::Tutorial::Animation=sdl_anim.pl -e 1
 
 =head1 ANIMATING A RECTANGLE
 

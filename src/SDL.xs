@@ -480,6 +480,14 @@ PumpEvents ()
 	CODE:
 		SDL_PumpEvents();
 
+int
+PushEvent( e )
+	SDL_Event *e
+	CODE:
+		RETVAL = SDL_PushEvent( e );
+	OUTPUT:
+		RETVAL
+
 SDL_Event *
 NewEvent ()
 	CODE:	
@@ -488,7 +496,7 @@ NewEvent ()
 		RETVAL
 
 void
-FreeEvent( e )
+FreeEvent ( e )
 	SDL_Event *e
 	CODE:
 		safefree(e);
@@ -523,6 +531,16 @@ EventType ( e )
 	SDL_Event *e
 	CODE:
 		RETVAL = e->type;
+	OUTPUT:
+		RETVAL
+
+Uint8
+SetEventType ( e, type )
+	SDL_Event *e
+	Uint8 type
+	CODE:
+		RETVAL = e->type;
+		e->type = type;
 	OUTPUT:
 		RETVAL
 
@@ -727,7 +745,11 @@ CreateRGBSurfaceFrom (pixels, width, height, depth, pitch, Rmask, Gmask, Bmask, 
 	Uint32 Bmask
 	Uint32 Amask
 	CODE:
-		RETVAL = SDL_CreateRGBSurfaceFrom ( pixels, width, height,
+		Uint8* pixeldata;
+		Uint32 len = pitch * height;
+		New(0,pixeldata,len,Uint8);
+		Copy(pixels,pixeldata,len,Uint8);
+		RETVAL = SDL_CreateRGBSurfaceFrom ( pixeldata, width, height,
 				depth, pitch, Rmask, Gmask, Bmask, Amask );
 	OUTPUT:	
 		RETVAL
@@ -749,10 +771,9 @@ SurfaceCopy ( surface )
 	SDL_Surface *surface
 	CODE:
 		Uint8* pixels;
-		Uint32 size = surface->pitch * surface->format->BytesPerPixel*
-				surface->h;
-		pixels = (Uint8*)safemalloc(size);
-		memcpy(pixels,surface->pixels,size);
+		Uint32 size = surface->pitch * surface->h;
+		New(0,pixels,size,Uint8);
+		Copy(surface->pixels,pixels,size,Uint8);
 		RETVAL = SDL_CreateRGBSurfaceFrom(pixels,surface->w,surface->h,
 			surface->format->BitsPerPixel, surface->pitch,
 			surface->format->Rmask, surface->format->Gmask,
@@ -764,7 +785,13 @@ void
 FreeSurface ( surface )
 	SDL_Surface *surface
 	CODE:
-		SDL_FreeSurface(surface);
+		if (surface) {
+			Uint8* pixels = surface->pixels;
+			Uint32 flags = surface->flags;
+			SDL_FreeSurface(surface);
+			if (flags & SDL_PREALLOC)
+				Safefree(pixels);
+		}
 	
 Uint32
 SurfaceFlags ( surface )

@@ -19,8 +19,8 @@ sub new {
 	my $proto = shift;
 	my $class = ref($proto) || $proto;
 	my $self;
-	$self->{-number} = shift;
-	$self = \SDL::CDOpen($self->{-number});
+	my $number = shift;
+	$self = \SDL::CDOpen($number);
 	die SDL::GetError() if ( SDL::CD_ERROR() eq SDL::CDStatus($$self));
 	bless $self,$class;
 	return $self;

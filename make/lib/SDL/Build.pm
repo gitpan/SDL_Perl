@@ -186,7 +186,7 @@ sub write_sdl_config
 	sub has
 	{
 		my ($class, $define) = @_;
-		scalar grep { exists $$sdl_config{$_}{$define} } keys %$sdl_config;
+		scalar grep { $$sdl_config{$_}{$define} } keys %$sdl_config;
 	}
 
 	1;

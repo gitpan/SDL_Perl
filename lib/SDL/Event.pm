@@ -27,6 +27,9 @@ sub DESTROY {
 
 sub type {
 	my $self = shift;
+	if (@_) {
+		SDL::SetEventType($$self,$_[0]);
+	}
 	return SDL::EventType($$self);
 }
 
@@ -39,6 +42,11 @@ sub poll {
 	return SDL::PollEvent($$self);
 }
 
+sub push {
+	my $self = shift;
+	return SDL::PushEvent($$self);
+}
+
 sub wait {
 	my $self = shift;
 	return SDL::WaitEvent($$self);
@@ -46,9 +54,8 @@ sub wait {
 
 sub set { 
 	my $self = shift;
-	my $type = shift;
 	my $state = shift;
-	return SDL::EventState($type,$state);
+	return SDL::EventState($self->type(),$state);
 }
 
 sub set_unicode {
@@ -223,7 +230,7 @@ Waits for an event end returns then. Always returns true.
 
 =head2 set( type, state )
 
-Set type and state of the event.
+Set the state for all events of the given event's type
 
 =head2 set_unicode( toggle )
 

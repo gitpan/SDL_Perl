@@ -9,8 +9,17 @@ package SDL::Constants;
 
 require Exporter;
 
-use SelfLoader;
-#$SelfLoader::DEBUG=1;
+BEGIN {
+#supposedly this crap isn't thread safe
+#SelfLoader screws up and we can't be certain to read all DATA
+#if this isn't loaded prior to creating new threads.
+
+  if (! $threads::threads) {
+
+    use SelfLoader;
+    #$SelfLoader::DEBUG=1;
+  }
+};
 
 use vars qw(
 	@EXPORT
@@ -285,6 +294,7 @@ use vars qw(
 	UTF8_SHADED
 	UTF8_SOLID
 );
+
 
 __DATA__
 sub AUDIO_S16 {32784}

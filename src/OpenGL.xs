@@ -364,13 +364,350 @@ glDisable ( cap )
 	CODE:
 		glDisable(cap);
 
-double
+void 
 glGet ( param )
-	GLenum param
-	CODE:
-		glGetDoublev(param,&RETVAL);
-	OUTPUT:
-		RETVAL
+        GLenum param
+    PPCODE:
+        switch (param) {
+        case GL_EDGE_FLAG_ARRAY:
+        case GL_MAP1_TEXTURE_COORD_1:
+        case GL_LIGHT_MODEL_TWO_SIDE:
+        case GL_INDEX_LOGIC_OP:
+        case GL_PACK_ALIGNMENT:
+        case GL_CLIP_PLANE4:
+        case GL_TEXTURE_GEN_S:
+        case GL_MAP1_VERTEX_3:
+        case GL_LIGHT6:
+        case GL_LIGHT0:
+        case GL_NORMAL_ARRAY:
+        case GL_EDGE_FLAG:
+        case GL_INDEX_ARRAY:
+        case GL_AUTO_NORMAL:
+        case GL_POLYGON_OFFSET_FILL:
+        case GL_MAP1_TEXTURE_COORD_4:
+        case GL_FOG:
+        case GL_LIGHT2:
+        case GL_UNPACK_SWAP_BYTES:
+        case GL_RGBA_MODE:
+        case GL_POLYGON_OFFSET_POINT:
+        case GL_POINT_SMOOTH:
+        case GL_ALPHA_TEST:
+        case GL_MAP2_TEXTURE_COORD_4:
+        case GL_COLOR_ARRAY:
+        case GL_POLYGON_OFFSET_LINE:
+        case GL_MAP2_NORMAL:
+        case GL_MAP1_INDEX:
+        case GL_PACK_LSB_FIRST:
+        case GL_MAP1_TEXTURE_COORD_2:
+        case GL_MAP2_VERTEX_3:
+        case GL_MAP2_TEXTURE_COORD_2:
+        case GL_CULL_FACE:
+        case GL_DOUBLEBUFFER:
+        case GL_UNPACK_LSB_FIRST:
+        case GL_TEXTURE_COORD_ARRAY:
+        case GL_LIGHT1:
+        case GL_TEXTURE_GEN_Q:
+        case GL_MAP_STENCIL:
+        case GL_TEXTURE_1D:
+        case GL_LIGHT4:
+        case GL_LIGHTING:
+        case GL_LIGHT7:
+        case GL_MAP1_NORMAL:
+        case GL_CLIP_PLANE0:
+        case GL_TEXTURE_GEN_R:
+        case GL_PACK_SWAP_BYTES:
+        case GL_DEPTH_WRITEMASK:
+        case GL_COLOR_LOGIC_OP:
+        case GL_CLIP_PLANE5:
+        case GL_NORMALIZE:
+        case GL_TEXTURE_2D:
+        case GL_CLIP_PLANE3:
+        case GL_COLOR_MATERIAL:
+        case GL_BLEND:
+        case GL_CLIP_PLANE2:
+        case GL_MAP1_VERTEX_4:
+        case GL_DITHER:
+        case GL_CLIP_PLANE1:
+        case GL_MAP2_INDEX:
+        case GL_POLYGON_SMOOTH:
+        case GL_STEREO:
+        case GL_MAP2_COLOR_4:
+        case GL_LIGHT3:
+        case GL_VERTEX_ARRAY:
+        case GL_MAP1_TEXTURE_COORD_3:
+        case GL_STENCIL_TEST:
+        case GL_MAP2_TEXTURE_COORD_3:
+        case GL_TEXTURE_GEN_T:
+        case GL_LIGHT_MODEL_LOCAL_VIEWER:
+        case GL_LINE_SMOOTH:
+        case GL_MAP1_COLOR_4:
+        case GL_MAP2_TEXTURE_COORD_1:
+        case GL_CURRENT_RASTER_POSITION_VALID:
+        case GL_INDEX_MODE:
+        case GL_SCISSOR_TEST:
+        case GL_MAP_COLOR:
+        case GL_POLYGON_STIPPLE:
+        case GL_LIGHT5:
+        case GL_DEPTH_TEST:
+        case GL_LINE_STIPPLE:
+        case GL_MAP2_VERTEX_4:
+        {
+            GLboolean ret[1];
+            int i;
+            glGetBooleanv(param, ret);
+
+            for (i = 0; i < 1; i++) {
+                XPUSHs(sv_2mortal(newSViv(ret[i])));
+            }
+            break;
+        }
+        case GL_COLOR_WRITEMASK:
+        {
+            GLboolean ret[4];
+            int i;
+            glGetBooleanv(param, ret);
+
+            for (i = 0; i < 4; i++) {
+                XPUSHs(sv_2mortal(newSViv(ret[i])));
+            }
+            break;
+        }
+        case GL_ZOOM_Y:
+        case GL_ALPHA_TEST_REF:
+        case GL_POINT_SIZE_GRANULARITY:
+        case GL_CURRENT_RASTER_DISTANCE:
+        case GL_ALPHA_SCALE:
+        case GL_RED_BIAS:
+        case GL_DEPTH_BIAS:
+        case GL_FOG_DENSITY:
+        case GL_GREEN_BIAS:
+        case GL_DEPTH_CLEAR_VALUE:
+        case GL_ALPHA_BIAS:
+        case GL_FOG_END:
+        case GL_GREEN_SCALE:
+        case GL_BLUE_BIAS:
+        case GL_DEPTH_SCALE:
+        case GL_POINT_SIZE:
+        case GL_POLYGON_OFFSET_FACTOR:
+        case GL_ZOOM_X:
+        case GL_FOG_START:
+        case GL_POLYGON_OFFSET_UNITS:
+        case GL_LINE_WIDTH:
+        case GL_LINE_WIDTH_GRANULARITY:
+        case GL_BLUE_SCALE:
+        case GL_RED_SCALE:
+        {
+            GLdouble ret[1];
+            int i;
+            glGetDoublev(param, ret);
+
+            for (i = 0; i < 1; i++) {
+                XPUSHs(sv_2mortal(newSVnv(ret[i])));
+            }
+            break;
+        }
+        case GL_MODELVIEW_MATRIX:
+        case GL_TEXTURE_MATRIX:
+        case GL_PROJECTION_MATRIX:
+        {
+            GLdouble ret[16];
+            int i;
+            glGetDoublev(param, ret);
+
+            for (i = 0; i < 16; i++) {
+                XPUSHs(sv_2mortal(newSVnv(ret[i])));
+            }
+            break;
+        }
+        case GL_POINT_SIZE_RANGE:
+        case GL_LINE_WIDTH_RANGE:
+        case GL_MAP1_GRID_DOMAIN:
+        case GL_DEPTH_RANGE:
+        {
+            GLdouble ret[2];
+            int i;
+            glGetDoublev(param, ret);
+
+            for (i = 0; i < 2; i++) {
+                XPUSHs(sv_2mortal(newSVnv(ret[i])));
+            }
+            break;
+        }
+        case GL_CURRENT_NORMAL:
+        {
+            GLdouble ret[3];
+            int i;
+            glGetDoublev(param, ret);
+
+            for (i = 0; i < 3; i++) {
+                XPUSHs(sv_2mortal(newSVnv(ret[i])));
+            }
+            break;
+        }
+        case GL_FOG_COLOR:
+        case GL_MAP2_GRID_DOMAIN:
+        case GL_CURRENT_RASTER_POSITION:
+        case GL_CURRENT_COLOR:
+        case GL_LIGHT_MODEL_AMBIENT:
+        case GL_CURRENT_RASTER_TEXTURE_COORDS:
+        case GL_TEXTURE_ENV_COLOR:
+        case GL_CURRENT_RASTER_COLOR:
+        case GL_CURRENT_TEXTURE_COORDS:
+        case GL_COLOR_CLEAR_VALUE:
+        case GL_ACCUM_CLEAR_VALUE:
+        {
+            GLdouble ret[4];
+            int i;
+            glGetDoublev(param, ret);
+
+            for (i = 0; i < 4; i++) {
+                XPUSHs(sv_2mortal(newSVnv(ret[i])));
+            }
+            break;
+        }
+        case GL_CULL_FACE_MODE:
+        case GL_PIXEL_MAP_I_TO_A_SIZE:
+        case GL_PIXEL_MAP_A_TO_A_SIZE:
+        case GL_BLUE_BITS:
+        case GL_EDGE_FLAG_ARRAY_STRIDE:
+        case GL_RENDER_MODE:
+        case GL_FOG_MODE:
+        case GL_DEPTH_FUNC:
+        case GL_READ_BUFFER:
+        case GL_POINT_SMOOTH_HINT:
+        case GL_PACK_SKIP_PIXELS:
+        case GL_STENCIL_REF:
+        case GL_STENCIL_CLEAR_VALUE:
+        case GL_AUX_BUFFERS:
+        case GL_COLOR_MATERIAL_PARAMETER:
+        case GL_ACCUM_BLUE_BITS:
+        case GL_INDEX_SHIFT:
+        case GL_VERTEX_ARRAY_STRIDE:
+        case GL_STENCIL_PASS_DEPTH_PASS:
+        case GL_CLIENT_ATTRIB_STACK_DEPTH:
+        case GL_DRAW_BUFFER:
+        case GL_LINE_STIPPLE_REPEAT:
+        case GL_BLEND_SRC:
+        case GL_PIXEL_MAP_B_TO_B_SIZE:
+        case GL_MAX_PIXEL_MAP_TABLE:
+        case GL_MAX_TEXTURE_SIZE:
+        case GL_PIXEL_MAP_S_TO_S_SIZE:
+        case GL_LOGIC_OP_MODE:
+        case GL_DEPTH_BITS:
+        case GL_GREEN_BITS:
+        case GL_LINE_SMOOTH_HINT:
+        case GL_ALPHA_TEST_FUNC:
+        case GL_MAX_LIGHTS:
+        case GL_FOG_HINT:
+        case GL_MAX_NAME_STACK_DEPTH:
+        case GL_INDEX_ARRAY_TYPE:
+        case GL_TEXTURE_COORD_ARRAY_TYPE:
+        case GL_COLOR_ARRAY_TYPE:
+        case GL_MAX_LIST_NESTING:
+        case GL_STENCIL_WRITEMASK:
+        case GL_LIST_BASE:
+        case GL_ACCUM_ALPHA_BITS:
+        case GL_INDEX_ARRAY_STRIDE:
+        case GL_PIXEL_MAP_I_TO_B_SIZE:
+        case GL_INDEX_BITS:
+        case GL_STENCIL_FAIL:
+        case GL_UNPACK_ALIGNMENT:
+        case GL_STENCIL_PASS_DEPTH_FAIL:
+        case GL_ATTRIB_STACK_DEPTH:
+        case GL_PACK_SKIP_ROWS:
+        case GL_TEXTURE_STACK_DEPTH:
+        case GL_MATRIX_MODE:
+        case GL_COLOR_ARRAY_STRIDE:
+        case GL_LIST_MODE:
+        case GL_UNPACK_SKIP_PIXELS:
+        case GL_PIXEL_MAP_G_TO_G_SIZE:
+        case GL_VERTEX_ARRAY_TYPE:
+        case GL_RED_BITS:
+        case GL_MAX_CLIENT_ATTRIB_STACK_DEPTH:
+        case GL_INDEX_CLEAR_VALUE:
+        case GL_PIXEL_MAP_I_TO_G_SIZE:
+        case GL_ALPHA_BITS:
+        case GL_PIXEL_MAP_I_TO_R_SIZE:
+        case GL_COLOR_ARRAY_SIZE:
+        case GL_TEXTURE_COORD_ARRAY_SIZE:
+        case GL_MAP1_GRID_SEGMENTS:
+        case GL_VERTEX_ARRAY_SIZE:
+        case GL_PIXEL_MAP_R_TO_R_SIZE:
+        case GL_TEXTURE_COORD_ARRAY_STRIDE:
+        case GL_MODELVIEW_STACK_DEPTH:
+        case GL_MAX_TEXTURE_STACK_DEPTH:
+        case GL_PIXEL_MAP_I_TO_I_SIZE:
+        case GL_FOG_INDEX:
+        case GL_INDEX_WRITEMASK:
+        case GL_PACK_ROW_LENGTH:
+        case GL_CURRENT_INDEX:
+        case GL_STENCIL_VALUE_MASK:
+        case GL_UNPACK_SKIP_ROWS:
+        case GL_MAX_PROJECTION_STACK_DEPTH:
+        case GL_LIST_INDEX:
+        case GL_STENCIL_FUNC:
+        case GL_INDEX_OFFSET:
+        case GL_UNPACK_ROW_LENGTH:
+        case GL_COLOR_MATERIAL_FACE:
+        case GL_NORMAL_ARRAY_TYPE:
+        case GL_STENCIL_BITS:
+        case GL_PROJECTION_STACK_DEPTH:
+        case GL_CURRENT_RASTER_INDEX:
+        case GL_SHADE_MODEL:
+        case GL_TEXTURE_ENV_MODE:
+        case GL_NORMAL_ARRAY_STRIDE:
+        case GL_PERSPECTIVE_CORRECTION_HINT:
+        case GL_MAX_CLIP_PLANES:
+        case GL_MAX_MODELVIEW_STACK_DEPTH:
+        case GL_SUBPIXEL_BITS:
+        case GL_ACCUM_RED_BITS:
+        case GL_BLEND_DST:
+        case GL_FRONT_FACE:
+        case GL_MAX_EVAL_ORDER:
+        case GL_LINE_STIPPLE_PATTERN:
+        case GL_NAME_STACK_DEPTH:
+        case GL_MAX_ATTRIB_STACK_DEPTH:
+        case GL_POLYGON_SMOOTH_HINT:
+        case GL_ACCUM_GREEN_BITS:
+        {
+            GLint ret[1];
+            int i;
+            glGetIntegerv(param, ret);
+
+            for (i = 0; i < 1; i++) {
+                XPUSHs(sv_2mortal(newSViv(ret[i]))); 
+            }
+            break;
+        }
+        case GL_POLYGON_MODE:
+        case GL_MAX_VIEWPORT_DIMS:
+        case GL_MAP2_GRID_SEGMENTS:
+        {
+            GLint ret[2];
+            int i;
+            glGetIntegerv(param, ret);
+
+            for (i = 0; i < 2; i++) {
+                XPUSHs(sv_2mortal(newSViv(ret[i]))); 
+            }
+            break;
+        }
+        case GL_SCISSOR_BOX:
+        case GL_VIEWPORT:
+        {
+            GLint ret[4];
+            int i;
+            glGetIntegerv(param, ret);
+
+            for (i = 0; i < 4; i++) {
+                XPUSHs(sv_2mortal(newSViv(ret[i]))); 
+            }
+            break;
+        }
+        default:
+            croak("Unknown glGet parameter!");
+        }
+
 
 Uint32
 glIsEnabled ( cap )
@@ -738,6 +1075,8 @@ glLightModel ( pname, ... )
 			vec[2] = SvNV(ST(3));
 			vec[3] = SvNV(ST(4));
 			glLightModelfv(pname,vec);
+		} else {
+			Perl_croak(aTHX_ "SDL::OpenGL::glLightModel unknown model %d",pname);
 		}
 
 void
@@ -922,7 +1261,7 @@ glDrawPixels ( width, height, format, type, pixels )
 
 
 SV*
-ReadPixels ( x, y, width, height, format, type )
+glReadPixels ( x, y, width, height, format, type )
         Uint32 x
         Uint32 y
         Uint32 height
@@ -932,32 +1271,27 @@ ReadPixels ( x, y, width, height, format, type )
         CODE:
                 int len, size;
                 char *buf;
-                                                                                                                                                            
                 size = 1;       /* ALPHA, BLUE, GREEN or RED */
-                if (format == GL_BGR || format == GL_RGB) {
+                if (format == GL_BGR || format == GL_RGB) 
                         size = 3;
-                        }
-                if (format == GL_BGRA || format == GL_RGBA) {
+                if (format == GL_BGRA || format == GL_RGBA) 
                         size = 4;
-                        }
                 len = height * width * size;            /* in bytes */
                 RETVAL = newSV(len);                    /* alloc len+1 bytes */
                 SvPOK_on(RETVAL);                       /* make an PV */
                 buf = SvPVX(RETVAL);                    /* get ptr to buffer */
-                                                                                                                                                            
                 glReadPixels(x,y,width,height,format,type,buf);
                 SvCUR_set(RETVAL, len);                 /* set real length */
         OUTPUT:
                 RETVAL
                                                                                                                                                             
 AV*
-ReadPixel ( x, y )
+glReadPixel ( x, y )
         Uint32 x
         Uint32 y
         CODE:
                 int rgba[4];    /* r,g,b,a */
                 int i;
-                                                                                                                                                            
                 glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_INT,rgba);
                 RETVAL = newAV();
                 for ( i = 0; i < 4; i++ ) {
@@ -1024,6 +1358,8 @@ glPixelZoom ( zoomx, zoomy )
 	double zoomy
 	CODE:
 		glPixelZoom(zoomx,zoomy);
+
+#ifdef GL_VERSION_1_3
 
 void
 glColorTable ( target, internalFormat, width, format, type, data )
@@ -1224,6 +1560,8 @@ glBlendEquation ( mode )
 	CODE:
 		glBlendEquation(mode);
 
+#endif // GL_VERSION_1_3
+
 void
 glTexImage2D ( target, level, internalFormat, width, height, border, format, type, data )
 	GLenum target
@@ -1326,6 +1664,8 @@ glCopyTexSubImage1D ( target, level, xoffset, x, y, width )
 	CODE:
 		glCopyTexSubImage1D(target,level,xoffset,x,y,width);
 
+#ifdef GL_VERSION_1_3
+
 void
 glTexImage3D ( target, level, internalFormat, width, height, depth, border, format, type, data )
 	GLenum target
@@ -1371,6 +1711,8 @@ glCopyTexSubImage3D ( target, level, xoffset, yoffset, zoffset, x, y, width, hei
 	Uint32 height
 	CODE:
 		glCopyTexSubImage3D(target,level,xoffset,yoffset,zoffset,x,y,width,height);
+
+#endif // GL_VERSION_1_3
 
 AV*
 glGenTextures ( n )
@@ -1544,6 +1886,8 @@ glTexGen ( coord, name, ... )
 				break;
 		}
 
+#ifdef GL_VERSION_1_3
+
 void
 glActiveTextureARB ( texUnit )
 	GLenum texUnit
@@ -1570,6 +1914,8 @@ glMultiTexCoord ( texUnit,  ... )
 				s = SvNV(ST(0));	
 		}
 		glMultiTexCoord4dARB(texUnit,s,t,r,q);
+
+#endif // GL_VERSION_1_3
 
 void
 glDrawBuffer ( mode )
@@ -1743,7 +2089,15 @@ glGetError ( )
 		RETVAL = glGetError();
 	OUTPUT:
 		RETVAL
-	
+
+GLint
+glRenderMode ( mode )
+	GLenum mode
+	CODE:
+		RETVAL = glRenderMode( mode );
+	OUTPUT:
+		RETVAL
+
 void
 glInitNames ( )
 	CODE:
@@ -1807,6 +2161,16 @@ gluPerspective ( fovy, aspect, n, f )
 	double f
 	CODE:
 		gluPerspective(fovy,aspect,n,f);
+
+void
+gluPickMatrix ( x, y, delx, dely, viewport )
+	double x
+	double y
+	double delx
+	double dely
+	GLint* viewport
+	CODE:
+		gluPickMatrix(x,y,delx,dely,viewport);
 
 void
 gluOrtho2D ( left, right, bottom, top )
@@ -2171,6 +2535,9 @@ gluUnProject ( winx, winy, winz, mm, pm, vp )
 		av_push(RETVAL,newSVnv((double)objz));
 	OUTPUT:
 		RETVAL
+
+
+#ifdef GL_VERSION_1_3
 		
 AV*
 gluUnProject4 ( winx, winy, winz, clipw, mm, pm, vp, n, f )
@@ -2196,6 +2563,8 @@ gluUnProject4 ( winx, winy, winz, clipw, mm, pm, vp, n, f )
         OUTPUT:
                 RETVAL
 
+#endif // GL_VERSION_1_3
+
 AV*
 gluProject ( objx, objy, objz, mm, pm, vp )
 	double objx
@@ -2215,7 +2584,8 @@ gluProject ( objx, objy, objz, mm, pm, vp )
 	OUTPUT:
 		RETVAL
 
-#ifdef GLUtesselator
+#ifdef GL_VERSION_1_2
+
 GLUtesselator*
 gluNewTess ()
 	CODE:
@@ -2332,5 +2702,6 @@ gluTessVertex ( tessobj, coords, vd )
 		gluTessVertex(tessobj,(GLdouble*)coords,vd);
 	
 #endif
+
 #endif
 

@@ -1,5 +1,39 @@
 Revision history for Perl extension SDL_perl.
 
+* Sep 23 2004	David J. Goehrig <dgoehrig@cpan.org>
+	- added SDL::Config tests for SDL_gfx support to test/testgfxroto.pl
+		test/testgfxprim.pl and SDL::Tool::Graphic.pm
+	- removed exists test form SDL::Config::has()
+	- added SDL::PushEvent
+	- added SDL::SetEventType
+	- renamed SDL::OpenGL::glReadPixel(s)
+	- added error message for SDL::OpenGL::glLightModel
+	- cleaned up some formatting issues in OpenGL.xs
+	- fixed bug in SDL::Cdrom (referencing a scalar as a hashref) 
+	- added some more documentation to SDL::Color
+	- added SDL::Event::push (Andy Bakun)
+	- fixed documentation and usage of SDL::Event::set
+	- added SDL::Event::type([type]) setting parameter
+	- updated Pod::ToDemo recommends in Build.PL
+	- added chromatic's OpenGL version checks
+	- added GL_ALL_CLIENT_ATTRIB_BITS (in addition to GL_CLIENT_ATTRIB_BITS)
+	- added chromatic's SDL::Build::Cygwin.pm and SDL::Build::Win32.pm
+	- applied chromatic's patches to SDL::Tutorial, etc. for updated Pod::ToDemo
+
+
+* Sep 21 2004	David J. Goehrig <dgoehrig@cpan.org>
+	- added thread check to SDL::Constants.pm (prevent unsafe SelfLoader)
+	- applied Andy Bakun <sdlperl@thwartedefforts.org>'s patches
+		to SDL::CreateRGBSurfaceFrom, SDL::SurfaceCopy, and
+		SDL::FreeSurface
+	- applied GLint* to typemap patch
+	- applied glRenderMode patch
+	- applied gluPickMatrix patch
+	- fixed SDL::Surface::blit typo bug
+	- applied glGet patch by Luke (enumerating them all!)
+	- fixed typo bug in make/lib/SDL/Build/Darwin.pm
+		
+
 * Feb 23 2004	David J. Goehrig <dgoehrig@cpan.org>
 	- fixed OpenGL exporting & bootstrapping
 	- added ifdefs in OpenGL for NURBS and GLUTesslator

@@ -1,13 +1,6 @@
 package SDL::Tutorial;
 
-use Pod::ToDemo;
-
-return 1 if defined caller();
-
-Pod::ToDemo::write_demo( shift, "#!$^X\n" . <<'END_HERE' );
-use strict;
-use warnings;
-
+use Pod::ToDemo <<'END_HERE';
 use SDL::App;
 
 # change these values as necessary
@@ -25,6 +18,8 @@ my $app = SDL::App->new(
 sleep 2;
 END_HERE
 
+1;
+
 __END__
 
 =head1 NAME
@@ -37,7 +32,7 @@ SDL::Tutorial - introduction to Perl SDL
 	$ perldoc SDL::Tutorial
 
 	# to create a bare-bones SDL app based on this tutorial
-	$ perl -MSDL::Tutorial basic_app.pl
+	$ perl -MSDL::Tutorial=basic_app.pl -e 1
 
 =head1 SDL BASICS
 

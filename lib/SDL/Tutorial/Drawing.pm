@@ -1,13 +1,6 @@
 package SDL::Tutorial::Drawing;
 
-use Pod::ToDemo;
-
-return 1 if defined caller();
-
-Pod::ToDemo::write_demo( shift, "#!$^X\n" . <<'END_HERE' );
-use strict;
-use warnings;
-
+use Pod::ToDemo <<'END_HERE';
 use SDL::App;
 use SDL::Rect;
 use SDL::Color;
@@ -45,6 +38,7 @@ $app->update( $rect );
 sleep 2;
 END_HERE
 
+1;
 __END__
 
 =head1 NAME
@@ -57,7 +51,7 @@ SDL::Tutorial::Drawing - basic drawing with Perl SDL
 	$ perldoc SDL::Tutorial::Drawing
 
 	# to create a bare-bones SDL app based on this tutorial
-	$ perl -MSDL::Tutorial::Drawing basic_app.pl
+	$ perl -MSDL::Tutorial::Drawing=basic_app.pl -e 1
 
 =head1 DRAWING BASICS
 

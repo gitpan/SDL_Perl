@@ -4,7 +4,7 @@ use base 'SDL::Build';
 
 sub fetch_includes
 {
-	return 
+	return (
 	'/usr/local/include/SDL'   => '/usr/local/lib',
 	'/usr/local/include'       => '/usr/local/lib',
 	'/usr/local/include/smpeg' => '/usr/local/lib',

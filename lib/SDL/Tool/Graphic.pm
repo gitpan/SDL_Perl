@@ -7,6 +7,7 @@
 package SDL::Tool::Graphic;
 
 use SDL;
+use SDL::Config;
 require SDL::Surface;
 
 sub new {
@@ -92,6 +93,8 @@ sub invertColor {
 	}
 }
 
+die "SDL::Tool::Graphic requires SDL_gfx support\n"
+	unless SDL::Config->has('SDL_gfx');
  
 
 1;

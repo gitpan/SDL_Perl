@@ -180,7 +180,7 @@ sub blit {
 	if ($SDL::DEBUG) {
 		die "SDL::Surface::blit requires SDL::Rect objects"
 			unless ($_[1] == 0 || $_[1]->isa('SDL::Rect'))
-			&& ($_[1] == 0 || $_[3]->isa('SDL::Rect'));
+			&& ($_[3] == 0 || $_[3]->isa('SDL::Rect'));
 		die "SDL::Surface::blit requires SDL::Surface objects"
 			unless $_[2]->isa('SDL::Surface'); 
 	}

@@ -2,37 +2,24 @@
 #
 #	The application object, sort of like a surface
 #
-#	Copyright (C) 2000,2002 David J. Goehrig
+#	Copyright (C) 2000,2002,2003,2004 David J. Goehrig
 
 package SDL::App;
+
 use strict;
-use vars qw(@ISA);
-
 use SDL;
-use SDL::Surface;
 use SDL::Event;
+use SDL::Surface;
+use SDL::Rect;
 
-@ISA = qw(SDL::Surface Exporter);
-
-
-BEGIN {
-	use Exporter();
-	use vars qw(@EXPORT);
-	@EXPORT = qw(&SDL_SWSURFACE &SDL_HWSURFACE &SDL_ANYFORMAT 
-		     &SDL_HWPALETTE &SDL_DOUBLEBUF &SDL_FULLSCREEN
-		     &SDL_TEXTWIDTH &SDL_RESIZABLE &SDL_HWACCEL	
-		     &SDL_SRCCOLORKEY &SDL_RLEACCELOK &SDL_RLEACCEL	
-		     &SDL_SRCALPHA &SDL_ASYNCBLIT &SDL_GRAB_QUERY
-		     &SDL_GRAB_ON &SDL_GRAB_OFF &SDL_OPENGL
-		    );
-}
+our @ISA = qw(SDL::Surface);
 
 sub new {
 	my $proto = shift;
 	my $class = ref($proto) || $proto;
 	my %options = @_;
 
-	verify (%options, qw/	-opengl -gl -fullscreen -full
+	verify (%options, qw/	-opengl -gl -fullscreen -full -resizeable
 				-title -t -icon_title -it -icon -i 
 				-width -w -height -h -depth -d -flags -f 
 				-red_size -r -blue_size -b -green_size -g -alpha_size -a
@@ -41,17 +28,15 @@ sub new {
 				-double_buffer -db -buffer_size -bs -stencil_size -st
 		/ ) if ($SDL::DEBUG);
 
-	SDL::Init(SDL::INIT_EVERYTHING());
+	SDL::Init(SDL_INIT_EVERYTHING());
 	
-	my $self = {};
-
 	my $t = $options{-title} 	|| $options{-t} 	|| $0;
 	my $it = $options{-icon_title} 	|| $options{-it} 	|| $t;
 	my $ic = $options{-icon} 	|| $options{-i}		|| "";
 	my $w = $options{-width} 	|| $options{-w}		|| 800;
 	my $h = $options{-height} 	|| $options{-h}		|| 600;
 	my $d = $options{-depth} 	|| $options{-d}		|| 16;
-	my $f = $options{-flags} 	|| $options{-f}		|| SDL::ANYFORMAT();
+	my $f = $options{-flags} 	|| $options{-f}		|| SDL_ANYFORMAT();
 	my $r = $options{-red_size}	|| $options{-r}		|| 5;
 	my $g = $options{-green_size}	|| $options{-g}		|| 5;
 	my $b = $options{-blue_size}	|| $options{-b}		|| 5;
@@ -66,31 +51,33 @@ sub new {
 
 	$f |= SDL_OPENGL() if ($options{-gl} || $options{-opengl});
 	$f |= SDL_FULLSCREEN() if ($options{-fullscreen} || $options{-full});
+	$f |= SDL_RESIZABLE() if ($options{-resizeable});
 
 	if ($f & SDL_OPENGL()) { 
-		$$self{-opengl} = 1; 
+		$SDL::App::USING_OPENGL = 1;
+		SDL::GLSetAttribute(SDL_GL_RED_SIZE(),$r) if ($r);	
+		SDL::GLSetAttribute(SDL_GL_GREEN_SIZE(),$g) if ($g);	
+		SDL::GLSetAttribute(SDL_GL_BLUE_SIZE(),$b) if ($b);	
+		SDL::GLSetAttribute(SDL_GL_ALPHA_SIZE(),$a) if ($a);	
 
-		SDL::GLSetAttribute(SDL::GL_RED_SIZE(),$r) if ($r);	
-		SDL::GLSetAttribute(SDL::GL_GREEN_SIZE(),$g) if ($g);	
-		SDL::GLSetAttribute(SDL::GL_BLUE_SIZE(),$b) if ($b);	
-		SDL::GLSetAttribute(SDL::GL_ALPHA_SIZE(),$a) if ($a);	
-
-		SDL::GLSetAttribute(SDL::GL_RED_ACCUM_SIZE(),$ras) if ($ras);	
-		SDL::GLSetAttribute(SDL::GL_GREEN_ACCUM_SIZE(),$gas) if ($gas);	
-		SDL::GLSetAttribute(SDL::GL_BLUE_ACCUM_SIZE(),$bas) if ($bas);	
-		SDL::GLSetAttribute(SDL::GL_ALPHA_ACCUM_SIZE(),$aas) if ($aas);	
+		SDL::GLSetAttribute(SDL_GL_RED_ACCUM_SIZE(),$ras) if ($ras);	
+		SDL::GLSetAttribute(SDL_GL_GREEN_ACCUM_SIZE(),$gas) if ($gas);	
+		SDL::GLSetAttribute(SDL_GL_BLUE_ACCUM_SIZE(),$bas) if ($bas);	
+		SDL::GLSetAttribute(SDL_GL_ALPHA_ACCUM_SIZE(),$aas) if ($aas);	
 		
-		SDL::GLSetAttribute(SDL::GL_DOUBLEBUFFER(),$db) if ($db);
-		SDL::GLSetAttribute(SDL::GL_BUFFER_SIZE(),$bs) if ($bs);
-		SDL::GLSetAttribute(SDL::GL_DEPTH_SIZE(),$d);
+		SDL::GLSetAttribute(SDL_GL_DOUBLEBUFFER(),$db) if ($db);
+		SDL::GLSetAttribute(SDL_GL_BUFFER_SIZE(),$bs) if ($bs);
+		SDL::GLSetAttribute(SDL_GL_DEPTH_SIZE(),$d);
+	} else {
+		$SDL::App::USING_OPENGL = 0;
 	}
 
-	($$self{-surface} = SDL::SetVideoMode($w,$h,$d,$f)) 
+	my $self = \SDL::SetVideoMode($w,$h,$d,$f)
 		or die SDL::GetError();
 	
 	if ($ic and -e $ic) {
 	   my $icon = new SDL::Surface -name => $ic;
-	   SDL::WMSetIcon($$icon{-surface});	   
+	   SDL::WMSetIcon($$icon);	   
 	}
 
 	SDL::WMSetCaption($t,$it);
@@ -98,6 +85,15 @@ sub new {
 	bless $self,$class;
 	return $self;
 }	
+
+sub resize ($$$) {
+	my ($self,$w,$h) = @_;
+	my $flags = SDL::SurfaceFlags($$self);
+	if ( $flags & SDL_RESIZABLE()) {
+		my $bpp = SDL::SurfaceBitsPerPixel($$self);
+		$self = \SDL::SetVideoMode($w,$h,$bpp,$flags);
+	}
+}
 
 sub title ($;$) {
 	my $self = shift;
@@ -131,7 +127,7 @@ sub warp ($$$) {
 
 sub fullscreen ($) {
 	my $self = shift;
-	SDL::WMToggleFullScreen($self->{-surface});
+	SDL::WMToggleFullScreen($$self);
 }
 
 sub iconify ($) {
@@ -157,7 +153,7 @@ sub loop ($$) {
 
 sub sync ($) {
 	my $self = shift;
-	if ($self->{-opengl}) {
+	if ($SDL::App::USING_OPENGL) {
 		SDL::GLSwapBuffers()
 	} else {
 		$self->flip();
@@ -166,7 +162,7 @@ sub sync ($) {
 
 sub attribute ($$;$) {
 	my ($self,$mode,$value) = @_;
-	return undef unless ($self->{-opengl});
+	return undef unless ($SDL::App::USING_OPENGL);
 	if (defined $value) {
 		SDL::GLSetAttribute($mode,$value);
 	}
@@ -175,81 +171,11 @@ sub attribute ($$;$) {
 	$$returns[1];	
 }
 
-sub SDL_SWSURFACE {
-	return SDL::SWSURFACE;
-}
-
-sub SDL_HWSURFACE {
-	return SDL::HWSURFACE;
-}
-
-sub SDL_ANYFORMAT  {
-	return SDL::ANYFORMAT;
-}
-
-sub SDL_HWPALETTE {
-	return SDL::HWPALETTE;
-}
-
-sub SDL_DOUBLEBUF {
-	return SDL::DOUBLEBUF;
-}
-
-sub SDL_FULLSCREEN {
-	return SDL::FULLSCREEN;
-}
-
-sub SDL_TEXTWIDTH {
-	return SDL::TextWidth(join('',@_));
-}
-
-sub SDL_RESIZABLE {
-	return SDL::RESIZABLE;
-}
-
-sub SDL_HWACCEL {	
-	return SDL::HWACCEL;
-}
-
-sub SDL_SRCCOLORKEY {
-	return SDL::SRCCOLORKEY;
-}
-
-sub SDL_RLEACCELOK {
-	return SDL::RLEACCELOK;
-}
-
-sub SDL_RLEACCEL {
-	return SDL::RLEACCEL;
-}
-
-sub SDL_SRCALPHA {
-	return SDL::SRCALPHA;
-}
-
-sub SDL_ASYNCBLIT {
-	return SDL::ASYNCBLIT;
-}
-
-sub SDL_GRAB_QUERY {
-	return SDL::GRAB_QUERY;
-}
-
-sub SDL_GRAB_ON {
-	return SDL::GRAB_ON;
-}
-
-sub SDL_GRAB_OFF {
-	return SDL::GRAB_OFF;
-}
-
-sub SDL_OPENGL {
-	return SDL::OPENGL;
-}
-
 1;
 
 __END__;
+
+=pod
 
 =head1 NAME
 
@@ -257,10 +183,19 @@ SDL::App - a SDL perl extension
 
 =head1 SYNOPSIS
 
-  $app = new SDL::App ( -title => 'test program', 
-		-width => 640, -height => 480, -depth => 32 );
+	my $app = new SDL::App (
+		-title => 'Application Title',
+		-width => 640, 
+		-height => 480,
+		-depth => 32 );
 
 =head1 DESCRIPTION
+
+L<SDL::App> controls the root window of the of your SDL based application.
+It extends the L<SDL_Surface> class, and provides an interface to the window
+manager oriented functions.
+
+=head1 METHODS
 
 =head2 new
 
@@ -271,25 +206,36 @@ C<SDL::App::new> takes a series of named parameters:
 =over 4
 
 =item *
+
 -title
 
 =item *
+
 -icon_title
 
 =item *
+
 -icon
 
 =item *
+
 -width
 
 =item *
+
 -height
 
 =item *
+
 -depth
 
 =item *
+
 -flags
+
+=item *
+
+-resizeable
 
 =back
 
@@ -313,6 +259,11 @@ C<SDL::App::ticks> returns the number of ms since the application began.
 =head2 error
 
 C<SDL::App::error> returns the last error message set by the SDL.
+
+=head2 resize
+
+C<SDL::App::resize> takes a new height and width of the application
+if the application was originally created with the -resizable option.
 
 =head2 fullscreen
 
@@ -338,6 +289,8 @@ SDL_GRAB_ON
 =item *
 SDL_GRAB_OFF
 
+=back
+
 =head2 loop
 
 C<SDL::App::loop> is a simple event loop method which takes a reference to a hash
@@ -362,7 +315,7 @@ the event object used in the loop.
 =head2 sync
 
 C<SDL::App::sync> encapsulates the various methods of syncronizing the screen with the
-current video buffer.  SDL::App::sync will do a fullscreen update, using the double buffer
+current video buffer.  C<SDL::App::sync> will do a fullscreen update, using the double buffer
 or OpenGL buffer if applicable.  This is prefered to calling flip on the application window.
 
 =head2 attribute ( attr, [value] )
@@ -373,11 +326,10 @@ always returns the current value of the given attribute, or dies on failure.
 
 =head1 AUTHOR
 
-  David J. Goehrig
+David J. Goehrig
 
 =head1 SEE ALSO
 
-  perl(1) SDL::Surface(3) SDL::Mixer(3) SDL::Event(3) SDL::Cdrom(3).
+L<perl> L<SDL::Surface> L<SDL::Event>  L<SDL::OpenGL>
 
 =cut	
-

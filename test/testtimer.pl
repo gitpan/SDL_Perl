@@ -5,7 +5,7 @@ use SDL::Timer;
 
 die "usage: $0\n" if in($ARGV[0], qw/ -? -h --help/);
 
-SDL::Init(SDL::INIT_EVERYTHING());
+SDL::Init(SDL_INIT_EVERYTHING());
 
 print STDERR "Waiting 4 seconds\n";
 SDL::Delay(4000);

@@ -3,31 +3,30 @@
 #
 #	A package for manipulating SDL_Surface *
 #
-#	Copyright (C) 2000, 2001, 2002 David J. Goehrig
+#	Copyright (C) 2003 David J. Goehrig
 
 package SDL::Surface;
+
 use strict;
 use SDL;
-require SDL::Rect;
-require SDL::Palette;
-require SDL::Color;
-
-require Exporter;
+use SDL::SFont;
+use SDL::Color;
+use SDL::Rect;
 
 sub new {
 	my $proto = shift;	
 	my $class = ref($proto) || $proto;
-	my $self = {};
 	my %options = @_;
+	my $self;
 
 	verify (%options, qw/ -name -n -flags -fl -width -w -height -h -depth -d
 				-pitch -p -Rmask -r -Gmask -g -Bmask -b -Amask -a
 				-from -f /) if $SDL::DEBUG;
 	
-	if ( $options{-name} ne "" && exists $SDL::{IMGLoad} ) {		
-	   $$self{-surface} = SDL::IMGLoad($options{-name});	
+	if ( defined($options{-name}) && $options{-name} ne "" && exists $SDL::{IMGLoad} ) {		
+	   $self = \SDL::IMGLoad($options{-name});	
 	} else {
-		my $f = $options{-flags}  	|| $options{-fl} 	|| SDL::ANYFORMAT();
+		my $f = $options{-flags}  	|| $options{-fl} 	|| SDL_ANYFORMAT();
 		my $w = $options{-width} 	|| $options{-w}		|| 1;
 		my $h = $options{-height} 	|| $options{-h}		|| 1;	
 		my $d = $options{-depth} 	|| $options{-d}		|| 8;
@@ -43,238 +42,220 @@ sub new {
 
 		if ( $options{-from}|| $options{-f} ) { 
 			my $src = $options{-from}|| $options{-f};
-			$$self{-surface} = SDL::CreateRGBSurfaceFrom(
-				$src,$w,$h,$d,$p,$r,$g,$b,$a);
+			$self = \SDL::CreateRGBSurfaceFrom($src,$w,$h,$d,$p,$r,$g,$b,$a);
 		} else {
-			$$self{-surface} = SDL::CreateRGBSurface(
-				$f,$w,$h,$d,$r,$g,$b,$a);
+			$self = \SDL::CreateRGBSurface($f,$w,$h,$d,$r,$g,$b,$a);
 		}
 	}
 	die "SDL::Surface::new failed. ", SDL::GetError()
-		unless ( $$self{-surface});
+		unless ( $$self);
 	bless $self,$class;
 	return $self;
 }
 
 sub DESTROY {		
-	my $self = shift;	
-	SDL::FreeSurface($$self{-surface});	
+	SDL::FreeSurface(${$_[0]});
 }
 
 sub flags {
-	my $self = shift;
-	return SDL::SurfaceFlags($$self{-surface});
+	SDL::SurfaceFlags(${$_[0]});
 }
 
 sub palette {
-	my $self = shift;
-	return SDL::SurfacePalette($$self{-surface});
+	SDL::SurfacePalette(${$_[0]});
 }
 
 sub bpp {
-	my $self = shift;
-	return SDL::SurfaceBitsPerPixel($$self{-surface});
+	SDL::SurfaceBitsPerPixel(${$_[0]});
 }
 
 sub bytes_per_pixel {
-	my $self = shift;
-	return SDL::SurfaceBytesPerPixel($$self{-surface});
+	SDL::SurfaceBytesPerPixel(${$_[0]});
 }
 
 sub Rshift {
-	my $self = shift;
-	return SDL::SurfaceRshift($$self{-surface});
+	SDL::SurfaceRshift(${$_[0]});
 }
 
 sub Gshift {
-	my $self = shift;
-	return SDL::SurfaceGshift($$self{-surface});
+	SDL::SurfaceGshift(${$_[0]});
 }
 
 sub Bshift {
-	my $self = shift;
-	return SDL::SurfaceBshift($$self{-surface});
+	SDL::SurfaceBshift(${$_[0]});
 }
 
 sub Ashift {
-	my $self = shift;
-	return SDL::SurfaceAshift($$self{-surface});
+	SDL::SurfaceAshift(${$_[0]});
 }
 
 sub Rmask {
-	my $self = shift;
-	return SDL::SurfaceRmask($$self{-surface});
+	SDL::SurfaceRmask(${$_[0]});
 }
 
 sub Gmask {
-	my $self = shift;
-	return SDL::SurfaceGmask($$self{-surface});
+	SDL::SurfaceGmask(${$_[0]});
 }
 
 sub Bmask {
-	my $self = shift;
-	return SDL::SurfaceBmask($$self{-surface});
+	SDL::SurfaceBmask(${$_[0]});
 }
 
 sub Amask {
-	my $self = shift;
-	return SDL::SurfaceAmask($$self{-surface});
+	SDL::SurfaceAmask(${$_[0]});
 }
 
 sub color_key {
-	my $self = shift;
-	return SDL::SurfaceColorKey($$self{-surface});
+	SDL::SurfaceColorKey(${$_[0]});
 }
 
 sub alpha {
-	my $self = shift;
-	return SDL::SurfaceAlpha($$self{-surface});
+	SDL::SurfaceAlpha(${$_[0]});
 }
 
 sub width {
-	my $self = shift;
-	return SDL::SurfaceW($$self{-surface});
+	SDL::SurfaceW(${$_[0]});
 }
 
 sub height {
-	my $self = shift;
-	return SDL::SurfaceH($$self{-surface});
+	SDL::SurfaceH(${$_[0]});
 }
 
 sub pitch {
-	my $self = shift;
-	return SDL::SurfacePitch($$self{-surface});
+	SDL::SurfacePitch(${$_[0]});
 }
 
 sub pixels {
-	my $self = shift;
-	return SDL::SurfacePixels($$self{-surface});
+	SDL::SurfacePixels(${$_[0]});
 }
 
 sub pixel {
-	my ($self,$x,$y,$color) = @_;
-	if ($color) {
-		$color = $$color{-color} if (ref($color) && $color->isa('SDL::Color'));
-		return SDL::SurfacePixel($$self{-surface},$x,$y,$color);
-	} else {
-		return SDL::SurfacePixel($$self{-surface},$x,$y);
-	}
+	die "SDL::Surface::pixel requires a SDL::Color"
+		if $_[3] && $SDL::DEBUG && !$_[3]->isa("SDL::Color");
+	$_[3] ?
+		new SDL::Color -color => SDL::SurfacePixel(${$_[0]},$_[1],$_[2],${$_[3]}) :
+		new SDL::Color -color => SDL::SurfacePixel(${$_[0]},$_[1],$_[2]);
 }
 
 sub fill {
-	my ($self,$rect,$color) = @_;
-	$rect = $$rect{-rect} if (ref($rect) && $rect->isa("SDL::Rect"));
-	$color = $$color{-color} if (ref($color) && $color->isa("SDL::Color"));
-	return SDL::FillRect($$self{-surface},$rect,$color);
+	die "SDL::Surface::fill requires a SDL::Rect object"
+		unless !$SDL::DEBUG || $_[1] == 0 || $_[1]->isa('SDL::Rect');
+	die "SDL::Surface::fill requires a SDL::Color object"
+		unless !$SDL::DEBUG || $_[2]->isa('SDL::Color');
+	if ($_[1] == 0 ) {
+		SDL::FillRect(${$_[0]},0,${$_[2]});
+	} else {
+		SDL::FillRect(${$_[0]},${$_[1]},${$_[2]});
+	}
 }
 
 sub lockp {
-	my $self = shift;
-	return SDL::MUSTLOCK($$self{-surface});
+	SDL::MUSTLOCK(${$_[0]});
 }
 
 sub lock {
-	my $self = shift;
-	return SDL::SurfaceLock($$self{-surface});
+	SDL::SurfaceLock(${$_[0]});
 }
 
 sub unlock {
-	my $self = shift;
-	return SDL::SurfaceUnlock($$self{-surface});
+	SDL::SurfaceUnlock(${$_[0]});
 }
 
 sub update {
-	my ($self,@rects) = @_;
-	my @rect_ptrs;
-	for (@rects) { 
-		push @rect_ptrs, (ref($_) &&  $_->isa("SDL::Rect") ? $$_{-rect} : $_ );
+	my $self = shift;;
+	if ($SDL::DEBUG) {
+		for (@_) { 
+			die "SDL::Surface::update requires SDL::Rect objects"
+				unless $_->isa('SDL::Rect');
+		}
 	}
-	SDL::UpdateRects($$self{-surface}, @rect_ptrs );
+	SDL::UpdateRects($$self, map { ${$_} } @_ );
 }
 
 sub flip {
-	my $self = shift;
-	SDL::Flip($$self{-surface});
+	SDL::Flip(${$_[0]});
 }
 
 sub blit {
-	my ($self,$srect,$dest,$drect) = @_;
-	$srect = $$srect{-rect} if (ref($srect) && $srect->isa("SDL::Rect"));
-	$drect = $$drect{-rect} if (ref($drect) && $drect->isa( "SDL::Rect"));
-	$dest = $$dest{-surface} if (ref($dest) && $dest->isa("SDL::Surface"));
-	return SDL::BlitSurface($$self{-surface},$srect,$dest,$drect);
+	if ($SDL::DEBUG) {
+		die "SDL::Surface::blit requires SDL::Rect objects"
+			unless ($_[1] == 0 || $_[1]->isa('SDL::Rect'))
+			&& ($_[1] == 0 || $_[3]->isa('SDL::Rect'));
+		die "SDL::Surface::blit requires SDL::Surface objects"
+			unless $_[2]->isa('SDL::Surface'); 
+	}
+	SDL::BlitSurface(map { $_ != 0 ? ${$_} : $_ } @_);
 }
 
 sub set_colors {
-	my ($self,$start,@colors) = @_;
-	my (@color_ptrs);
-	for (@colors) {
-		push @color_ptrs, (ref($_) && $_->isa("SDL::Color") ? $$_{-color} : $_ );
+	my $self = shift;
+	my $start = shift;
+	for (@_) {
+		die "SDL::Surface::set_colors requires SDL::Color objects"
+			unless !$SDL::DEBUG || $_->isa('SDL::Color');
 	}
-	return SDL::SetColors($$self{-surface},$start,@color_ptrs);
+	return SDL::SetColors($$self, $start, map { ${$_} } @_);
 }
 
 sub set_color_key {
-	my $self = shift;
-	my $flag = shift;
-	my $pixel;
-	if (@_ == 1) {
-		$pixel = shift;
-		$pixel = $pixel->pixel($$self{-surface}) 
-			if (ref($pixel) && $pixel->isa("SDL::Color"));
-	} else {
-		$pixel = $self->pixel(@_);
-	}	
-	return SDL::SetColorKey($$self{-surface},$flag,$pixel);
+	die "SDL::Surface::set_color_key requires a SDL::Color object"
+		unless !$SDL::DEBUG || $_[2]->isa('SDL::Color');
+	SDL::SetColorKey(${$_[0]},$_[1],${$_[2]});
 }
 
 sub set_alpha {
-	my ($self,$flag,$alpha) = @_;
-	return SDL::SetAlpha($$self{-surface},$flag,$alpha);
+	SDL::SetAlpha(${$_[0]},$_[1],$_[2]);
 }
 
 sub display_format {
 	my $self = shift;
-	my $tmp = SDL::DisplayFormat ($$self{-surface});
-	SDL::FreeSurface ($$self{-surface});
-	$$self{-surface} = $tmp;
-	return $self;
+	my $tmp = SDL::DisplayFormat($$self);
+	SDL::FreeSurface ($$self);
+	$$self = $tmp;
+	$self;
 }
 
 sub rgb {
 	my $self = shift;
-	my $tmp = SDL::ConvertRGB($$self{-surface});
-	SDL::FreeSurface($$self{-surface});
-	$$self{-surface} = $tmp;
-	return $self;
+	my $tmp = SDL::ConvertRGB($$self);
+	SDL::FreeSurface($$self);
+	$$self = $tmp;
+	$self;
 }
 
 sub rgba {
 	my $self = shift;
-	my $tmp = SDL::ConvertRGBA($$self{-surface});
-	SDL::FreeSurface($$self{-surface});
-	$$self{-surface} = $tmp;
-	return $self;
+	my $tmp = SDL::ConvertRGBA($$self);
+	SDL::FreeSurface($$self);
+	$$self = $tmp;
+	$self;
+}
+
+sub rect {
+	my $self = shift;
+	new SDL::Rect -width => $self->width(), -height => $self->height(),
+			-x => $_[0] || 0, -y => $_[1] || 0;
 }
 
 sub print {
 	my ($self,$x,$y,@text) = @_;
-	SDL::PutString( $$self{-surface}, $x, $y, join('',@text));
+	SDL::SFont::PutString( $$self, $x, $y, join('',@text));
 }
 
 sub save_bmp {
-	my ($self,$filename) = @_;
-	return SDL::SaveBMP( $$self{-surface}, $filename);
+	SDL::SaveBMP( ${$_[0]},$_[1]);
 }
 
 sub video_info {
-	my $self = shift;
-	return SDL::VideoInfo();
+	shift;
+	SDL::VideoInfo();
 }
 
 1;
 
 __END__;
+
+=pod 
 
 =head1 NAME
 
@@ -290,6 +271,19 @@ SDL::Surface - a SDL perl extension
 The C<SDL::Surface> module encapsulates the SDL_Surface* structure, and
 many of its ancillatory functions.  Not only is it a workhorse of the
 OO Layer, it is the base class for the C<SDL::App> class.  
+	
+=head1 EXPORTS
+
+	SDL_SWSURFACE		SDL_HWSURFACE
+	SDL_ASYNCBLIT 		SDL_ANYFORMAT
+	SDL_HWPALETTE 		SDL_DOUBLEBUF 
+	SDL_FULLSCREEN		SDL_OPENGL 
+	SDL_OPENGLBLIT		SDL_RESIZEABLE
+	SDL_NOFRAME		SDL_SRCCOLORKEY
+	SDL_RLEACCEL		SDL_SRCALPHA
+	SDL_PREALLOC
+
+=head1 METHODS
 
 =head2 new (-name => 'foo.png')
 
@@ -313,7 +307,7 @@ of memory.  This method takes the following additional parameters:
 
 =item *
 
--height 		the height of the image in pixels
+-height		the height of the image in pixels
 
 =item *
 
@@ -421,7 +415,9 @@ C<SDL::Surface::Amask> returns the bit mask for the alpha field for teh surface'
 =head2 color_key ()
 
 C<SDL::Surface::color_key> returns the current color key for the image, which can be set with
-the C<SDL::Surface::set_color_key> method.
+the C<SDL::Surface::set_color_key> method.  Before calling C<SDL::Surface::color_key> on 
+a image, you should fist call C<SDL::Surface::display_format> to convert it to the same
+format as the display.  Failure to do so will result in failure to apply the correct color_key.
 
 =head2 alpha ()
 
@@ -493,8 +489,7 @@ low level C-style API.
 =head2 set_color_key (flag,pixel) or (flag,x,y)
 
 C<SDL::Surface::set_color_key> sets the blit flag, usually SDL_SRCCOLORKEY, 
-for either the supplied pixel, or for the value of the pixel at (x,y) in the image.
-A SDL::Color object may be passed for the pixel value.
+to the specified L<SDL::Color> object.  Optional a SDL_Color* may be passed.
 
 =head2 set_alpha (flag,alpha)
 
@@ -534,7 +529,6 @@ David J. Goehrig
 
 =head1 SEE ALSO
 
-	perl(1) SDL::Rect(3) SDL::Font(3) SDL::App(3).
+L<perl> L<SDL::App> L<SDL::Color> L<SDL::Palette> L<SDL::Rect> 
 
 =cut
-

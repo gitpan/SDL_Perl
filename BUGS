@@ -1,6 +1,7 @@
 BUGS and Outstanding Issues 
 
-- Need to document OO layer and where C layer differs from SDL proper
-- Need to fix UNICODE support, for True Type Fonts
-- Need to find more BUGS
-- Nvidia driver conflict, theading?
+- MacOS X build screwed possibly
+- Win32 build screwed definitely
+- Haven't confirmed GL stuff working
+- RPM spec file needs fixing
+

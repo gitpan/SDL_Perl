@@ -3,7 +3,7 @@
 use SDL;
 
 die "Could not initialize SDL: ", SDL::GetError()
-	if ( 0 > SDL::Init(SDL::INIT_AUDIO()));
+	if ( 0 > SDL::Init(SDL_INIT_AUDIO()));
 
 $ARGV[0] ||= 'data/sample.wav';
 
@@ -21,14 +21,14 @@ $fillerup  = sub {
 	$wav_remainder = $wav_len - $wav_pos;
 
 	while ( $wav_remainder <= $len ) {
-		SDL::MixAudio($data,$wav_ptr,$wav_remainder,SDL::MIX_MAXVOLUME);
+		SDL::MixAudio($data,$wav_ptr,$wav_remainder,SDL_MIX_MAXVOLUME);
 		$data += $wav_remainder;
 		$len -= $wav_remainder;
 		$wav_ptr = $wav_buffer;	
 		$wav_remainder = $wav_len;
 		$wav_pos = 0;
 	}
-	SDL::MixAudio($data,$wav_ptr,$len,SDL::MIX_MAXVOLUME);
+	SDL::MixAudio($data,$wav_ptr,$len,SDL_MIX_MAXVOLUME);
 	$wav_pos += $len;
 };
 
@@ -56,7 +56,7 @@ SDL::PauseAudio(0);
 
 print "Using audio driver: ", SDL::AudioDriverName(), "\n";
 	
-while (! $done && ( SDL::GetAudioStatus() == SDL::AUDIO_PLAYING())) {
+while (! $done && ( SDL::GetAudioStatus() == SDL_AUDIO_PLAYING())) {
 	SDL::Delay(1000);
 }
 

@@ -34,17 +34,17 @@ sub print_modifiers
 	$mod = SDL::GetModState();
 
 	print " modifiers:", 
-		($mod & SDL::KMOD_LSHIFT) ? " LSHIFT" : "",
-		($mod & SDL::KMOD_RSHIFT) ? " RSHIFT" : "",
-		($mod & SDL::KMOD_LCTRL) ? " LCTRL" : "",
-		($mod & SDL::KMOD_RCTRL) ? " RCTRL" : "",
-		($mod & SDL::KMOD_LALT) ? " LALT" : "",
-		($mod & SDL::KMOD_RALT) ? " RALT" : "",
-		($mod & SDL::KMOD_LMETA) ? " LMETA" : "",
-		($mod & SDL::KMOD_RMETA) ? " RMETA" : "",
-		($mod & SDL::KMOD_CAPS) ? " CAPS" : "",
-		($mod & SDL::KMOD_NUM) ? " NUM" : "",
-		($mod & SDL::KMOD_MODE) ? " MODE" : "",
+		($mod & KMOD_LSHIFT) ? " LSHIFT" : "",
+		($mod & KMOD_RSHIFT) ? " RSHIFT" : "",
+		($mod & KMOD_LCTRL) ? " LCTRL" : "",
+		($mod & KMOD_RCTRL) ? " RCTRL" : "",
+		($mod & KMOD_LALT) ? " LALT" : "",
+		($mod & KMOD_RALT) ? " RALT" : "",
+		($mod & KMOD_LMETA) ? " LMETA" : "",
+		($mod & KMOD_RMETA) ? " RMETA" : "",
+		($mod & KMOD_CAPS) ? " CAPS" : "",
+		($mod & KMOD_NUM) ? " NUM" : "",
+		($mod & KMOD_MODE) ? " MODE" : "",
 		"\n" ;
 }
 
@@ -83,7 +83,7 @@ my %events = (
 while (!$done && $event->wait())
 {
 	if ( $events{$event->type()}) {
-		&{$events{$event->type()}}($event->{-event});
+		&{$events{$event->type()}}($$event);
 	}
 };
 

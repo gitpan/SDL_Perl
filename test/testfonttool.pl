@@ -1,16 +1,18 @@
 #!/usr/bin/env perl
 
+use strict;
 use SDL;
 use SDL::App;
 use SDL::Event;
-use SDL::FontTool;
+use SDL::Tool::Font;
 use SDL::Color;
 
-my %options;
+my (%options,$app,$mode);
 
 die "usage: $0 [-hw] [-fullscreen] [-width 640] [-height 480] [-bpp 24]\n"
-	if ( in ($ARGV[0], qw/ -h -? --help/ ));
+	if ( SDL::in ($ARGV[0], qw/ -h -? --help/ ));
 
+chdir 'test' if -d 'test';
 die "$0 must be run in the SDL_perl/test/ directory!"
 	unless (-d 'data');
 
@@ -47,7 +49,7 @@ for ( reverse keys %ttfonts ) {
 	for $mode ( qw/ -normal -bold -italic -underline / ) {
 		if (-e "data/$_") {
 			print STDERR "Loading $_\n";
-			$ttfonts{"$_$mode"} = new SDL::FontTool 
+			$ttfonts{"$_$mode"} = new SDL::Tool::Font 
 						$mode => 1,
 						-ttfont => "data/$_", 
 						-size => 20, 
@@ -63,7 +65,7 @@ for ( reverse keys %ttfonts ) {
 for ( reverse keys %sfonts) {
 	if (-e "data/$_") {
 		print STDERR "Loading $_\n";
-		$sfonts{$_} = new SDL::FontTool -sfont => "data/$_";
+		$sfonts{$_} = new SDL::Tool::Font -sfont => "data/$_";
 		push @fonts,  $sfonts{$_};
 	}
 }
@@ -86,12 +88,10 @@ DrawFonts(10,10);
 $app->loop( {
 	SDL_KEYDOWN() => sub { 
 		my ($event) = @_;
-		$app->warp($options{-width}/2,$options{-height}/2) 
-			if ($event->key_sym() == SDLK_SPACE);
-		$app->fullscreen()
-			if ($event->key_sym() == SDLK_f);
+		$app->warp($options{-width}/2,$options{-height}/2)  if ($event->key_sym() == SDLK_SPACE);
+		$app->fullscreen() if ($event->key_sym() == SDLK_f);
 		exit(0) if ($event->key_sym() == SDLK_ESCAPE);	
-		},
+	},
 	SDL_QUIT() => sub { exit(0); }
 } );
 

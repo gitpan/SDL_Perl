@@ -11,20 +11,42 @@ use SDL;
 sub new {
 	my $proto = shift;	
 	my $class = ref($proto) || $proto;
-	my $self = {};
 	my $filename = shift;
-	$self->{-data} = SDL::MixLoadMusic($filename);
+	my $self = \SDL::MixLoadMusic($filename);
 	bless $self,$class;
 	return $self;
 }
 
 sub DESTROY {
 	my $self = shift;
-	SDL::MixFreeMusic($self->{-data});
+	SDL::MixFreeMusic($$self);
 }
 
 1;
 
 __END__;
 
+=pod
 
+=head1 NAME
+
+SDL::Music - a perl extension
+
+=head1 DESCRIPTION
+
+L<SDL::Music> is used to load music files for use with L<SDL::Mixer>.
+To load a music file one simply creates a new object passing the filename 
+to the constructor:
+
+	my $music = new SDL::Music 'my_song.ogg';
+
+
+=head1 AUTHOR
+
+David J. Goehrig
+
+=head1 SEE ALSO
+
+L<perl> L<SDL::Mixer>
+
+=cut

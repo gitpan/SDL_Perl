@@ -53,3 +53,10 @@ ConsoleInformation * 	T_PTR
 GLboolean		T_U_CHAR
 GLUnurbsObj *		T_PTR
 GLUtesselator *		T_PTR
+GLuint			T_UV
+float *			T_PTR
+GLfloat			T_NV
+Sound_DecoderInfo *	T_PTR
+const Sound_DecoderInfo *	T_PTR
+Sound_Sample *		T_PTR
+Sound_AudioInfo *	T_PTR

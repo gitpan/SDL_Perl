@@ -81,7 +81,9 @@ sub init_game_context
 	$sprite = new SDL::Surface -name =>"data/icon.bmp"; 
 
 	# Set transparent pixel as the pixel at (0,0) 
-	$sprite->set_color_key(SDL_SRCCOLORKEY,0,0);	
+	$sprite->set_color_key(SDL_SRCCOLORKEY,$sprite->pixel(0,0));	
+
+	print STDERR "Got past that\n";
 
 	$sprite->display_format();
 
@@ -129,7 +131,7 @@ sub instruments
 
 sub game_loop
 {
-	my $surf = $app->{-surface};
+	my $surf = $$app;
 	my $surfWidth=$settings{screen_width};
 	my $surfHeight=$settings{screen_height};
 	my $surfMidWidth=$settings{screen_width}>>1;;
@@ -213,7 +215,7 @@ sub game_loop
 		"!",255,255,255,255);
 
 	SDL::GFXStringRGBA($surf,$surfMidWidth,$surfHeight*.75,
-		"SDLPerl Primitive Test.",255,255,255,255);
+		"SDL_Perl Primitive Test.",255,255,255,255);
 
 	$app->flip();
 

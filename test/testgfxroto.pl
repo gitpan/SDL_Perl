@@ -84,10 +84,6 @@ sub	init_game_context
 
 	$sprite = new SDL::Surface -name =>"data/logo.png"; 
 
-	# Set transparent pixel as the pixel at (0,0) 
-
-	$sprite->set_color_key(SDL_SRCCOLORKEY,0,0);	# sets the transparent color to that at (0,0)
-
 	$sprite->display_format();
 
 	$sprite_rect = new SDL::Rect(-x		 => 0, 
@@ -121,7 +117,9 @@ sub instruments
 	
 	# Run a sample blit to trigger blit (if posssible)
 	# acceleration before the check just after 
-	put_sprite_rotated($sprite,0,0,0);
+	put_sprite_rotated($sprite,
+			$settings{screen_width}/2, $settings{screen_height}/2,
+			0,0,0);
 	
 	if ( ($sprite->flags & SDL_HWACCEL) == SDL_HWACCEL ) {
 		printf("Sprite blit uses hardware acceleration\n");
@@ -156,8 +154,9 @@ sub generate_sprite_rotated
 	}
 	else
 	{
-		 $rotate_cache{$key}= SDL::DisplayFormat(
-			SDL::GFXRotoZoom($surface, $angle, $zoom, $smooth));
+		 my $sur = SDL::GFXRotoZoom($surface, $angle, $zoom, $smooth);
+
+		 $rotate_cache{$key}= SDL::DisplayFormat($sur);
 	}
 	return $rotate_cache{$key};
 }
@@ -166,11 +165,12 @@ sub put_sprite_rotated
 {
 	my ($surface, $x, $y, $angle, $zoom, $smooth) = @_;
 
-	my $roto = generate_sprite_rotated($surface->{-surface}, $angle, $zoom, $smooth);
+	my $roto = generate_sprite_rotated($$surface, $angle, $zoom, $smooth);
 
 	die "Failed to create rotozoom surface" unless $roto;
 
 	my ($w,$h) = (SDL::SurfaceW($roto),SDL::SurfaceH($roto));;	 
+	
 
 	my $dest_rect = new SDL::Rect
 				-x => $x - ($w/2),
@@ -180,7 +180,7 @@ sub put_sprite_rotated
 
 	SDL::SetColorKey($roto, SDL_SRCCOLORKEY, SDL::SurfacePixel($roto,$w/2,$h/2));
 	
-	SDL::BlitSurface($roto, 0, $$app{-surface}, $$dest_rect{-rect});	
+	SDL::BlitSurface($roto, 0, $$app, $$dest_rect);	
 }
 
 

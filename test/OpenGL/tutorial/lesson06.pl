@@ -12,6 +12,7 @@ use Getopt::Long;
 use Data::Dumper;
 use Benchmark;
 
+use SDL;
 use SDL::App;
 use SDL::OpenGL;
 use SDL::Event;
@@ -40,16 +41,14 @@ exit;
 sub main
   {  
    my $done=0;
-   my $vidmode_flags= SDL_OPENGL;
-
-   $vidmode_flags|= SDL_FULLSCREEN if $arg_fullscreen;
    
    my $app = new SDL::App ( -title => "Jeff Molofee's GL Code Tutorial ... NeHe '99", 
 			    -icon => "Data/perl.png",
-			    -flags => $vidmode_flags,			
 			    -width => $arg_screen_width,
 			    -height =>$arg_screen_height,
+			    -opengl => 1,
 			  );
+   $app->fullscreen() if $arg_fullscreen;
    
    SDL::ShowCursor(0);   
 

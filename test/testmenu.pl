@@ -5,11 +5,11 @@ use SDL::App;
 use SDL::Surface;
 use SDL::Rect;
 use SDL::Event;
-use strict;
-
-my $app = new SDL::App -w => 800, -h => 600;
 
 my $menu = new SDL::Surface -name => 'data/menu.png';
+
+my $app = new SDL::App -w => $menu->width(), -h => $menu->height(), -resizeable => 1;
+
 my $hilight = new SDL::Surface -name => 'data/highlight.png';
 
 my %menu = (

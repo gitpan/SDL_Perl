@@ -10,8 +10,6 @@ package SDL::TTFont;
 use strict;
 use SDL;
 use SDL::Surface;
-use SDL::Color;
-use SDL::Rect;
 
 use vars qw/ @ISA /;
 
@@ -23,7 +21,7 @@ sub new {
 	my $self = {};
 	my %options;
 	(%options) = @_;
-	$self->{-mode} = $options{-mode} 	|| $options{-m}	 || SDL::TTF_TEXT_SHADED();
+	$self->{-mode} = $options{-mode} 	|| $options{-m}	 || TEXT_SHADED();
 	$self->{-name} = $options{-name} 	|| $options{-n};
 	$self->{-size} = $options{-size} 	|| $options{-s};
 	$self->{-fg} = $options{-foreground} 	|| $options{-fg} || $SDL::Color::black;
@@ -53,12 +51,13 @@ sub DESTROY {
 sub print {
 	my ($self,$surface,$x,$y,@text) = @_;
 
-	$surface = $$surface{-surface} if ( ref($surface) && $surface->isa("SDL::Surface"));
+	die "Print requies an SDL::Surface"
+		unless( ref($surface) && $surface->isa("SDL::Surface") );
 
 	SDL::FreeSurface($self->{-surface}) if ($$self{-surface});
 
 	$$self{-surface} = SDL::TTFPutString($$self{-font},$$self{-mode},
-		$surface,$x,$y,$$self{-fg}{-color},$$self{-bg}{-color},join("",@text));
+		$$surface,$x,$y,${$$self{-fg}},${$$self{-bg}},join("",@text));
 
 	die "Could not print \"", join("",@text), "\" to surface, ",
 		SDL::GetError(), "\n" unless ($$self{-surface});
@@ -66,7 +65,8 @@ sub print {
 
 sub width {
         my ($self,@text) = @_;
-        SDL::TTFSizeText($$self{-font},join(" ",@text));
+        my $aref = SDL::TTFSizeText($$self{-font},join(" ",@text));
+	$$aref[0];
 }
 
 sub height {
@@ -86,68 +86,68 @@ sub descent {
 
 sub normal {
 	my ($self) = @_;
-	SDL::TTFSetFontStyle($$self{-font},SDL::TTF_STYLE_NORMAL());
+	SDL::TTFSetFontStyle($$self{-font},TTF_STYLE_NORMAL());
 }
 
 sub bold {
 	my ($self) = @_;
-	SDL::TTFSetFontStyle($$self{-font},SDL::TTF_STYLE_BOLD());
+	SDL::TTFSetFontStyle($$self{-font},TTF_STYLE_BOLD());
 }
 
 sub italic {
 	my ($self) = @_;
-	SDL::TTFSetFontStyle($$self{-font},SDL::TTF_STYLE_ITALIC());
+	SDL::TTFSetFontStyle($$self{-font},TTF_STYLE_ITALIC());
 
 }
 
 sub underline {
 	my ($self) = @_;
-	SDL::TTFSetFontStyle($$self{-font},SDL::TTF_STYLE_UNDERLINE());
+	SDL::TTFSetFontStyle($$self{-font},TTF_STYLE_UNDERLINE());
 }
 
 sub text_shaded {
 	my ($self) = @_;
-	$$self{-mode} = SDL::TTF_TEXT_SHADED();
+	$$self{-mode} = TEXT_SHADED();
 }
 
 sub text_solid {
 	my ($self) = @_;
-	$$self{-mode} = SDL::TTF_TEXT_SOLID();
+	$$self{-mode} = TEXT_SOLID();
 }
 
 sub text_blended {
 	my ($self) = @_;
-	$$self{-mode} = SDL::TTF_TEXT_BLENDED();
+	$$self{-mode} = TEXT_BLENDED();
 }
 
 sub utf8_shaded {
 	my ($self) = @_;
-	$$self{-mode} = SDL::TTF_UTF8_SHADED();
+	$$self{-mode} = UTF8_SHADED();
 }
 
 sub utf8_solid {
 	my ($self) = @_;
-	$$self{-mode} = SDL::TTF_UTF8_SOLID();
+	$$self{-mode} = UTF8_SOLID();
 }
 
 sub utf8_blended {
 	my ($self) = @_;
-	$$self{-mode} = SDL::TTF_UTF8_BLENDED();
+	$$self{-mode} = UTF8_BLENDED();
 }
 
 sub unicode_shaded {
 	my ($self) = @_;
-	$$self{-mode} = SDL::TTF_UNICODE_SHADED();
+	$$self{-mode} = UNICODE_SHADED();
 }
 
 sub unicode_solid {
 	my ($self) = @_;
-	$$self{-mode} = SDL::TTF_UNICODE_SOLID();
+	$$self{-mode} = UNICODE_SOLID();
 }
 
 sub unicode_blended {
 	my ($self) = @_;
-	$$self{-mode} = SDL::TTF_UNICODE_BLENDED();
+	$$self{-mode} = UNICODE_BLENDED();
 }
 
 die "Could not initialize True Type Fonts\n"
@@ -156,6 +156,8 @@ die "Could not initialize True Type Fonts\n"
 1;
 
 __END__;
+
+=pod
 
 =head1 NAME
 
@@ -167,7 +169,7 @@ SDL::TTFont - a SDL perl extension
 	
 =head1 DESCRIPTION
 
-
+L<SDL::TTFont> is a module for applying true type fonts to L<SDL::Surface>.
 
 =head1 AUTHOR
 
@@ -175,6 +177,6 @@ David J. Goehrig
 
 =head1 SEE ALSO
 
-perl(1) SDL::Surface(3)
+L<perl> L<SDL::Surface>
 
 =cut

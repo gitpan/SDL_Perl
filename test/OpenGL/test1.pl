@@ -2,19 +2,24 @@
 
 use SDL;
 use SDL::App;
+use SDL::Surface;
 use SDL::Event;
 use SDL::OpenGL;
+
+#for ( keys %main:: ) {
+#	print "$_\n";
+#}
 
 print "Starting $0\n";
 
 my $app = new SDL::App	-w => 800, -h => 600, -d => 16, -gl => 1;
 
 print "Initializing OpenGL settings\n";
-printf "%-24s%s\n", "GL_RED_SIZE ", $app->attribute( SDL::GL_RED_SIZE() );
-printf "%-24s%s\n", "GL_GREEN_SIZE ", $app->attribute( SDL::GL_GREEN_SIZE());
-printf "%-24s%s\n", "GL_BLUE_SIZE ", $app->attribute( SDL::GL_BLUE_SIZE() );
-printf "%-24s%s\n", "GL_DEPTH_SIZE ", $app->attribute( SDL::GL_DEPTH_SIZE() );
-printf "%-24s%s\n", "GL_DOUBLEBUFFER ", $app->attribute( SDL::GL_DOUBLEBUFFER() );
+printf "%-24s%s\n", "GL_RED_SIZE ", $app->attribute( SDL_GL_RED_SIZE() );
+printf "%-24s%s\n", "GL_GREEN_SIZE ", $app->attribute( SDL_GL_GREEN_SIZE());
+printf "%-24s%s\n", "GL_BLUE_SIZE ", $app->attribute( SDL_GL_BLUE_SIZE() );
+printf "%-24s%s\n", "GL_DEPTH_SIZE ", $app->attribute( SDL_GL_DEPTH_SIZE() );
+printf "%-24s%s\n", "GL_DOUBLEBUFFER ", $app->attribute( SDL_GL_DOUBLEBUFFER() );
 
 sub DrawScene {
 

@@ -5,29 +5,23 @@
 
 package SDL::Cursor;
 use strict;
-use SDL;
 
 sub new {
 	my $proto = shift;
 	my $class = ref($proto) || $proto;
-	my $self = {};
 	my %options = @_;
 
 	verify (%options, qw/ -data -mask -x -y /) if $SDL::DEBUG;
 
-	$self->{-data} = $options{-data};
-	$self->{-mask} = $options{-mask};
-	$self->{-x} = $options{-x};
-	$self->{-y} = $options{-y};
-	$self->{-cursor} = SDL::NewCursor($self->{-data},$self->{-mask},
-				$self->{-x},$self->{-y});
+	my $self = \SDL::NewCursor($options{-data},$options{-mask},
+				$options{-x},$options{-y});
 	bless $self, $class;
 	$self;
 }
 
 sub DESTROY ($) {
 	my $self = shift;
-	SDL::FreeCursor($self->{-cursor});
+	SDL::FreeCursor($$self);
 }
 
 sub warp ($$$) {
@@ -37,7 +31,7 @@ sub warp ($$$) {
 
 sub use ($) {
 	my $self = shift;
-	SDL::SetCursor($self->{-cursor});
+	SDL::SetCursor($$self);
 }
 
 sub get () {
@@ -52,6 +46,9 @@ sub show ($;$) {
 1;
 
 __END__;
+
+=pod
+
 
 
 =head1 NAME
@@ -103,6 +100,6 @@ David J. Goehrig
 
 =head1 SEE ALSO
 
-perl(1) SDL::Surface(3)
+L<perl> L<SDL::Surface>
 
 =cut	

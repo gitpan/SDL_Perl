@@ -7,32 +7,11 @@
 package SDL::Mixer;
 use strict;
 use SDL;
-require SDL::Music;
-require SDL::Sound;
+use SDL::Sound;
+use SDL::Music;
 
 BEGIN {
-	use Exporter();
-	use vars qw(@EXPORT @ISA);
-	@ISA = qw(Exporter);
-	@EXPORT = qw(&MIX_MAX_VOLUME &MIX_DEFAULT_FREQUENCY &MIX_DEFAULT_FORMAT
-			&MIX_DEFAULT_CHANNELS &MIX_NO_FADING &MIX_FADING_OUT
-			&MIX_FADING_IN &AUDIO_U8 &AUDIO_S8 &AUDIO_U16 
-			&AUDIO_S16 &AUDIO_U16MSB &AUDIO_S16MSB );
 }
-
-sub MIX_MAX_VOLUME { return SDL::MIX_MAX_VOLUME(); }
-sub MIX_DEFAULT_FREQUENCY { return SDL::MIX_DEFAULT_FREQUENCY(); }
-sub MIX_DEFAULT_FORMAT { return SDL::MIX_DEFAULT_FORMAT(); }
-sub MIX_DEFAULT_CHANNELS { return SDL::MIX_DEFAULT_CHANNELS(); }
-sub MIX_NO_FADING { return SDL::MIX_NO_FADING(); }
-sub MIX_FADING_OUT { return SDL::MIX_FADING_OUT(); }
-sub MIX_FADING_IN { return SDL::MIX_FADING_IN(); }
-sub AUDIO_U8 { return SDL::AUDIO_U8(); }
-sub AUDIO_S8 { return SDL::AUDIO_S8(); }
-sub AUDIO_U16 { return SDL::AUDIO_U16(); }
-sub AUDIO_S16 { return SDL::AUDIO_S16(); }
-sub AUDIO_U16MSB { return SDL::AUDIO_U16MSB(); }
-sub AUDIO_S16MSB { return SDL::AUDIO_S16MSB(); }
 
 $SDL::Mixer::initialized = 0;
 
@@ -41,9 +20,9 @@ sub new {
 	my $class = ref($proto) || $proto;
 	my $self = {};
 	my %options = @_;
-	my $frequency = $options{-frequency} || $options{-rate} || MIX_DEFAULT_FREQUENCY();
-	my $format = $options{-format} || MIX_DEFAULT_FORMAT();
-	my $channels = $options{-channels} || MIX_DEFAULT_CHANNELS();
+	my $frequency = $options{-frequency} || $options{-rate} || SDL::MIX_DEFAULT_FREQUENCY();
+	my $format = $options{-format} || SDL::MIX_DEFAULT_FORMAT();
+	my $channels = $options{-channels} || SDL::MIX_DEFAULT_CHANNELS();
 	my $size = $options{-size} || 4096;
 	unless ( $SDL::Mixer::initialized ) {
 		SDL::MixOpenAudio($frequency,$format,$channels,$size ) && 
@@ -115,23 +94,23 @@ sub group_newer ($$) {
 sub play_channel ($$$$;$) {
 	my ($self,$channel,$chunk,$loops,$ticks) = @_;
 	$ticks ||= -1; 
-	return SDL::MixPlayChannelTimed($channel,$chunk->{-data},$loops,$ticks);
+	return SDL::MixPlayChannelTimed($channel,$$chunk,$loops,$ticks);
 }
 
 sub play_music ($$$) {
 	my ($self,$music,$loops) = @_;
-	return SDL::MixPlayMusic($music->{-data},$loops);
+	return SDL::MixPlayMusic($$music,$loops);
 }
 
 sub fade_in_channel ($$$$$;$) {
 	my ($self,$channel,$chunk,$loops,$ms,$ticks) = @_;
 	$ticks ||= -1;
-	return SDL::MixFadeInChannelTimed($channel,$chunk->{-data},$loops,$ms,$ticks);
+	return SDL::MixFadeInChannelTimed($channel,$$chunk,$loops,$ms,$ticks);
 }
 
 sub fade_in_music ($$$$) {
 	my ($self,$music,$loops,$ms) = @_;
-	return SDL::MixFadeInMusic($music->{-data},$loops,$ms);
+	return SDL::MixFadeInMusic($$music,$loops,$ms);
 }
 
 sub channel_volume ($$$) {
@@ -231,6 +210,8 @@ sub playing_music () {
 
 __END__;
 
+=pod
+
 =head1 NAME
 
 SDL::Mixer - a SDL perl extension
@@ -241,24 +222,6 @@ SDL::Mixer - a SDL perl extension
 				-format => MIX_DEFAULT_FORMAT,
 				-channels => MIX_DEFAULT_CHANNELS,
 				-size => 4096;
-
-=head1 EXPORTS
-
-SDL::Mixer exports the following symbols by default:
-
-	MIX_MAX_VOLUME
-	MIX_DEFAULT_FREQUENCY
-	MIX_DEFAULT_FORMAT
-	MIX_DEFAULT_CHANNELS
-	MIX_NO_FADING
-	MIX_FADING_OUT
-	MIX_FADING_IN
-	AUDIO_U8
-	AUDIO_S8
-	AUDIO_U16
-	AUDIO_S16
-	AUDIO_U16MSB
-	AUDIO_S16MSB
 
 =head1 DESCRIPTION
 
@@ -301,169 +264,120 @@ Reserve so many channels.
 
 Allocate so many channels.
 
-=head2 group_channel()
-
-	$mixer->group_channel($channel,$group);
+=head2 group_channel(channel,group)
 
 Group the channel number C<$channel> into group C<$group>.
 
-=head2 group_channels()
+=head2 group_channels(from,to,group)
 
-	$mixer->group_channels ($from, $to, $group);
+Groups a range of channels
 
-=head2 group_available()
-
-	$mixer->group_available($group);
+=head2 group_available(group)
 
 Return true when the group is available.
 
-=head2 group_count
+=head2 group_count(group)
 
-	$mixer = $self->group_count($group);
+Returns the number of channels in the group
 
 =head2 group_oldest()
 
-	$mixer->group_oldest($group);
 
 =head2 group_newer()
 
-	$mixer->group_newer($group);
 
 =head2 play_channel()
 
-	$mixer->play_channel($channel,$chunk,$loops,$ticks);
 
 =head2 play_music()
 
-	$mixer->play_music($music,$loops);
-
 Play C<$music> C<$loop> times.
 
-=head2 fade_in_channel()
+=head2 fade_in_channel(channel,chunk,loops,ms,ticks)
 
-	$mixer->fade_in_channel($channel,$chunk,$loops,$ms,$ticks);
+Fades a channel in
 
-=head2 fade_in_music()
+=head2 fade_in_music(music,loops,ms)
 
-	$mixer->fade_in_music($music,$loops,$ms);
+Fades the music in over a number of ms, looping as it does
 
-=head2 channel_volume()
+=head2 channel_volume(channel,volume)
 
-	$mixer->channel_volume($channel,$volume);
+Sets the volume for a single channel
 
-=head2 mucis_volume()
+=head2 mucis_volume(volume)
 
-	$mixer->music_volume($volume);
-	
 Set the volume for the music.
 
-=head2 halt_channel()
+=head2 halt_channel(channel)
 
-	$mixer->halt_channel($channel);
-	
-=head2 halt_group()
+Stops a specific channel
 
-	$mixer->halt_group($group);
+=head2 halt_group(group)
+
+Stops a group of channels
 
 =head2 halt_music()
 
-	$mixer->halt_music();
+Stops the music
 
-=head2 channel_expire()
+=head2 channel_expire(channel,ticks)
 
-	$mixer->channel_expire($channel,$ticks);
+Ignores the channel after C<ticks> has expired
 
-=head2 fade_out_channel()
-
-	$mixer->fade_out_channel($channel,$ms);
+=head2 fade_out_channel(channel,ms)
 
 Fade the channel number C<$channel> in C<$ms> ms out.
 
-=head2 fade_out_group()
+=head2 fade_out_group(group,ms)
 	
-	$mixer->fade_out_group($group,$ms);
-
 Fade the channel group C<$group> in C<$ms> ms out.
 
-=head2 fade_out_music()
+=head2 fade_out_music(ms)
 	
-	$mixer->fade_out_music($ms);
-
 Fade the music in C<$ms> ms out.
 
 =head2 fading_music()
-
-	if ($mixer->fading_music())
-	  {
-	  ...
-	  }
 
 Return true when the music is currently fading in or out.
 
 =head2 fading_channel()
 
-	if ($mixer->fading_channel($channel))
-	  {
-	  ...
-	  }
-
 Return true when the channel number C<$channel> is currently fading in or out.
 
-=head2 pause()
-
-	$mixer->pause($channel);
+=head2 pause( channel )
 
 Pause the channel C<$channel>.
 
-=head2 resume()
-
-	$mixer->resume($channel);
+=head2 resume(channel)
 
 Resume the channel C<$channel>.
 
 =head2 paused()
 
-	if ($mixer->paused($channel))
-	  {
-	  ...
-	  }
-
 Return true when the channel is currently paused.
 
 =head2 pause_music()
-
-	$mixer->pause_music();
 
 Pause the music play.
 
 =head2 resume_music()
 	
-	$mixer->resume_music();
-
 Resume the music play.
 
 =head2 rewind_music()
 
-	$mixer->rewind_music();
+Resets the music file to the beginning
 
 =head2 music_paused()
-
-	if ($mixer->music_paused())
-	  {
-	  ...
-	  }
 
 Return true when the music is currently paused.
 
 =head2 playing()
 
-	$mixer->playing($channel);
-
 Return true when the channel is currently playing.
 
 =head2 playing_music ()
-
-	$mixer->playing_music();
 
 Return true when the music is currently playing.
 
@@ -473,8 +387,6 @@ David J. Goehrig, basic doc added by Tels <http://bloodgate.com>.
 
 =head1 SEE ALSO
 
-perl(1), L<SDL::Music> and L<SDL::Sound>.
+L<perl>, L<SDL::Music> and L<SDL::Sound>.
 
 =cut
-
-

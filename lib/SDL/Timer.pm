@@ -57,6 +57,9 @@ sub stop {
 
 __END__;
 
+=pod
+
+
 =head1 NAME
 
 SDL::Timer - a SDL perl extension to handle timers
@@ -79,7 +82,6 @@ David J. Goehrig
 
 =head1 SEE ALSO
 
-perl(1) SDL(3)
+L<perl> L<SDL>
 
-=cut
-
+=pod

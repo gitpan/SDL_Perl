@@ -7,7 +7,6 @@
 
 package SDL::Cdrom;
 use strict;
-use SDL;
 
 BEGIN {
 	use Exporter();
@@ -19,17 +18,17 @@ BEGIN {
 sub new {
 	my $proto = shift;
 	my $class = ref($proto) || $proto;
-	my $self = {};
+	my $self;
 	$self->{-number} = shift;
-	$self->{-cdrom} = SDL::CDOpen($self->{-number});
-	die SDL::GetError() if ( SDL::CD_ERROR() eq SDL::CDStatus($self->{-cdrom}));
+	$self = \SDL::CDOpen($self->{-number});
+	die SDL::GetError() if ( SDL::CD_ERROR() eq SDL::CDStatus($$self));
 	bless $self,$class;
 	return $self;
 }
 
 sub DESTROY {
 	my $self = shift;
-	SDL::CDClose($self->{-cdrom});
+	SDL::CDClose($$self);
 }
 
 sub CD_NUM_DRIVES {
@@ -38,47 +37,47 @@ sub CD_NUM_DRIVES {
 
 sub name ($) {
 	my $self = shift;
-	return SDL::CDName($self->{-cdrom});
+	return SDL::CDName($$self);
 }
 
 sub status ($) {
 	my $self = shift;
-	return SDL::sdlpl::sdl_cd_status($self->{-cdrom});
+	return SDL::sdlpl::sdl_cd_status($$self);
 }
 
 sub play ($$$;$$) {
 	my ($self,$start,$length,$fs,$fl) = @_;
-	return SDL::CDPlayTracks($self->{-cdrom},$start,$length,$fs,$fl);
+	return SDL::CDPlayTracks($$self,$start,$length,$fs,$fl);
 }
 
 sub pause ($) {
 	my $self = shift;
-	return SDL::CDPause($self->{-cdrom});
+	return SDL::CDPause($$self);
 }
 
 sub resume ($) {
 	my $self = shift;
-	return SDL::CDResume($self->{-cdrom});
+	return SDL::CDResume($$self);
 }
 
 sub stop ($) {
 	my $self = shift;
-	return SDL::CDStop($self->{-cdrom});
+	return SDL::CDStop($$self);
 }
 
 sub eject ($) {
 	my $self = shift;
-	return SDL::CDEject($self->{-cdrom});
+	return SDL::CDEject($$self);
 }
 
 sub id ($) {
 	my $self = shift;
-	return SDL::CDId($self->{-cdrom});
+	return SDL::CDId($$self);
 }
 
 sub num_tracks ($) {
 	my $self = shift;
-	return SDL::CDNumTracks($self->{-cdrom});
+	return SDL::CDNumTracks($$self);
 }
 
 my $buildtrack = sub {
@@ -94,22 +93,26 @@ my $buildtrack = sub {
 sub track {
 	my $self = shift;
 	my $number = shift;
-	return &$buildtrack(SDL::CDTrack($self->{-cdrom},$number));
+	return &$buildtrack(SDL::CDTrack($$self,$number));
 }
 
 sub current {
 	my $self = shift;
-	return $self->track(SDL::CDCurTrack($self->{-cdrom}));
+	return $self->track(SDL::CDCurTrack($$self));
 }
 
 sub current_frame {
 	my $self = shift;
-	return SDL::CDCurFrame($self->{-cdrom});
+	return SDL::CDCurFrame($$self);
 }
 
 1;
 
 __END__;
+
+=pod
+
+
 
 =head1 NAME
 
@@ -123,27 +126,29 @@ SDL::Cdrom - a SDL perl extension for managing CD-ROM drives
 
 =head1 EXPORTS
 
-C<SDL::Cdrom> exports by default only one symbol: C<CD_NUM_DRIVES>.
+=over 4
+
+=item *
+
+C<CD_NUM_DRIVES>.
+
+=back
 
 =head1 DESCRIPTION
 
-=head1 METHODS
-
-=head2 new()
-
+Create a new SDL::Cdrom object. The passed $id is the number of the drive,
+whereas 0 is the first drive etc.
+	
 	use SDL::Cdrom;
 	my $drive => SDL::Cdrom->new($id);
 
-Create a new SDL::Cdrom object. The passed $id is the number of the drive,
-whereas 0 is the first drive etc.
+=head1 METHODS
 
 =head2 CD_NUM_DRIVES()
 
 Returns the number of CD-ROM drives present.
 
 =head2 name()
-
-	my $name = $drive->name();
 
 Returns the system dependent name of the CD-ROM device.
 
@@ -152,8 +157,6 @@ Returns the system dependent name of the CD-ROM device.
 Return the status of the drive.
 
 =head2 play()
-
-	$drive->play ($start,$length,$fs,$fl);
 
 Play a track.
 
@@ -183,7 +186,7 @@ Return the number of tracks on the medium.
 
 =head2 track()
 
-	$drive->track($number);
+Returns the track description
 
 =head2 current()
 
@@ -195,11 +198,11 @@ Return the current frame.
 
 =head1 AUTHORS
 
- David J. Goehrig
- Documentation by Tels <http://bloodgate.com/>.
+David J. Goehrig
+Documentation by Tels <http://bloodgate.com/>.
 
 =head1 SEE ALSO
 
-See perl(1), L<SDL::Mixer> and L<SDL::App>.
+L<perl> L<SDL::Mixer> L<SDL::App>.
 
 =cut

@@ -12,6 +12,7 @@ use Getopt::Long;
 use Data::Dumper;
 use Benchmark;
 
+use SDL;
 use SDL::App;
 use SDL::OpenGL;
 use SDL::Event;

@@ -5,6 +5,7 @@
 
 use SDL;
 use SDL::App;
+use SDL::Surface;
 use SDL::Event;
 use SDL::OpenGL;
 

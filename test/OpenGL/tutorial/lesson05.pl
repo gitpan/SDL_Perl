@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl 
 # This code was created by Jeff Molofee '99
 # (ported to SDL by Sam Lantinga '2000)
 # (ported to Perl/SDL by Wayne Keenan '2000)
@@ -10,6 +10,7 @@
 use strict;
 use Getopt::Long;
 
+use SDL;
 use SDL::App;
 use SDL::OpenGL;
 use SDL::Event;
@@ -34,21 +35,20 @@ exit;
 sub main
   {  
    my $done=0;
-   my $vidmode_flags= SDL_OPENGL;
-
-   $vidmode_flags|= SDL_FULLSCREEN if $arg_fullscreen;
    
    my $app = new SDL::App ( -title => "Jeff Molofee's GL Code Tutorial ... NeHe '99", 
 			    -icon => "icon.png",
-			    -flags => $vidmode_flags,			
 			    -width => $arg_screen_width,
 			    -height =>$arg_screen_height,
+			    -opengl => 1,
 			  );
+
+	$app->fullscreen if ($arg_fullscreen);
    
    SDL::ShowCursor(0);   
    
    my $event = new SDL::Event;
-   $event->set(SDL_SYSWMEVENT,SDL_IGNORE);#
+   $event->set(SDL_SYSWMEVENT(),SDL_IGNORE());#
    
    InitGL($arg_screen_width, $arg_screen_height);
 
@@ -63,12 +63,12 @@ sub main
     $event->poll;
     
     
-    if ( $event->type == SDL_QUIT ) {
+    if ( $event->type == SDL_QUIT() ) {
      $done = 1;
     }
 
-    if ( $event->type == SDL_KEYDOWN ) {
-     if ( $event->key_sym == SDLK_ESCAPE ) {
+    if ( $event->type == SDL_KEYDOWN() ) {
+     if ( $event->key_sym == SDLK_ESCAPE() ) {
       $done = 1;
      }
     }

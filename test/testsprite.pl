@@ -80,10 +80,11 @@ sub  init_game_context
   $sprite = new SDL::Surface(-name =>"data/icon.bmp"); 
 
   # Set transparent pixel as the pixel at (0,0) 
-
-  $sprite->set_color_key(SDL_SRCCOLORKEY,0,0);	# sets the transparent color to that at (0,0)
-
+  
   $sprite->display_format();
+
+  $sprite->set_color_key(SDL_SRCCOLORKEY,$sprite->pixel(0,0));	# sets the transparent color to that at (0,0)
+
 
   $sprite_rect = new SDL::Rect(-x     => 0, 
 			       -y     => 0,

@@ -4,11 +4,11 @@ use strict;
 use warnings;
 
 use SDL;
+use SDL::Surface;
 use SDL::App;
-use SDL::GraphicTool;
+use SDL::Tool::Graphic;
 
-
-my $app = new SDL::App(-title	=> "GraphicTool Test",
+my $app = new SDL::App(-title	=> "Graphic Tool Test",
 		       -width	=> 640,
 		       -height	=> 480,
 		       -depth	=> 16,
@@ -19,11 +19,10 @@ my $app_rect = new SDL::Rect(	-x=>0,
 				-height=>$app->height);
 
 my $sprite = new SDL::Surface(-name => "data/logo.png");
-$sprite->set_color_key(SDL_SRCCOLORKEY, 0, 0);
 $sprite->display_format();
 
 #Test Zoom
-my $graphicTool = new SDL::GraphicTool();
+my $graphicTool = new SDL::Tool::Graphic();
 $graphicTool->zoom($sprite, .5, .5, 1);
 
 my $sprite_rect = new SDL::Rect(	-x=>0,
@@ -43,6 +42,16 @@ $sprite_rect = new SDL::Rect(	-x=>0,
 				-y=>0,
 				-width=>$sprite->width,
 				-height=>$sprite->height);
+$sprite->blit($sprite_rect, $app, $sprite_rect);
+$app->flip();
+sleep 4;
+
++print "GrayScaling\n";
++$app->fill($app_rect, $SDL::Color::black);
+
+#Test GrayScale
+$graphicTool->grayScale($sprite);
+
 $sprite->blit($sprite_rect, $app, $sprite_rect);
 $app->flip();
 sleep 4;

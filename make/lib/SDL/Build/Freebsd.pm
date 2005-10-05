@@ -1,4 +1,4 @@
-package SDL::Build::Linux;
+package SDL::Build::Freebsd;
 
 use base 'SDL::Build';
 

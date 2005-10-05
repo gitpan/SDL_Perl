@@ -9,6 +9,7 @@ use strict;
 use lib  'make/lib';
 
 use SDL::Build;
+use YAML;
 
 my $sdl_compile_flags = `sdl-config --cflags`;
 my $sdl_link_flags    = `sdl-config --libs`;
@@ -128,6 +129,7 @@ my $build   = SDL::Build->new(
 	build_requires       =>
 	{
 		'Test::Simple' => '0.47',
+		'Module::Build' => '0.22',
 	},
 	build_recommends     =>
 	{

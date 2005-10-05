@@ -35,7 +35,7 @@ sub build_links
 
 	for my $subsystem (values %$links)
 	{
-		push @ $subsystem{ libs } }, '-lpthreads';
+		push @{ $subsystem{ libs } }, '-lpthreads';
 	}
 
 	return $links;

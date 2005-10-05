@@ -143,14 +143,14 @@ sub set_flags
 			extra_compiler_flags =>
 			[
 				@{ $includes->{$subsystem} },
-				$sdl_compile,
+				split(' ',$sdl_compile),
 				@{ $defines->{$subsystem} },
 				( defined $Config{usethreads} ? ('-DUSE_THREADS', '-fPIC') : '-fPIC' ),
 			],
 			extra_linker_flags => 
 			[
 				@{ $links->{$subsystem}{paths} },
-				$sdl_link,
+				split(' ',$sdl_link),
 				@{ $links->{$subsystem}{libs} },
 			],
 		},

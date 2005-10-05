@@ -85,7 +85,7 @@ C<SDL::Rect::x>	sets and fetches the x position.
 
 =item *
 
-C<SDL::Rect::y>	sets and fetches the x position.
+C<SDL::Rect::y>	sets and fetches the y position.
 
 =item *
 

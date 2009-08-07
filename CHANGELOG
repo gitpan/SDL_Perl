@@ -1,7 +1,40 @@
 Revision history for Perl extension SDL_perl.
 
+* Aug 7 2009	David J. Goehrig <dgoehrig@cpan.org>
+	- fixed Darwin build breakage
+	- added support for Mac Ports policies
+	- updated the name of the bundle
+	- added Darwin action ./Build bundle to create SDLPerl.app
+	- fixed SDLPerl.app compilation
+	- added .spl file type for SDLPerl applications!
 
-* Oct 4 2004	David J. Goehrig <dgoehrig@cpan.org>
+* Aug 5 2009    Kartik Thakore   <thakore.kartik@gmail.com>
+	- fixed build after Module::Build breakage
+	- fixed openGL header problems
+	- merged darwin app droper builder 
+
+* Jul 8 2006	David J. Goehrig <dgoehrig@cpan.org>
+	- finished embedding data in example scripts
+	- fixed Mac OS X file associations
+
+* Mar 15 2006	David J. Goehrig <dgoehrig@cpan.org>
+	- fixed OpenGL examples to work under MacOS X using the SDL Perl.app bundle
+	
+* Oct 12 2005	David J. Goehrig <dgoehrig@cpan.org>
+	- Fixed bug where SDL::App frees underlying Surface via DESTROY
+	- Added SDL_svg support
+	- cleaned up SDL_gfx support in SDL.xs
+	- cleaned up smpeg support in SDL.xs
+	- Added more SDL_sound support
+	- Added basic SDL_RWops support (TODO - perl callback for user defined)
+
+* Oct 6 2005	David J. Goehrig <dgoehrig@cpan.org>
+	- Changed constructors to die upon invalid initialization
+
+* Oct 5 2005	David J. Goehrig <dgoehrig@cpan.org>
+	- Updated the copyright notices as per the LGPL guidelines
+
+* Oct 4 2005	David J. Goehrig <dgoehrig@cpan.org>
 	- Patched Cygwin.pm
 	- Fixed SDL::Rect documentation
 	- Fixed Freebsd build module package designation

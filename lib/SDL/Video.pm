@@ -1,13 +1,38 @@
+#!/usr/bin/env perl
 #
-#	Video.pm
+# Video.pm
 #
-#	A package for manipulating MPEG video 
+# Copyright (C) 2005 David J. Goehrig <dgoehrig@cpan.org>
 #
-#	Copyright (C) 2004 David J. Goehrig
+# ------------------------------------------------------------------------------
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------------------
+#
+# Please feel free to send questions, suggestions or improvements to:
+#
+#	David J. Goehrig
+#	dgoehrig@cpan.org
+#
 
 package SDL::Video;
 
 use strict;
+use warnings;
+use Carp;
 use SDL;
 use SDL::Surface;
 use SDL::MPEG;
@@ -24,6 +49,7 @@ sub new {
 	my $info = new SDL::MPEG();
 	
 	my $self = \SDL::NewSMPEG($n,$$info,$a);
+	croak SDL::GetError() unless $$self;
 	bless $self,$class;
 	$self->audio(1);
 	$self->video(1);
@@ -51,7 +77,7 @@ sub volume {
 }
 
 sub display {
-	die "SDL::Video::Display requires a SDL::Surface\n" unless $_[1]->isa('SDL::Surface');
+	croak "SDL::Video::Display requires a SDL::Surface\n" unless $_[1]->isa('SDL::Surface');
 	SDL::SMPEGSetDisplay( ${$_[0]}, ${$_[1]}, 0);
 }
 
@@ -90,7 +116,7 @@ sub loop {
 }
 
 sub region {
-	die "SDL::Video::region requires a SDL::Rect\n" unless $_[1]->isa('SDL::Rect');
+	croak "SDL::Video::region requires a SDL::Rect\n" unless $_[1]->isa('SDL::Rect');
 	SDL::SMPEGDisplayRegion(${$_[0]},${$_[1]});
 }
 

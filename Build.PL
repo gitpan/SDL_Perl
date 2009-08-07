@@ -2,21 +2,24 @@
 #
 # Copyright (C) 2003 chromatic 
 # Copyright (C) 2004 David J. Goehrig
-#
+# Copyright (C) 2009 Kartik Thakore
 
 use strict;
-
+use warnings;
+use Carp;
 use lib  'make/lib';
 
+use Data::Dumper;
 use SDL::Build;
 use YAML;
+use YAML::Node;
 
 my $sdl_compile_flags = `sdl-config --cflags`;
 my $sdl_link_flags    = `sdl-config --libs`;
 
 if ($? >> 8)
 {
-	die "SDL doesn't appear to be installed.\n" .
+	croak "SDL doesn't appear to be installed.\n" .
 		"Please check that sdl-config is in your path and try again.\n";
 }
 
@@ -35,7 +38,7 @@ my %subsystems =
 	SDL => {
 		file      => {
 			from  => 'src/SDL.xs',
-			to    => 'src/SDL_perl.xs',
+			to    => './SDL_perl.xs',
 		},
 		libraries => [qw( SDL SDL_image SDL_mixer SDL_net SDL_ttf SDL_gfx
 		                  png jpeg smpeg )],
@@ -43,14 +46,14 @@ my %subsystems =
 	OpenGL => {
 		file      => {
 			from => 'src/OpenGL.xs',
-			to   => 'src/SDL/OpenGL.xs', 
+			to   => 'SDL/OpenGL.xs', 
 		},
 		libraries => [qw( SDL GL GLU )],
 	},
 	SFont => {
 		file	=> {
 			from => 'src/SFont.xs',
-			to   =>	'src/SDL/SFont.xs',
+			to   =>	'SDL/SFont.xs',
 		},
 		libraries => [qw( SDL SDL_image )],
 	},	
@@ -121,8 +124,8 @@ my $links         = $arch->build_links( \%libraries, $build_systems );
 # mangle the compilable files into a format Module::Build can understand
 my %xs = map { $subsystems{$_}{file}{from} => $subsystems{$_}{file}{to} }
 	     keys %subsystems;
-
 my $build   = SDL::Build->new(
+	module_name          => 'SDL',
 	dist_name            => 'SDL_Perl', 
 	license		     => 'lgpl',
 	dist_version_from    => 'lib/SDL.pm',
@@ -135,6 +138,7 @@ my $build   = SDL::Build->new(
 	{
 		'Pod::ToDemo'  => '0.20',
 	},
+	c_source	     => 'src',
 	xs_files             => \%xs,
 	dist_author	     => 'David J. Goehrig <DGOEHRIG@cpan.org>',
 );

@@ -1,11 +1,38 @@
-#	Timer.pm
+#!/usr/bin/env perl
 #
-#	A package for manipulating SDL_Timer *
+# Timer.pm
 #
-#	Copyright (C) 2002 David J. Goehrig
+# Copyright (C) 2005 David J. Goehrig <dgoehrig@cpan.org>
+#
+# ------------------------------------------------------------------------------
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------------------
+#
+# Please feel free to send questions, suggestions or improvements to:
+#
+#	David J. Goehrig
+#	dgoehrig@cpan.org
+#
 
 package SDL::Timer;
+
 use strict;
+use warnings;
+use Carp;
 use SDL;
 
 sub new {
@@ -17,7 +44,7 @@ sub new {
 
 	verify(%options,qw/ -delay -times -d -t /);
 
-	die "SDL::Timer::new no delay specified\n"
+	croak "SDL::Timer::new no delay specified\n"
 		unless ($options{-delay});
 	$$self{-delay} = $options{-delay} || $options{-d} || 0;
 	$$self{-times} = $options{-times} || $options{-t} || 0;
@@ -27,7 +54,7 @@ sub new {
 		$$self{-routine} = sub { &$func; $$self{-delay}};
 	}
 	$$self{-timer} = SDL::NewTimer($$self{-delay},$$self{-routine});
-	die "Could not create timer, ", SDL::GetError(), "\n"
+	croak "Could not create timer, ", SDL::GetError(), "\n"
 		unless ($self->{-timer});
 	bless $self,$class;
 	return $self;

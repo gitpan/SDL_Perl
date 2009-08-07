@@ -1,6 +1,31 @@
-// SDL::OpenGL
 //
-// Copyright (C) 2002,2003,2004 David J. Goehrig
+// OpenGL.xs
+//
+// Copyright (C) 2005 David J. Goehrig <dgoehrig@cpan.org>
+//
+// ------------------------------------------------------------------------------
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+// 
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//
+// ------------------------------------------------------------------------------
+//
+// Please feel free to send questions, suggestions or improvements to:
+//
+//	David J. Goehrig
+//	dgoehrig@cpan.org
+//
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -12,8 +37,14 @@
 
 #include <SDL.h>
 
+#ifdef PERL_DARWIN
 #include <gl.h>
 #include <glu.h>
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
+
 
 #ifdef USE_THREADS
 #define HAVE_TLS_CONTEXT
@@ -23,7 +54,7 @@
 #define GL_ALL_CLIENT_ATTRIB_BITS 0xFFFFFFF
 #endif /* GL_ALL_CLIENT_BITS */  
 
-#include "../defines.h"
+#include "../src/defines.h"
 
 SV* sdl_perl_nurbs_error_hook;
 void
@@ -1718,9 +1749,9 @@ AV*
 glGenTextures ( n )
 	Uint32 n;
 	CODE:
-		Uint32 i;
-		Uint32 *names;
-		names = (Uint32*)safemalloc(sizeof(Uint32)*n);
+		GLsizei i;
+		GLuint* names;
+		names = (GLuint*)safemalloc(sizeof(GLuint)*n);
 		RETVAL = newAV();
 		glGenTextures(n,names);
 		for ( i = 0; i < n; i++ ) {
@@ -1748,9 +1779,9 @@ glBindTexture ( target, texture )
 void
 glDeleteTextures ( ... )
 	CODE:
-		Uint32 *textures;
+		GLuint* textures;
 		int i;
-		textures = (Uint32*)safemalloc(sizeof(Uint32) * items);
+		textures = (GLuint*)safemalloc(sizeof(GLuint) * items);
 		if ( textures ) {
 	 		for ( i = 0; i < items; i++ ) {
 				textures[i] = SvIV(ST(i));	
@@ -1762,11 +1793,11 @@ glDeleteTextures ( ... )
 AV*
 glAreTexturesResident ( ... )
 	CODE:
-		Uint32 *textures;
+		GLuint* textures;
 		GLboolean *homes;
 		int i;
 		RETVAL = newAV();
-		textures = (Uint32*)safemalloc(sizeof(Uint32) * items);
+		textures = (GLuint*)safemalloc(sizeof(GLuint) * items);
 		homes = (GLboolean*)safemalloc(sizeof(GLboolean) * items);
 		if ( textures ) {
 	 		for ( i = 0; i < items; i++ ) {

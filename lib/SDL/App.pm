@@ -1,18 +1,47 @@
-#	App.pm
+#!/usr/bin/env perl
 #
-#	The application object, sort of like a surface
+# App.pm
 #
-#	Copyright (C) 2000,2002,2003,2004 David J. Goehrig
+# Copyright (C) 2005 David J. Goehrig <dgoehrig@cpan.org>
+#
+# ------------------------------------------------------------------------------
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------------------
+#
+# Please feel free to send questions, suggestions or improvements to:
+#
+#	David J. Goehrig
+#	dgoehrig@cpan.org
+#
 
 package SDL::App;
 
 use strict;
+use warnings;
+use Carp;
 use SDL;
 use SDL::Event;
 use SDL::Surface;
 use SDL::Rect;
 
 our @ISA = qw(SDL::Surface);
+sub DESTROY {
+
+}
 
 sub new {
 	my $proto = shift;
@@ -29,7 +58,7 @@ sub new {
 				-asyncblit
 		/ ) if ($SDL::DEBUG);
 
-	SDL::Init(SDL_INIT_EVERYTHING());
+	SDL::Init(SDL::SDL_INIT_EVERYTHING());
 	
 	my $t = $options{-title} 	|| $options{-t} 	|| $0;
 	my $it = $options{-icon_title} 	|| $options{-it} 	|| $t;
@@ -58,27 +87,27 @@ sub new {
 	$f |= SDL::SDL_DOUBLEBUF() if ($db); 
 	$f |= SDL::SDL_ASYNCBLIT() if ($async);
 
-	if ($f & SDL_OPENGL()) { 
+	if ($f & SDL::SDL_OPENGL()) { 
 		$SDL::App::USING_OPENGL = 1;
-		SDL::GLSetAttribute(SDL_GL_RED_SIZE(),$r) if ($r);	
-		SDL::GLSetAttribute(SDL_GL_GREEN_SIZE(),$g) if ($g);	
-		SDL::GLSetAttribute(SDL_GL_BLUE_SIZE(),$b) if ($b);	
-		SDL::GLSetAttribute(SDL_GL_ALPHA_SIZE(),$a) if ($a);	
+		SDL::GLSetAttribute(SDL::SDL_GL_RED_SIZE(),$r) if ($r);	
+		SDL::GLSetAttribute(SDL::SDL_GL_GREEN_SIZE(),$g) if ($g);	
+		SDL::GLSetAttribute(SDL::SDL_GL_BLUE_SIZE(),$b) if ($b);	
+		SDL::GLSetAttribute(SDL::SDL_GL_ALPHA_SIZE(),$a) if ($a);	
 
-		SDL::GLSetAttribute(SDL_GL_RED_ACCUM_SIZE(),$ras) if ($ras);	
-		SDL::GLSetAttribute(SDL_GL_GREEN_ACCUM_SIZE(),$gas) if ($gas);	
-		SDL::GLSetAttribute(SDL_GL_BLUE_ACCUM_SIZE(),$bas) if ($bas);	
-		SDL::GLSetAttribute(SDL_GL_ALPHA_ACCUM_SIZE(),$aas) if ($aas);	
+		SDL::GLSetAttribute(SDL::SDL_GL_RED_ACCUM_SIZE(),$ras) if ($ras);	
+		SDL::GLSetAttribute(SDL::SDL_GL_GREEN_ACCUM_SIZE(),$gas) if ($gas);	
+		SDL::GLSetAttribute(SDL::SDL_GL_BLUE_ACCUM_SIZE(),$bas) if ($bas);	
+		SDL::GLSetAttribute(SDL::SDL_GL_ALPHA_ACCUM_SIZE(),$aas) if ($aas);	
 		
-		SDL::GLSetAttribute(SDL_GL_DOUBLEBUFFER(),$db) if ($db);
-		SDL::GLSetAttribute(SDL_GL_BUFFER_SIZE(),$bs) if ($bs);
-		SDL::GLSetAttribute(SDL_GL_DEPTH_SIZE(),$d);
+		SDL::GLSetAttribute(SDL::SDL_GL_DOUBLEBUFFER(),$db) if ($db);
+		SDL::GLSetAttribute(SDL::SDL_GL_BUFFER_SIZE(),$bs) if ($bs);
+		SDL::GLSetAttribute(SDL::SDL_GL_DEPTH_SIZE(),$d);
 	} else {
 		$SDL::App::USING_OPENGL = 0;
 	}
 
 	my $self = \SDL::SetVideoMode($w,$h,$d,$f)
-		or die SDL::GetError();
+		or croak SDL::GetError();
 	
 	if ($ic and -e $ic) {
 	   my $icon = new SDL::Surface -name => $ic;
@@ -172,7 +201,7 @@ sub attribute ($$;$) {
 		SDL::GLSetAttribute($mode,$value);
 	}
 	my $returns = SDL::GLGetAttribute($mode);	
-	die "SDL::App::attribute failed to get GL attribute" if ($$returns[0] < 0);
+	croak "SDL::App::attribute failed to get GL attribute" if ($$returns[0] < 0);
 	$$returns[1];	
 }
 
@@ -327,11 +356,12 @@ or OpenGL buffer if applicable.  This is prefered to calling flip on the applica
 
 C<SDL::App::attribute> allows one to set and get GL attributes.  By passing a value
 in addition to the attribute selector, the value will be set.  C<SDL:::App::attribute>
-always returns the current value of the given attribute, or dies on failure.
+always returns the current value of the given attribute, or croaks on failure.
 
 =head1 AUTHOR
 
 David J. Goehrig
+Kartik Thakore
 
 =head1 SEE ALSO
 

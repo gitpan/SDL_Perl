@@ -1,9 +1,38 @@
+#!/usr/bin/env perl
 #
-#	SDL::Tool::Font -	format agnostic font tool
+# Font.pm
 #
-#	Copyright (C) 2002 David J. Goehrig
+# Copyright (C) 2005 David J. Goehrig <dgoehrig@cpan.org>
+#
+# ------------------------------------------------------------------------------
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------------------
+#
+# Please feel free to send questions, suggestions or improvements to:
+#
+#	David J. Goehrig
+#	dgoehrig@cpan.org
+#
 
 package SDL::Tool::Font;
+
+use strict;
+use warnings;
+use Carp;
 
 use SDL;
 use SDL::Font;
@@ -12,7 +41,7 @@ use SDL::TTFont;
 sub new {
 	my $proto = shift;
 	my $class = ref($proto) || $proto;
-	$self = {};
+	my $self = {};
 	my %option = @_;
 
 	verify (%option, qw/ -sfont -ttfont -size -fg -bg -foreground -background
@@ -33,7 +62,7 @@ sub new {
 			}
 		}
 	} else {
-		die "SDL::Tool::Font requires either a -sfont or -ttfont";	
+		croak "SDL::Tool::Font requires either a -sfont or -ttfont";	
 	}
 	bless $self,$class;
 	$self;
@@ -45,7 +74,7 @@ sub DESTROY {
 
 sub print {
 	my ($self,$surface,$x,$y,@text) = @_;
-	die "Tool::Font::print requires a SDL::Surface\n"
+	croak "Tool::Font::print requires a SDL::Surface\n"
 		unless ($SDL::DEBUG && $surface->isa('SDL::Surface'));
 	if ($$self{-font}->isa('SDL::Font')) {
 		$$self{-font}->use();

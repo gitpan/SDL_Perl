@@ -1,11 +1,38 @@
+#!/usr/bin/env perl
 #
-#	SDL::GraphicTool   -	zooming and rotating graphic tool
+# Graphic.pm
 #
-#	Copyright (C) 2002 Russell E. Valentine
-#	Copyright (C) 2002 David J. Goehrig
+# Copyright (C) 2005 David J. Goehrig <dgoehrig@cpan.org>
+#
+# ------------------------------------------------------------------------------
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------------------
+#
+# Please feel free to send questions, suggestions or improvements to:
+#
+#	David J. Goehrig
+#	dgoehrig@cpan.org
+#
 
 package SDL::Tool::Graphic;
 
+use strict;
+use warnings;
+use Carp;
 use SDL;
 use SDL::Config;
 require SDL::Surface;
@@ -13,7 +40,7 @@ require SDL::Surface;
 sub new {
 	my $proto = shift;
 	my $class = ref($proto) || $proto;
-	$self = {};
+	my $self = {};
 	bless $self, $class;
 	$self;
 }
@@ -26,7 +53,7 @@ sub DESTROY {
 
 sub zoom {
 	my ( $self, $surface, $zoomx, $zoomy, $smooth) = @_;
-	die "SDL::Tool::Graphic::zoom requires an SDL::Surface\n"
+	croak "SDL::Tool::Graphic::zoom requires an SDL::Surface\n"
 		unless ( ref($surface) && $surface->isa('SDL::Surface'));
 	my $tmp = $$surface;
 	$$surface = SDL::GFXZoom($$surface, $zoomx, $zoomy, $smooth);
@@ -36,7 +63,7 @@ sub zoom {
 
 sub rotoZoom {
 	my ( $self, $surface, $angle, $zoom, $smooth) = @_;
-	die "SDL::Tool::Graphic::rotoZoom requires an SDL::Surface\n"
+	croak "SDL::Tool::Graphic::rotoZoom requires an SDL::Surface\n"
 		unless ( ref($surface) && $surface->isa('SDL::Surface'));
 	my $tmp = $$surface;
 	$$surface = SDL::GFXRotoZoom($$surface, $angle, $zoom, $smooth);
@@ -46,8 +73,9 @@ sub rotoZoom {
 
 sub grayScale {
 	my ( $self, $surface ) = @_;
+	my $workingSurface;
 	if($surface->isa('SDL::Surface')) {
-		$workingSurface = $$surface;
+		 $workingSurface = $$surface;
 	} else {
 		$workingSurface = $surface;
 	}
@@ -71,6 +99,9 @@ sub grayScale {
  
 sub invertColor {
 	my ( $self, $surface ) = @_;
+	#Added because of strict if we needed global
+    #do $workingSurface init outside subs.
+	my $workingSurface;
 	if($surface->isa('SDL::Surface')) {
 		$workingSurface = $$surface;
 	} else {
@@ -93,7 +124,7 @@ sub invertColor {
 	}
 }
 
-die "SDL::Tool::Graphic requires SDL_gfx support\n"
+croak "SDL::Tool::Graphic requires SDL_gfx support\n"
 	unless SDL::Config->has('SDL_gfx');
  
 

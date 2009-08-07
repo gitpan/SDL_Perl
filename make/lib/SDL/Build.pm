@@ -1,11 +1,38 @@
+#!/usr/bin/env perl
 #
-# Copyright (C) 2004 chromatic
-# Copyright (C) 2004 David J. Goehrig
+# Build.pm
+#
+# Copyright (C) 2005 David J. Goehrig <dgoehrig@cpan.org>
+#
+# ------------------------------------------------------------------------------
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------------------
+#
+# Please feel free to send questions, suggestions or improvements to:
+#
+#	David J. Goehrig
+#	dgoehrig@cpan.org
 #
 
 package SDL::Build;
 
 use strict;
+use warnings;
+use Carp;
 use base 'Module::Build';
 
 use File::Spec;
@@ -27,6 +54,7 @@ sub process_xs
 	@$properties{ keys %$file_args } = @old_values;
 }
 
+
 # every platform has slightly different library and header paths
 sub get_arch
 {
@@ -35,7 +63,7 @@ sub get_arch
 		'SDL', 'Build', ucfirst( $os ) . '.pm' );
 	my $module        = 'SDL::Build::' . ucfirst( $os );
 
-	require $modpath or die "No module for $os platform\n";
+	require $modpath or croak "No module for $os platform\n";
 
 	return $module;
 }
@@ -52,7 +80,7 @@ sub find_subsystems
 		for my $library (@{ $subsystem->{libraries} })
 		{
 			my $lib = $libraries->{$library}
-				or die "Unknown library '$library' for '$name'\n";
+				or croak "Unknown library '$library' for '$name'\n";
 
 			my ($inc_dir, $link_dir)   =
 				$self->find_header( $lib->{header}, \%includes_libs );
@@ -130,27 +158,24 @@ sub set_flags
 {
 	my ($self, $subsystems, $build, $defines, $includes, $links,
 	    $sdl_compile, $sdl_link) = @_;
-
 	my %file_flags;
-
 	while (my ($subsystem, $buildable) = each %$build)
 	{
 		my $sub_file     = $subsystems->{$subsystem}{file}{to};
 		my $sub_includes = join(' ', @{ $includes->{$subsystem} } );
-
 		$file_flags{ $sub_file } = 
 		{
 			extra_compiler_flags =>
 			[
 				@{ $includes->{$subsystem} },
-				split(' ',$sdl_compile),
+				(split(' ',$sdl_compile)),
 				@{ $defines->{$subsystem} },
-				( defined $Config{usethreads} ? ('-DUSE_THREADS', '-fPIC') : '-fPIC' ),
+				( defined $Config{usethreads} ? ('-DUSE_THREADS', '-fPIC') : ('-fPIC' )),
 			],
 			extra_linker_flags => 
 			[
 				@{ $links->{$subsystem}{paths} },
-				split(' ',$sdl_link),
+				(split(' ',$sdl_link)),
 				@{ $links->{$subsystem}{libs} },
 			],
 		},
@@ -194,8 +219,49 @@ sub write_sdl_config
 
 	$text =~ s/^\t//gm;
 
-	open my $file, '>', $path or die "Cannot write to '$path': $!\n";
+	open my $file, '>', $path or croak "Cannot write to '$path': $!\n";
 	print $file $text;
+}
+
+# Subclass  Darwin to build Objective-C addons
+
+sub filter_support {
+	my $self = shift;
+	print STDERR "[SDL::Build] generic filter\n";
+	return ();
+}
+
+sub process_support_files {
+	my $self = shift;
+	my $p = $self->{properties};
+	return unless $p->{c_source};
+	return unless $p->{c_sources};
+
+	push @{$p->{include_dirs}}, $p->{c_source};
+	unless ( $p->{extra_compiler_flags} && $p->{extra_compiler_flags} =~ /DARCHNAME/) {
+		$p->{extra_compiler_flags} .=  " -DARCHNAME=" . $self->{config}{archname};
+	}
+	print STDERR "[SDL::Build] extra compiler flags" . $p->{extra_compiler_flags} . "\n";
+
+	foreach my $file (map($p->{c_source} . "/$_", @{$p->{c_sources}})) {
+		push @{$p->{objects}}, $self->compile_c($file);
+	}
+}
+
+# Override to create a MacOS Bundle
+sub ACTION_bundle
+{
+	my ($self) = @_;
+	$self->depends_on('build');
+	$self->get_arch($^O)->build_bundle();
+}
+
+# Override Install method for darwin
+sub ACTION_install {
+  my ($self) = @_;
+  require ExtUtils::Install;
+  $self->depends_on('build');
+  ExtUtils::Install::install($self->install_map, 1, 0, $self->{args}{uninst}||0);
 }
 
 1;

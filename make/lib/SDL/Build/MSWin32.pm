@@ -1,13 +1,44 @@
+#!/usr/bin/env perl
+#
+# MSWin32.pm
+#
+# Copyright (C) 2005 David J. Goehrig <dgoehrig@cpan.org>
+#
+# ------------------------------------------------------------------------------
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------------------
+#
+# Please feel free to send questions, suggestions or improvements to:
+#
+#	David J. Goehrig
+#	dgoehrig@cpan.org
+#
+
 package SDL::Build::MSWin32;
 
 use strict;
-
+use warnings;
+usr Carp;
 use base 'SDL::Build';
 use File::Spec::Functions;
 
 sub fetch_includes
 {
-	die "Environment variable INCLUDE is empty\n" unless $ENV{INCLUDE};
+	croak "Environment variable INCLUDE is empty\n" unless $ENV{INCLUDE};
 
 	return map { $_ => 1 } grep { $_ } split( ';', $ENV{INCLUDE} );
 }
@@ -16,7 +47,9 @@ sub find_header
 {
 	for my $key (qw( LIBS PATH ))
 	{
-		die "Environment variable $key is empty\n" unless $ENV{$key};
+		#this needs to be carp because some users will have SDL libs in same folder
+		carp "Environment variable $key is empty\n" unless $ENV{$key};
+		carp "This will probably fail the compile \nSet $key manually or try building anyway\n"  unless $ENV{$key}; 
 	}
 
 	my ( $self, $header, $includes ) = @_;
@@ -74,11 +107,10 @@ sub gl_vendor
 	my ( $self, $vendor ) = @_;
 
 	return 'ms_gl' unless defined $vendor;
-
 	return 'mesa_gl' if $vendor eq 'MESA';
 	return 'ms_gl'   if $vendor eq 'MS';
+	croak "Unrecognized GL vendor '$vendor'\n";
 
-	die "Unrecognized GL vendor '$vendor'\n";
 }
 
 sub ms_gl_subsystems

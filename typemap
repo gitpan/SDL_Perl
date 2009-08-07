@@ -2,6 +2,7 @@ TYPEMAP
 const Uint16 *		T_PTR
 Uint8			T_U_CHAR
 Uint8 *			T_PTR
+const Uint8*		T_PTR
 Uint8 **		T_PTR
 Uint16			T_UV
 Uint16 *		T_PTR
@@ -54,6 +55,8 @@ GLboolean		T_U_CHAR
 GLUnurbsObj *		T_PTR
 GLUtesselator *		T_PTR
 GLuint			T_UV
+GLuint*			T_PTR
+GLint			T_IV
 GLint*			T_PTR
 float *			T_PTR
 float			T_NV
@@ -62,3 +65,5 @@ Sound_DecoderInfo *	T_PTR
 const Sound_DecoderInfo *	T_PTR
 Sound_Sample *		T_PTR
 Sound_AudioInfo *	T_PTR
+SDL_RWops*		T_PTR
+SDL_svg_context*	T_PTR

@@ -1,5 +1,18 @@
 Revision history for Perl extension SDL_perl.
 
+* Aug 18 2009  Kartik Thakore   <thakore.kartik@gmail.com>
+	-Fixed constants with help from arodland
+	-Added warning instead of die for frozenbubble's sake
+	-Made a build script for Solaris
+
+* Aug 17 2009   Gabor Szabo <szabgab@gmail.com>
+	- Small fixes in the tutorials
+
+* Aug 15 2009   Kartik Thakore   <thakore.kartik@gmail.com>
+	- fixed undef access to blit in Surface
+	- made sdl font strict acceptable
+	- added cygwin build fix
+
 * Aug 7 2009	David J. Goehrig <dgoehrig@cpan.org>
 	- fixed Darwin build breakage
 	- added support for Mac Ports policies

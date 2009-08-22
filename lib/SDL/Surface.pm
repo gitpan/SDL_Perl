@@ -202,6 +202,9 @@ sub flip {
 }
 
 sub blit {
+		$_[1] = 0 unless defined $_[1];
+		$_[3] = 0 unless defined $_[3];
+
 	if ($SDL::DEBUG) {
 		croak "SDL::Surface::blit requires SDL::Rect objects"
 			unless ($_[1] == 0 || $_[1]->isa('SDL::Rect'))
@@ -209,7 +212,7 @@ sub blit {
 		croak "SDL::Surface::blit requires SDL::Surface objects"
 			unless $_[2]->isa('SDL::Surface'); 
 	}
-	SDL::BlitSurface(map { $_ != 0 ? ${$_} : $_ } @_);
+		SDL::BlitSurface(map { (defined($_) && $_ != 0)? ${$_} : $_ } @_) if defined(@_);
 }
 
 sub set_colors {

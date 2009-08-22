@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #
-# MSWin32.pm
+# Linux.pm
 #
 # Copyright (C) 2005 David J. Goehrig <dgoehrig@cpan.org>
 #
@@ -28,58 +28,29 @@
 #	dgoehrig@cpan.org
 #
 
-package SDL::Build::MSWin32;
-use Data::Dumper;
-use Carp;
-use base 'SDL::Build';
+package SDL::Build::Linux;
 
-sub opengl_headers
-{
-	return GL => 'SDL_opengl.h';
-}
+use base 'SDL::Build';
 
 sub fetch_includes
 {
 	return (
+	'/usr/local/include'       => '/usr/local/lib',
+	'/usr/local/include/gl'    => '/usr/local/lib',
+	'/usr/local/include/GL'    => '/usr/local/lib',
+	'/usr/local/include/SDL'   => '/usr/local/lib',
+	'/usr/local/include/smpeg' => '/usr/local/lib',
 
-	$ENV{SDL_INST_DIR}.'/include'              => $ENV{SDL_INST_DIR}.'/lib',
-	$ENV{SDL_INST_DIR}.'/include/gl'           => $ENV{SDL_INST_DIR}.'/lib',
-	$ENV{SDL_INST_DIR}.'/include/GL'           => $ENV{SDL_INST_DIR}.'/lib',
-	$ENV{SDL_INST_DIR}.'/include/SDL'          => $ENV{SDL_INST_DIR}.'/lib',
-	$ENV{SDL_INST_DIR}.'/include/smpeg'        => $ENV{SDL_INST_DIR}.'/lib',
+	'/usr/include'              => '/usr/lib',
+	'/usr/include/gl'           => '/usr/lib',
+	'/usr/include/GL'           => '/usr/lib',
+	'/usr/include/SDL'          => '/usr/lib',
+	'/usr/include/smpeg'        => '/usr/lib',
+
+	'/usr/X11R6/include'        => '/usr/X11R6/lib',
+	'/usr/X11R6/include/gl'     => '/usr/X11R6/lib',
+	'/usr/X11R6/include/GL'     => '/usr/X11R6/lib',
 	);
-}
-
-#Todo: his needs to be fixed hash references are a mess
-#sub build_links
-#{
-	
-#	my $self  = shift;
-#	my $links = $self->SUPER::build_links(@_);
-#	
-#	for my $subsystem (values %$links)
-#	{
-#		push @{ $subsystem{ libs } }, '-lpthreads';
-#	}
-
-#		return \%links;
-#}
-
-
-sub alt_link_flags
-{
-	my $self = shift;
-	my $sdl_dir = shift;
-
-	return $self->SUPER::alt_link_flags($sdl_dir).' -mwindows -lSDLmain -lSDL.dll';
-}
-
-sub alt_compile_flags
-{
-	my $self = shift;
-	my $sdl_dir = shift;
-
-	return $self->SUPER::alt_compile_flags($sdl_dir).' -D_GNU_SOURCE=1 -Dmain=SDL_main';
 }
 
 1;

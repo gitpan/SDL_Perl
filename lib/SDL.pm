@@ -47,8 +47,15 @@ BEGIN {
 	@EXPORT = qw( in verify &NULL );
 };
 
+# Give our caller SDL::Constant's stuff as well as ours.
+sub import {
+  my $self = shift;
 
-$VERSION = '2.2.0';
+  $self->export_to_level(1, @_);
+  SDL::Constants->export_to_level(1);
+}
+
+$VERSION = '2.2.1';
 
 print "$VERSION" if (defined($ARGV[0]) && ($ARGV[0] eq '--SDLperl'));
 
@@ -60,7 +67,11 @@ sub NULL {
 
 sub in {
 	my ($k,@t) = @_;
-	(scalar grep { defined $_ && $_ eq $k } @t) <=> 0;
+	return 0 unless defined $k;
+	my $r = ((scalar grep { defined $_ && $_ eq $k } @t) <=> 0);
+	return 0 if $r eq '';
+	return $r;
+
 } 
 
 sub verify (\%@) {

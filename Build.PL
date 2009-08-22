@@ -11,21 +11,12 @@ use lib  'make/lib';
 
 use Data::Dumper;
 use SDL::Build;
+use SDL::Utility;
 use YAML;
 use YAML::Node;
 
-my $sdl_compile_flags = `sdl-config --cflags`;
-my $sdl_link_flags    = `sdl-config --libs`;
-
-if ($? >> 8)
-{
-	croak "SDL doesn't appear to be installed.\n" .
-		"Please check that sdl-config is in your path and try again.\n";
-}
-
-chomp( $sdl_compile_flags );
-chomp( $sdl_link_flags );
-
+my $sdl_compile_flags = SDL::Utility->sdl_c_flags();
+my $sdl_link_flags    = SDL::Utility->sdl_libs();
 # subsystem to build
 #	file
 #		location of source file => location of build file to get name right
@@ -133,6 +124,7 @@ my $build   = SDL::Build->new(
 	{
 		'Test::Simple' => '0.47',
 		'Module::Build' => '0.22',
+		'YAML'	=> '0.68'
 	},
 	build_recommends     =>
 	{
@@ -153,6 +145,5 @@ $build->set_flags(
 	$sdl_compile_flags,
 	$sdl_link_flags,
 );
-
 # now we're ready to go!
 $build->create_build_script();

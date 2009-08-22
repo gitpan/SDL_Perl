@@ -37,9 +37,11 @@ make/lib/SDL/Build/Cygwin.pm
 make/lib/SDL/Build/Darwin.pm
 make/lib/SDL/Build/Freebsd.pm
 make/lib/SDL/Build/Linux.pm
+make/lib/SDL/Build/Solaris.pm
 make/lib/SDL/Build/MSWin32.pm
 make/lib/SDL/Build/Netbsd.pm
 make/lib/SDL/Build.pm
+make/lib/SDL/Utility.pm
 MacOSX/Info.plist
 MacOSX/launcher.h
 MacOSX/launcher.m
@@ -63,6 +65,7 @@ scripts/sdl_const.pl
 scripts/sdl_words.txt
 scripts/OpenGL/Constants.pm
 scripts/SDL/Constants.pm
+t/manifest.t
 t/apppm.t
 t/cdrompm.t
 t/colorpm.t

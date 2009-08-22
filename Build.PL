@@ -15,6 +15,8 @@ use SDL::Utility;
 use YAML;
 use YAML::Node;
 
+croak 'Windows support is currently broken. If you are interested in helping please contact us at sdl-devel\@perl.org.' if ($^O =~ /MSWin*|cygwin/ );
+
 my $sdl_compile_flags = SDL::Utility->sdl_c_flags();
 my $sdl_link_flags    = SDL::Utility->sdl_libs();
 # subsystem to build
@@ -132,6 +134,10 @@ my $build   = SDL::Build->new(
 	},
 	c_source	     => 'src',
 	xs_files             => \%xs,
+	meta_add	     =>	     
+	{
+		no_index =>  { file => [ <make/lib/SDL/*.pm>, <make/lib/SDL/Build/*.pm> ] },
+	},
 	dist_author	     => 'David J. Goehrig <DGOEHRIG@cpan.org>',
 );
 

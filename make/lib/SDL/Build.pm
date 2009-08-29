@@ -44,6 +44,9 @@ use Config;
 sub process_xs
 {
 	my ($self, $file) = @_;
+	
+	#TODO: call this in MSWin32::process_xs
+	$file =~ s/\\/\//g if( $^O =~ /MSWin.*/ );
 
 	my $properties                   = $self->{properties};
 	my $file_args                    = $self->notes( 'file_flags' )->{$file};
@@ -253,7 +256,7 @@ sub process_support_files {
 # get link flags with a given a sdl_dir
 sub alt_link_flags
 {
-	my($self) = @_;
+	my $self = shift;
 	my $sdl_dir = shift;
 
 	return '-L"'.$sdl_dir.'\lib"';
@@ -262,10 +265,10 @@ sub alt_link_flags
 # get compile flags with a given a sdl_dir
 sub alt_compile_flags
 {
-	 my($self) = @_;
+	 my $self = shift;
 	 my $sdl_dir = shift;
 
-	 return '-L"'.$sdl_dir.'\include\SDL"';	
+	 return '-I"'.$sdl_dir.'\include\SDL"';	
 }
 
 # Override to create a MacOS Bundle

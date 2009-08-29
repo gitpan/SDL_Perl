@@ -36,8 +36,8 @@ BEGIN {
 }
 
 use strict;
+use SDL;
 use SDL::Config;
-
 use Test::More;
 
 if ( SDL::Config->has('SDL_image') 
@@ -59,4 +59,22 @@ can_ok ('SDL::Tool::Font', qw/
 	new 
 	print
 	/);
+my $font = new SDL::Tool::Font
+		-normal => 1,
+		-ttfont => 'test/data/aircut3.ttf',
+		-size => 20,
+		-fg => $SDL::Color::black,
+	 	-bg => $SDL::Color::black;
+
+#use utf8;
+
+#my $string = "Test";
+#my $aref = SDL::TTFSizeText( $font, $string);
+#ok( defined($$aref[0]), "Testi width for SDL::TTFSizeText." );
+#ok( defined($$aref[1]), "Test height for SDL::TTFSizeText." );
+
+#utf8::encode($string);
+#my $bref =  SDL::TTFSizeUTF8( $font, $string);
+#ok( defined($$bref[0]), "Test for width SDL::TTFSizeUTF8." );
+#ok( defined($$bref[1]), "Test for height SDL::TTFSizeUTF8." );
 

@@ -132,7 +132,7 @@ my $build   = SDL::Build->new(
 		'Test::Simple' => '0.47',
 		'Module::Build' => '0.22',
 		'YAML'	=> '0.68',
-		'Alien::SDL'    => '0.01',
+		'Alien::SDL'    => '0.02',
 		'ExtUtils::CBuilder' => '0.260301'
 	},
 	build_recommends     =>
@@ -143,7 +143,7 @@ my $build   = SDL::Build->new(
 	xs_files             => \%xs,
 	meta_add	     =>	     
 	{
-		no_index =>  { file => [ <make/lib/SDL/*.pm>, <make/lib/SDL/Build/*.pm> ] },
+		no_index =>  { file => [ <make/lib/SDL/*.pm>, <make/lib/SDL/Build/*.pm>, <make/lib/ExtUtils/CBuilder/*>, <make/lib/ExtUtils/*>, <make/lib/ExtUtils/CBuilder/Platform/Windows.pm> ] },
 	},
 	dist_author	     => 'David J. Goehrig <DGOEHRIG@cpan.org>',
 );

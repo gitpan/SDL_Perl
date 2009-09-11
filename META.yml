@@ -1,6 +1,6 @@
 ---
 name: SDL_Perl
-version: v2.2.2.11
+version: v2.2.2.13
 author:
   - 'David J. Goehrig <DGOEHRIG@cpan.org>'
 abstract: Simple DirectMedia Layer for Perl
@@ -18,7 +18,7 @@ configure_requires:
 provides:
   SDL:
     file: lib/SDL.pm
-    version: v2.2.2.11
+    version: v2.2.2.13
   SDL::App:
     file: lib/SDL/App.pm
   SDL::Cdrom:
@@ -86,6 +86,7 @@ no_index:
     - make/lib/SDL/Build/Cygwin.pm
     - make/lib/SDL/Build/Darwin.pm
     - make/lib/SDL/Build/Freebsd.pm
+    - make/lib/SDL/Build/Gnukfreebsd.pm
     - make/lib/SDL/Build/Linux.pm
     - make/lib/SDL/Build/MSWin32.pm
     - make/lib/SDL/Build/Netbsd.pm

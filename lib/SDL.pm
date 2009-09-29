@@ -3,7 +3,7 @@
 # SDL.pm
 #
 # Copyright (C) 2005 David J. Goehrig <dgoehrig@cpan.org>
-#
+# Copyright (C) 2009 Kartik Thakore   <kthakore@cpan.org>
 # ------------------------------------------------------------------------------
 #
 # This library is free software; you can redistribute it and/or
@@ -24,8 +24,8 @@
 #
 # Please feel free to send questions, suggestions or improvements to:
 #
-#	David J. Goehrig
-#	dgoehrig@cpan.org
+#	Kartik Thakore
+#	kthakore@cpan.org
 #
 
 package SDL;
@@ -54,7 +54,7 @@ sub import {
   $self->export_to_level(1, @_);
   SDL::Constants->export_to_level(1);
 }
-$VERSION = '2.2.2.17';
+$VERSION = '2.2.3';
 
 print "$VERSION" if (defined($ARGV[0]) && ($ARGV[0] eq '--SDLperl'));
 
@@ -100,6 +100,50 @@ liberties with the SDL API, and attempts to adhere to the spirit of both the SDL
 and Perl.  This document describes the low-level functional SDL_perl API.  For the
 object oriented programming interface please see the documentation provided on a
 per class basis.
+
+=head1 The SDL Perl 2009 Development Team
+
+=head2 Documentation
+
+	Nick: magnet
+
+=head2 Perl Development
+
+	Nick: Garu
+	Name: Breno G. de Oliveira
+	
+	Nick: Dngor
+	Name: Rocco Caputo
+
+	Nick: nferraz
+	Name: Nelson Ferraz
+
+=head2 Maintainance 
+	
+	Nick: kthakore
+
+	Name: Kartik Thakore
+
+=head1 MacOSX Experimental Usage
+
+Please get libsdl packages from Fink
+	
+	perl Build.PL
+	perl Build test
+	perl Build Bundle
+	perl Build install
+
+=head2 Running SDL Perl Scripts in MacOSX
+
+First set the PERL5LIB environment variable to the dependencies of your script
+	
+	%export PERL5LIB=$PERL5LIB:./lib
+
+Use the SDLPerl executable made in the bundle and call your scripts
+
+	%SDLPerl.app/Contents/MacOS/SDLPerl yourScript.pl
+
+=head1 Functions exported by SDL.pm
 
 =head2 Init(flags) 
 
@@ -263,7 +307,7 @@ C<SDL::CDStop> will stop CD playback if playing.
 
 =head2 CDEject(cd) 
 
-This function will eject the CD
+This function will eject the CD.
 
 =head2 CDClose(cd) 
 
@@ -271,23 +315,79 @@ This function will release an opened CD.
 
 =head2 CDNumTracks 
 
+This function return the number of tracks on a CD,
+it take a SDL_CD as first parameter.
+
 =head2 CDCurTrack 
+
+This function return the number of the current track on a CD,
+it take a SDL_CD as first parameter.
 
 =head2 CDCurFrame 
 
+this function return the frame offset within the current track on a CD.
+it take a SDL_CD as first parameter.
+
 =head2 CDTrack 
+
+CDtrack stores data on each track on a CD, its fields should be pretty self explainatory.
+CDtrack take a SDL::CD as input and  return a SDL_CDTrack. 
 
 =head2 PumpEvents 
 
+Pumps the event loop, gathering events from the input devices.
+
+PumpEvents gathers all the pending input information from devices and places
+it on the event queue.
+Without calls to PumpEvents no events would ever be placed on the queue.
+Often the need for calls to PumpEvents is hidden from the user 
+since L</ PollEvent> and WaitEvent implicitly call PumpEvents. 
+However, if you are not polling or waiting for events (e.g. you are filtering them), 
+then you must call PumpEvents to force an event queue update.
+PumpEvents doesn't return any value and doesn't take any parameters.
+
+Note: You can only call this function in the thread that set the video mode. 
+
 =head2 NewEvent 
+
+Create a new event.It return a SDL::Event.
 
 =head2 FreeEvent
 
+FreeEvent delete the SDL::Event given as first parameter.
+it doesn't return anything.
+
 =head2 PollEvent 
+
+Polls for currently pending events.
+If event is not undef, the next event is removed from the queue and returned as a L< SDL::Event>.
+As this function implicitly calls L</ PumpEvents>, you can only call this function in the thread that set the video mode. 
+it take a SDL::Event as first parameter.
 
 =head2 WaitEvent 
 
+Waits indefinitely for the next available event, returning undef if there was an error while waiting for events,
+a L< SDL::Event> otherwise.
+If event is not NULL, the next event is removed.
+As this function implicitly calls L</ PumpEvents>, you can only call this function in the thread that set the video mode. 
+WaitEvent take a SDL::Event as first parameter.
+
 =head2 EventState 
+
+This function allows you to set the state of processing certain event types.
+
+it take an event type as first argument, and a state as second.
+
+If state is set to SDL_IGNORE, that event type will be automatically 
+dropped from the event queue and will not be filtered.
+If state is set to SDL_ENABLE, that event type will be processed 
+normally.
+If state is set to SDL_QUERY, SDL_EventState will return the current 
+processing state of the specified event type.
+
+A list of event types can be found in the L</ SDL_Event section>. 
+
+it returns a state(?).
 
 =head2 IGNORE 
 
@@ -313,9 +413,17 @@ This function will release an opened CD.
 
 =head2 EventType 
 
+EventType return the type of the SDL::Event given as first parameter.
+
 =head2 ActiveEventGain 
 
+ActiveEventGain return the active gain from the SDL::Event given as first parameter.
+see L</ SDL::Event> for more informations about the active state. 
+
 =head2 ActiveEventState 
+
+ActiveEventState return the active state from the SDL::Event given as first parameter.
+see L</ SDL::Event> for more informations about the active state. 
 
 =head2 APPMOUSEFOCUS 
 
@@ -324,6 +432,9 @@ This function will release an opened CD.
 =head2 APPACTIVE 
 
 =head2 KeyEventState
+
+KeyEventState return the active key state from the SDL::Event given as first parameter.
+see L</ SDL::Event> for me more informations about the active key.
 
 =head2 SDLK_BACKSPACE 
 
@@ -617,9 +728,18 @@ This function will release an opened CD.
 
 =head2 KeyEventSym 
 
+KeyEventSym return the key pressed/released  information from the SDL::Event given as first parameter.
+see L</ SDL::Event> for more informations about the keyboard events. 
+
 =head2 KeyEventMod 
 
+KeyEventMod return the mod keys pressed information from the SDL::Event given as first parameter.
+see L</ SDL::Event> for more informations about the keyboard events. 
+
 =head2 KeyEventUnicode 
+
+KeyEventMod return the unicode translated keys pressed/released information from the SDL::Event given as first parameter.
+see L</ SDL::Event> for more informations about the keyboard events. 
 
 =head2 KeyEventScanCode 
 

@@ -31,21 +31,31 @@
 #
 # basic testing of SDL::Timer
 
+use strict;
+use SDL;
+use SDL::Config;
+use Test::More;
+
 BEGIN {
 	unshift @INC, 'blib/lib','blib/arch';
 }
 
-use strict;
-use SDL;
-use SDL::Config;
+sub check_fail_timer
+{	
+	my $ret = 0;
+	eval
+	{
+      		$ret = SDL::Init(SDL_INIT_TIMER);
+	};
+	return 1 if ($@ or $ret == -1);
+	return 0;
+}
 
-use Test::More;
-
-if (SDL::Init(SDL_INIT_TIMER) < 0 )
+if( check_fail_timer() )
 {
 	 plan( skip_all => "Cannot initialize timer!!" );
-
 }
+
 plan ( tests => 4 );
 
 use_ok( 'SDL::Timer' ); 

@@ -1,16 +1,16 @@
 ---
 name: SDL_Perl
-version: v2.2.2.17
+version: v2.2.3
 author:
   - 'David J. Goehrig <DGOEHRIG@cpan.org>'
 abstract: Simple DirectMedia Layer for Perl
 license: lgpl
 resources:
   license: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
-build_requires:
-  Alien::SDL: 0.05
+requires:
+  Alien::SDL: 0.7
   ExtUtils::CBuilder: 0.260301
-  Module::Build: 0.22
+  Module::Build: 0.27
   Test::Simple: 0.47
   YAML: 0.68
 configure_requires:
@@ -18,7 +18,7 @@ configure_requires:
 provides:
   SDL:
     file: lib/SDL.pm
-    version: v2.2.2.17
+    version: v2.2.3
   SDL::App:
     file: lib/SDL/App.pm
   SDL::Cdrom:

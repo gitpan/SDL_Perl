@@ -127,13 +127,14 @@ my $build   = SDL::Build->new(
 	dist_name            => 'SDL_Perl', 
 	license		     => 'lgpl',
 	dist_version_from    => 'lib/SDL.pm',
-	build_requires       =>
+	requires	      =>
 	{
+		'Module::Build' => '0.27',
+		'Alien::SDL' => '0.7',
 		'Test::Simple' => '0.47',
-		'Module::Build' => '0.22',
 		'YAML'	=> '0.68',
-		'Alien::SDL'    => '0.05',
 		'ExtUtils::CBuilder' => '0.260301'
+
 	},
 	build_recommends     =>
 	{
@@ -148,6 +149,13 @@ my $build   = SDL::Build->new(
 	dist_author	     => 'David J. Goehrig <DGOEHRIG@cpan.org>',
 );
 
+if($arch eq 'Darwin')
+{
+	$build->{c_source} = $arch->build_c_source( \%libraries, $build_systems );
+	$build->{c_sources} = $arch->build_c_sources( \%libraries, $build_systems );
+	$build->{install_base} = $arch->build_install_base( \%libraries, $build_systems );
+
+}
 
 # and here's where the real (and ugly) magic works... see SDL::Build
 $build->set_flags(

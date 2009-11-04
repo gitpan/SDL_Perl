@@ -1,6 +1,6 @@
 ---
 name: SDL_Perl
-version: v2.2.3.1
+version: v2.2.4
 author:
   - 'David J. Goehrig <DGOEHRIG@cpan.org>, Kartik Thakore <KTHAKORE@cpan.org>'
 abstract: Simple DirectMedia Layer for Perl
@@ -12,18 +12,20 @@ build_requires:
 configure_requires:
   Alien::SDL: v0.7.1
   ExtUtils::CBuilder: 0.260301
-  Module::Build: 0.34
+  Module::Build: 0.35
   YAML: 0.68
 provides:
   SDL:
     file: lib/SDL.pm
-    version: v2.2.3.1
+    version: v2.2.4
   SDL::App:
     file: lib/SDL/App.pm
   SDL::Cdrom:
     file: lib/SDL/Cdrom.pm
   SDL::Color:
     file: lib/SDL/Color.pm
+  SDL::Config:
+    file: lib/SDL/Config.pm
   SDL::Constants:
     file: lib/SDL/Constants.pm
   SDL::Cursor:
@@ -32,6 +34,9 @@ provides:
     file: lib/SDL/Event.pm
   SDL::Font:
     file: lib/SDL/Font.pm
+  SDL::Game::Rect:
+    file: lib/SDL/Game/Rect.pm
+    version: 0.01
   SDL::MPEG:
     file: lib/SDL/MPEG.pm
   SDL::Mixer:
@@ -68,13 +73,15 @@ provides:
     file: lib/SDL/Tutorial/Drawing.pm
   SDL::Tutorial::Images:
     file: lib/SDL/Tutorial/Images.pm
+  SDL::Tutorial::LunarLander:
+    file: lib/SDL/Tutorial/LunarLander.pm
   SDL::Video:
     file: lib/SDL/Video.pm
   SDL_perl:
     file: lib/SDL_perl.pm
   Walker:
     file: lib/SDL/Tutorial/Images.pm
-generated_by: Module::Build version 0.34
+generated_by: Module::Build version 0.35
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
@@ -89,7 +96,5 @@ no_index:
     - make/lib/SDL/Build/Linux.pm
     - make/lib/SDL/Build/MSWin32.pm
     - make/lib/SDL/Build/Netbsd.pm
-    - make/lib/SDL/Build/Openbsd.pm
     - make/lib/SDL/Build/Solaris.pm
-    - make/lib/ExtUtils/CBuilder
     - make/lib/ExtUtils/CBuilder/Platform/Windows.pm

@@ -1,6 +1,6 @@
 ---
 name: SDL_Perl
-version: v2.2.5
+version: v2.2.6
 author:
   - 'David J. Goehrig <DGOEHRIG@cpan.org>, Kartik Thakore <KTHAKORE@cpan.org>'
 abstract: Simple DirectMedia Layer for Perl
@@ -17,15 +17,13 @@ configure_requires:
 provides:
   SDL:
     file: lib/SDL.pm
-    version: v2.2.5
+    version: v2.2.6
   SDL::App:
     file: lib/SDL/App.pm
   SDL::Cdrom:
     file: lib/SDL/Cdrom.pm
   SDL::Color:
     file: lib/SDL/Color.pm
-  SDL::Config:
-    file: lib/SDL/Config.pm
   SDL::Constants:
     file: lib/SDL/Constants.pm
   SDL::Cursor:

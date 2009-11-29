@@ -42,6 +42,190 @@ my %subsystems =
 		libraries => [qw( SDL SDL_image SDL_mixer SDL_net SDL_ttf SDL_gfx
 		                  png jpeg smpeg )],
 	},
+	Time => {
+		file      => {
+			from  => 'src/Core/Time.xs',
+			to    => 'lib/SDL/Time.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Events => {
+		file      => {
+			from  => 'src/Core/Events.xs',
+			to    => 'lib/SDL/Events.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Event => {
+		file      => {
+			from  => 'src/Core/objects/Event.xs',
+			to    => 'lib/SDL/Event.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	MultiThread => {
+		file      => {
+			from  => 'src/Core/MultiThread.xs',
+			to    => 'lib/SDL/MultiThread.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Video => {
+		file      => {
+			from  => 'src/Core/Video.xs',
+			to    => 'lib/SDL/Video.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Audio => {
+		file      => {
+			from  => 'src/Core/Audio.xs',
+			to    => 'lib/SDL/Audio.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Rect => {
+		file      => {
+			from  => 'src/Core/objects/Rect.xs',
+			to    => 'lib/SDL/Rect.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Color => {
+		file      => {
+			from  => 'src/Core/objects/Color.xs',
+			to    => 'lib/SDL/Color.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Surface => {
+		file      => {
+			from  => 'src/Core/objects/Surface.xs',
+			to    => 'lib/SDL/Surface.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Overlay => {
+		file      => {
+			from  => 'src/Core/objects/Overlay.xs',
+			to    => 'lib/SDL/Overlay.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	RWOps => {
+		file      => {
+			from  => 'src/Core/objects/RWOps.xs',
+			to    => 'lib/SDL/RWOps.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+
+	PixelFormat => {
+		file      => {
+			from  => 'src/Core/objects/PixelFormat.xs',
+			to    => 'lib/SDL/PixelFormat.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	AudioSpec => {
+		file      => {
+			from  => 'src/Core/objects/AudioSpec.xs',
+			to    => 'lib/SDL/AudioSpec.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	AudioCVT => {
+		file      => {
+			from  => 'src/Core/objects/AudioCVT.xs',
+			to    => 'lib/SDL/AudioCVT.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	MixChunk => {
+		file      => {
+			from  => 'src/Mixer/objects/MixChunk.xs',
+			to    => 'lib/SDL/Mixer/MixChunk.xs',
+		},
+		libraries => [qw( SDL SDL_mixer )],
+	},
+	MixMusic => {
+		file      => {
+			from  => 'src/Mixer/objects/MixMusic.xs',
+			to    => 'lib/SDL/Mixer/MixMusic.xs',
+		},
+		libraries => [qw( SDL SDL_mixer )],
+	},
+	Palette => {
+		file      => {
+			from  => 'src/Core/objects/Palette.xs',
+			to    => 'lib/SDL/Palette.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	VideoInfo => {
+		file      => {
+			from  => 'src/Core/objects/VideoInfo.xs',
+			to    => 'lib/SDL/VideoInfo.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Mouse => {
+		file      => {
+			from  => 'src/Core/Mouse.xs',
+			to    => 'lib/SDL/Mouse.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Cursor => {
+		file      => {
+			from  => 'src/Core/objects/Cursor.xs',
+			to    => 'lib/SDL/Cursor.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	Joystick => {
+		file      => {
+			from  => 'src/Core/Joystick.xs',
+			to    => 'lib/SDL/Joystick.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	CDROM => {
+		file      => {
+			from  => 'src/Core/CDROM.xs',
+			to    => 'lib/SDL/CDROM.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	CDTrack => {
+		file      => {
+			from  => 'src/Core/objects/CDTrack.xs',
+			to    => 'lib/SDL/CDTrack.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+	CD => {
+		file      => {
+			from  => 'src/Core/objects/CD.xs',
+			to    => 'lib/SDL/CD.xs',
+		},
+		libraries => [qw( SDL )],
+	},
+
+	TTF_Font => {
+		file      => {
+			from  => 'src/TTF/objects/TTF_Font.xs',
+			to    => 'lib/SDL/TTF_Font.xs',
+		},
+		libraries => [qw( SDL SDL_ttf )],
+	},
+	Version => {
+		file      => {
+			from  => 'src/Core/objects/Version.xs',
+			to    => 'lib/SDL/Version.xs',
+		},
+		libraries => [qw( SDL )],
+	},
 	OpenGL => {
 		file      => {
 			from => 'src/OpenGL.xs',
@@ -54,7 +238,7 @@ my %subsystems =
 			from => 'src/SFont.xs',
 			to   =>	'lib/SDL/SFont.xs',
 		},
-		libraries => [qw( SDL SDL_image )],
+		libraries => [qw( SDL SDL_ttf )],
 	},	
 );
 
@@ -132,12 +316,13 @@ my $build   = SDL::Build->new(
 	{
 		'YAML'	=> '0.68',
 		'ExtUtils::CBuilder' => '0.260301',
-		'Alien::SDL' => '0.7.1',
+		'Alien::SDL' => '0.07.2',
 	},
 	build_requires =>
 	{
-		'Test::Simple' => '0.47',
-
+		'Test::Simple' => '0.88',
+		'IO::CaptureOutput' => '0',
+		'Test::Most' => '0.21',
 	},
 	build_recommends     =>
 	{
@@ -149,7 +334,8 @@ my $build   = SDL::Build->new(
 	{
 		no_index =>  { file => [ <make/lib/SDL/*.pm>, <make/lib/SDL/Build/*.pm>, <make/lib/ExtUtils/CBuilder/*>, <make/lib/ExtUtils/*>, <make/lib/ExtUtils/CBuilder/Platform/Windows.pm> ] },
 	},
-	dist_author	     => 'David J. Goehrig <DGOEHRIG@cpan.org>, Kartik Thakore <KTHAKORE@cpan.org>',
+	dist_abstract => 'SDL bindings to Perl',
+	dist_author	     => 'Kartik Thakore <KTHAKORE@cpan.org>',
 );
 
 if($arch eq 'Darwin')

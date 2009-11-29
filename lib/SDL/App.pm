@@ -34,9 +34,11 @@ use strict;
 use warnings;
 use Carp;
 use SDL;
-use SDL::Event;
-use SDL::Surface;
 use SDL::Rect;
+use SDL::Video;
+use SDL::Event;
+use SDL::Events;
+use SDL::Surface;
 
 our @ISA = qw(SDL::Surface);
 sub DESTROY {
@@ -62,7 +64,7 @@ sub new {
 	 my $init = defined $options{-init} ? $options{-init} :
 	SDL_INIT_EVERYTHING();
 	
-	 SDL::Init($init);
+	 SDL::init($init);
 
 	#SDL::Init(SDL::SDL_INIT_EVERYTHING());
 	
@@ -95,32 +97,32 @@ sub new {
 
 	if ($f & SDL::SDL_OPENGL()) { 
 		$SDL::App::USING_OPENGL = 1;
-		SDL::GLSetAttribute(SDL::SDL_GL_RED_SIZE(),$r) if ($r);	
-		SDL::GLSetAttribute(SDL::SDL_GL_GREEN_SIZE(),$g) if ($g);	
-		SDL::GLSetAttribute(SDL::SDL_GL_BLUE_SIZE(),$b) if ($b);	
-		SDL::GLSetAttribute(SDL::SDL_GL_ALPHA_SIZE(),$a) if ($a);	
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_RED_SIZE(),$r) if ($r);	
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_GREEN_SIZE(),$g) if ($g);	
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_BLUE_SIZE(),$b) if ($b);	
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_ALPHA_SIZE(),$a) if ($a);	
 
-		SDL::GLSetAttribute(SDL::SDL_GL_RED_ACCUM_SIZE(),$ras) if ($ras);	
-		SDL::GLSetAttribute(SDL::SDL_GL_GREEN_ACCUM_SIZE(),$gas) if ($gas);	
-		SDL::GLSetAttribute(SDL::SDL_GL_BLUE_ACCUM_SIZE(),$bas) if ($bas);	
-		SDL::GLSetAttribute(SDL::SDL_GL_ALPHA_ACCUM_SIZE(),$aas) if ($aas);	
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_RED_ACCUM_SIZE(),$ras) if ($ras);	
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_GREEN_ACCUM_SIZE(),$gas) if ($gas);	
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_BLUE_ACCUM_SIZE(),$bas) if ($bas);	
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_ALPHA_ACCUM_SIZE(),$aas) if ($aas);	
 		
-		SDL::GLSetAttribute(SDL::SDL_GL_DOUBLEBUFFER(),$db) if ($db);
-		SDL::GLSetAttribute(SDL::SDL_GL_BUFFER_SIZE(),$bs) if ($bs);
-		SDL::GLSetAttribute(SDL::SDL_GL_DEPTH_SIZE(),$d);
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_DOUBLEBUFFER(),$db) if ($db);
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_BUFFER_SIZE(),$bs) if ($bs);
+		SDL::Video::GL_set_attribute(SDL::SDL_GL_DEPTH_SIZE(),$d);
 	} else {
 		$SDL::App::USING_OPENGL = 0;
 	}
 
-	my $self = \SDL::SetVideoMode($w,$h,$d,$f)
-		or croak SDL::GetError();
+	my $self = SDL::Video::set_video_mode($w,$h,$d,$f)
+		or croak SDL::get_error();
 	
 	if ($ic and -e $ic) {
 	   my $icon = new SDL::Surface -name => $ic;
-	   SDL::WMSetIcon($$icon);	   
+	   SDL::Video::wm_set_icon($$icon);
 	}
 
-	SDL::WMSetCaption($t,$it);
+	SDL::Video::wm_set_caption($t,$it);
 	
 	bless $self,$class;
 	return $self;
@@ -141,49 +143,49 @@ sub title ($;$) {
 	if (@_) { 
 		$title = shift; 
 		$icon = shift || $title;
-		SDL::WMSetCaption($title,$icon);
+		SDL::Video::wm_set_caption($title,$icon);
 	}
-	return SDL::WMGetCaption();
+	return SDL::Video::wm_get_caption();
 }
 
 sub delay ($$) {
 	my $self = shift;
 	my $delay = shift;
-	SDL::Delay($delay);
+	SDL::delay($delay);
 }
 
 sub ticks {
-	return SDL::GetTicks();
+	return SDL::get_ticks();
 }
 
 sub error {
-	return SDL::GetError();
+	return SDL::get_error();
 }
 
 sub warp ($$$) {
 	my $self = shift;
-	SDL::WarpMouse(@_);
+	SDL::Mouse::warp_mouse(@_);
 }
 
 sub fullscreen ($) {
 	my $self = shift;
-	SDL::WMToggleFullScreen($$self);
+	SDL::Video::wm_toggle_full_screen($self);
 }
 
 sub iconify ($) {
 	my $self = shift;
-	SDL::WMIconifyWindow();
+	SDL::Video::wm_iconify_window();
 }
 
 sub grab_input ($$) {
 	my ($self,$mode) = @_;
-	SDL::WMGrabInput($mode);
+	SDL::Video::wm_grab_input($mode);
 }
 
 sub loop ($$) {
 	my ($self,$href) = @_;
-	my $event = new SDL::Event;
-	while ( $event->wait() ) {
+	my $event = SDL::Event->new();
+	while ( SDL::Events::wait($event->wait) ) {
 		if ( ref($$href{$event->type()}) eq "CODE" ) {
 			&{$$href{$event->type()}}($event);			
 		}
@@ -193,9 +195,9 @@ sub loop ($$) {
 sub sync ($) {
 	my $self = shift;
 	if ($SDL::App::USING_OPENGL) {
-		SDL::GLSwapBuffers()
+		SDL::Video::GL_swap_buffers()
 	} else {
-		$self->flip();
+		SDL::Video::flip($self);
 	}
 }
 
@@ -203,191 +205,12 @@ sub attribute ($$;$) {
 	my ($self,$mode,$value) = @_;
 	return undef unless ($SDL::App::USING_OPENGL);
 	if (defined $value) {
-		SDL::GLSetAttribute($mode,$value);
+		SDL::Video::GL_set_attribute($mode,$value);
 	}
-	my $returns = SDL::GLGetAttribute($mode);	
+	my $returns = SDL::Video::GL_get_attribute($mode);	
 	croak "SDL::App::attribute failed to get GL attribute" if ($$returns[0] < 0);
 	$$returns[1];	
 }
 
 1;
 
-__END__;
-
-=pod
-
-=head1 NAME
-
-SDL::App - a SDL perl extension
-
-=head1 SYNOPSIS
-		
-	use SDL;
-	use SDL::Event; 
-	use SDL::App; 
-	 
-	my $app = new SDL::App ( 
-	-title => 'Application Title', 
-	-width => 640, 
-	-height => 480, 
-	-depth => 32 ); 
-
-This is the manual way of doing things	
-
-	my $event = new SDL::Event;             # create a new event 
-
-	$event->pump();
-	$event->poll();
-
-	while ($event->wait()) { 
-	  my $type = $event->type();      # get event type 
-	  print $type; 
-	  exit if $type == SDL_QUIT; 
-	  }
-An alternative to the manual Event processing is the L<SDL::App::loop> .
-
-=head1 DESCRIPTION
-
-L<SDL::App> controls the root window of the of your SDL based application.
-It extends the L<SDL::Surface> class, and provides an interface to the window
-manager oriented functions.
-
-=head1 METHODS
-
-=head2 new
-
-C<SDL::App::new> initializes the SDL, creates a new screen,
-and initializes some of the window manager properties.
-C<SDL::App::new> takes a series of named parameters:
-
-=over 4
-
-=item *
-
--title
-
-=item *
-
--icon_title
-
-=item *
-
--icon
-
-=item *
-
--width
-
-=item *
-
--height
-
-=item *
-
--depth
-
-=item *
-
--flags
-
-=item *
-
--resizeable
-
-=back
-
-=head2 title
-
-C<SDL::App::title> takes 0, 1, or 2  arguments.  It returns the current
-application window title.  If one parameter is passed, both the window
-title and icon title will be set to its value.  If two parameters are
-passed the window title will be set to the first, and the icon title
-to the second.
-
-=head2 delay
-
-C<SDL::App::delay> takes 1 argument, and will sleep the application for
-that many ms.
-
-=head2 ticks
-
-C<SDL::App::ticks> returns the number of ms since the application began.
-
-=head2 error
-
-C<SDL::App::error> returns the last error message set by the SDL.
-
-=head2 resize
-
-C<SDL::App::resize> takes a new height and width of the application
-if the application was originally created with the -resizable option.
-
-=head2 fullscreen
-
-C<SDL::App::fullscreen> toggles the application in and out of fullscreen mode.
-
-=head2 iconify
-
-C<SDL::App::iconify> iconifies the applicaiton window.
-
-=head2 grab_input
-
-C<SDL::App::grab_input> can be used to change the input focus behavior of
-the application.  It takes one argument, which should be one of the following:
-
-=over 4
-
-=item *
-SDL_GRAB_QUERY
-
-=item *
-SDL_GRAB_ON
-
-=item *
-SDL_GRAB_OFF
-
-=back
-
-=head2 loop
-
-C<SDL::App::loop> is a simple event loop method which takes a reference to a hash
-of event handler subroutines.  The keys of the hash must be SDL event types such
-as SDL_QUIT(), SDL_KEYDOWN(), and the like.  The event method recieves as its parameter 
-the event object used in the loop.
- 
-  Example:
-
-	my $app = new SDL::App  -title => "test.app", 
-				-width => 800, 
-				-height => 600, 
-				-depth => 32;
-	
-	my %actions = (
-		SDL_QUIT() => sub { exit(0); },
-		SDL_KEYDOWN() => sub { print "Key Pressed" },
-	);
-
-	$app->loop(\%actions);
-
-=head2 sync
-
-C<SDL::App::sync> encapsulates the various methods of syncronizing the screen with the
-current video buffer.  C<SDL::App::sync> will do a fullscreen update, using the double buffer
-or OpenGL buffer if applicable.  This is prefered to calling flip on the application window.
-
-=head2 attribute ( attr, [value] )
-
-C<SDL::App::attribute> allows one to set and get GL attributes.  By passing a value
-in addition to the attribute selector, the value will be set.  C<SDL:::App::attribute>
-always returns the current value of the given attribute, or croaks on failure.
-
-=head1 AUTHOR
-
-David J. Goehrig
-Kartik Thakore
-
-=head1 SEE ALSO
-
-L<perl> L<SDL::Surface> L<SDL::Event>  L<SDL::OpenGL>
-
-=cut	

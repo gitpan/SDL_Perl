@@ -1,7 +1,8 @@
 package SDL::Game::Rect;
 use strict;
 use warnings;
-use SDL::Rect;
+use Carp;
+use base 'SDL::Rect';
 
 our $VERSION = '0.01';
 
@@ -12,42 +13,39 @@ sub new {
     my $w = shift || 0;
     my $h = shift || 0;
 
-    my $self = {};
+    my $self = $class->SUPER::new($x, $y, $w, $h);
+    unless ($$self) {
+        #require Carp;
+        croak SDL::get_error();
+    }
     bless $self, $class;
-
-    $self->{rect} = SDL::Rect->new(
-            -x      => $x,
-            -y      => $y,
-            -width  => $w,
-            -height => $h,
-        );
-
     return $self;
-}
-
-############################
-## duplicated accessors
-############################
-sub x      { return shift->{rect}->x(@_) }
-sub left   { return shift->{rect}->x(@_) }
-sub top    { return shift->{rect}->y(@_) }
-sub y      { return shift->{rect}->y(@_) }
-
-sub w      { return shift->{rect}->width(@_)  }
-sub width  { return shift->{rect}->width(@_)  }
-sub h      { return shift->{rect}->height(@_) }
-sub height { return shift->{rect}->height(@_) }
-
-###########################
-## main rect accessor
-###########################
-sub rect {
-    return shift->{rect};
 }
 
 #############################
 ## extra accessors
 #############################
+
+sub left {
+    my $self = shift;
+    $self->x(@_);
+}
+
+sub top {
+    my $self = shift;
+    $self->y(@_);
+}
+
+sub width {
+    my $self = shift;
+    $self->w(@_);
+}
+
+sub height {
+    my $self = shift;
+    $self->h(@_);
+}
+
 sub bottom {
     my ($self, $val) = (@_);
     if (defined $val) {
@@ -64,7 +62,7 @@ sub right {
     return $self->left + $self->width; # x + width
 }
 
-sub center_x {
+sub centerx {
     my ($self, $val) = (@_);
     if (defined $val) {
         $self->left($val - ($self->width >> 1)); # x = val - (width/2)
@@ -72,7 +70,7 @@ sub center_x {
     return $self->left + ($self->width >> 1); # x + (width/2)
 }
 
-sub center_y {
+sub centery {
     my ($self, $val) = (@_);
     if (defined $val) {
         $self->top($val - ($self->height >> 1)); # y = val - (height/2)
@@ -94,7 +92,7 @@ sub size {
     }
 }
 
-sub top_left {
+sub topleft {
     my ($self, $y, $x) = (@_);
     
     return ($self->top, $self->left) # (top, left)
@@ -109,7 +107,7 @@ sub top_left {
     return;
 }
 
-sub mid_left {
+sub midleft {
     my ($self, $centery, $x) = (@_);
     
     return ($self->top + ($self->height >> 1), $self->left) # (centery, left)
@@ -124,7 +122,7 @@ sub mid_left {
     return;
 }
 
-sub bottom_left {
+sub bottomleft {
     my ($self, $bottom, $x) = (@_);
     
     return ($self->top + $self->height, $self->left) # (bottom, left)
@@ -154,7 +152,7 @@ sub center {
     return;
 }
 
-sub top_right {
+sub topright {
     my ($self, $y, $right) = (@_);
     
     return ($self->top, $self->left + $self->width) # (top, right)
@@ -169,7 +167,7 @@ sub top_right {
     return;
 }
 
-sub mid_right {
+sub midright {
     my ($self, $centery, $right) = (@_);
     
     return ($self->top + ($self->height >> 1), $self->left + $self->width) # (centery, right)
@@ -184,7 +182,7 @@ sub mid_right {
     return;
 }
 
-sub bottom_right {
+sub bottomright {
     my ($self, $bottom, $right) = (@_);
     
     return ($self->top + $self->height, $self->left + $self->width) # (bottom, right)
@@ -199,7 +197,7 @@ sub bottom_right {
     return;
 }
 
-sub mid_top {
+sub midtop {
     my ($self, $centerx, $y) = (@_);
     
     return ($self->left + ($self->width >> 1), $self->top) # (centerx, top)
@@ -214,7 +212,7 @@ sub mid_top {
     return;
 }
 
-sub mid_bottom {
+sub midbottom {
     my ($self, $centerx, $bottom) = (@_);
     
     return ($self->left + ($self->width >> 1), $self->top + $self->height) # (centerx, bottom)
@@ -251,7 +249,22 @@ sub copy {
 sub move {
     my ($self, $x, $y) = (@_);
     if (not defined $x or not defined $y) {
-        _error( "must receive x and y positions as argument" );
+        #require Carp;
+        croak "must receive x and y positions as argument";
+    }
+    return $self->new(
+        -top    => $self->top + $y,
+        -left   => $self->left + $x,
+        -width  => $self->width,
+        -height => $self->height,
+    );
+}
+
+sub move_ip {
+    my ($self, $x, $y) = (@_);
+    if (not defined $x or not defined $y) {
+        #require Carp;
+        croak "must receive x and y positions as argument";
     }
     $self->x($self->x + $x);
     $self->y($self->y + $y);
@@ -262,7 +275,23 @@ sub move {
 sub inflate {
     my ($self, $x, $y) = (@_);
     if (not defined $x or not defined $y) {
-        _error( "must receive x and y positions as argument" );
+        #require Carp;
+        croak "must receive x and y positions as argument";
+    }
+    
+    return $self->new(
+        -left   => $self->left   - ($x / 2),
+        -top    => $self->top    - ($y / 2),
+        -width  => $self->width  + $x,
+        -height => $self->height + $y,
+    );
+}
+
+sub inflate_ip {
+    my ($self, $x, $y) = (@_);
+    if (not defined $x or not defined $y) {
+        #require Carp;
+        croak "must receive x and y positions as argument";
     }
     
     $self->x( $self->x - ($x / 2) );
@@ -292,8 +321,21 @@ sub _get_clamp_coordinates {
 sub clamp {
     my ($self, $rect) = (@_);
     
-    unless ($rect->isa('SDL::Rect') or $rect->isa('SDL::Game::Rect')) {
-        _error( "must receive an SDL::Rect-based object" );
+    unless ($rect->isa('SDL::Rect')) {
+        croak "must receive an SDL::Rect-based object";
+    }
+
+    my $x = _get_clamp_coordinates($self->x, $self->w, $rect->x, $rect->w);
+    my $y = _get_clamp_coordinates($self->y, $self->h, $rect->y, $rect->h);
+    
+    return $self->new($x, $y, $self->w, $self->h);
+}
+
+sub clamp_ip {
+    my ($self, $rect) = (@_);
+    
+    unless ($rect->isa('SDL::Rect')) {
+        croak "must receive an SDL::Rect-based object";
     }
 
     my $x = _get_clamp_coordinates($self->x, $self->w, $rect->x, $rect->w);
@@ -363,12 +405,23 @@ INTERSECTION:
 
 }
 
-
 sub clip {
     my ($self, $rect) = (@_);
     
-    unless ($rect->isa('SDL::Rect') or $rect->isa('SDL::Game::Rect')) {
-        _error( "must receive an SDL::Rect-based object" );
+    unless ($rect->isa('SDL::Rect')) {
+        croak "must receive an SDL::Rect-based object";
+    }
+
+    my ($x, $y, $w, $h) = _get_intersection_coordinates($self, $rect);
+    
+    return $self->new($x, $y, $w, $h);
+}
+
+sub clip_ip {
+    my ($self, $rect) = (@_);
+    
+    unless ($rect->isa('SDL::Rect')) {
+        croak "must receive an SDL::Rect-based object";
     }
 
     my ($x, $y, $w, $h) = _get_intersection_coordinates($self, $rect);
@@ -402,6 +455,33 @@ sub _test_union {
     return ($x, $y, $w, $h);
 }
 
+sub union {
+    my ($self, $rect) = (@_);
+    
+    unless ($rect->isa('SDL::Rect')) {
+        croak "must receive an SDL::Rect-based object";
+    }
+    
+    my ($x, $y, $w, $h) = _test_union($self, $rect);
+    return $self->new($x, $y, $w, $h);
+}
+
+sub union_ip {
+    my ($self, $rect) = (@_);
+    
+    unless ($rect->isa('SDL::Rect')) {
+        croak "must receive an SDL::Rect-based object";
+    }
+    
+    my ($x, $y, $w, $h) = _test_union($self, $rect);
+    
+    $self->x($x);
+    $self->y($y);
+    $self->w($w);
+    $self->y($h);
+    
+    return;
+}
 
 sub _test_unionall {
     my ($self, $rects) = (@_);
@@ -413,10 +493,10 @@ sub _test_unionall {
     my $bottom = $self->y + $self->h;
     
     foreach my $rect (@{$rects}) {
-        unless ($rect->isa('SDL::Rect') or $rect->isa('SDL::Game::Rect')) {
+        unless ($rect->isa('SDL::Rect')) {
             # TODO: better error message, maybe saying which item 
             # is the bad one (by list position)
-            _error( "must receive only SDL::Rect-based objects" );
+            croak "must receive an array reference of SDL::Rect-based objects";
         }
 
         $left   = $rect->x if $rect->x < $left; # MIN
@@ -428,15 +508,26 @@ sub _test_unionall {
     return ($left, $top, $right - $left, $bottom - $top);
 }
 
-
-sub union {
-    my ($self, @rects) = (@_);
+sub unionall {
+    my ($self, $rects) = (@_);
     
-    unless (@rects > 0) {
-        _error( "must receive at least one SDL::Rect-based objects as an argument" );
+    unless (defined $rects and ref $rects eq 'ARRAY') {
+        croak "must receive an array reference of SDL::Rect-based objects";
     }
 
-    my ($x, $y, $w, $h) = _test_unionall($self, \@rects);
+    my ($x, $y, $w, $h) = _test_unionall($self, $rects);
+    
+    return $self->new($x, $y, $w, $h);
+}
+
+sub unionall_ip {
+    my ($self, $rects) = (@_);
+    
+    unless (defined $rects and ref $rects eq 'ARRAY') {
+        croak "must receive an array reference of SDL::Rect-based objects";
+    }
+
+    my ($x, $y, $w, $h) = _test_unionall($self, $rects);
     
     $self->x($x);
     $self->y($y);
@@ -462,12 +553,23 @@ sub _check_fit {
     return ($x, $y, $w, $h);
 }
 
-
 sub fit {
     my ($self, $rect) = (@_);
     
-    unless ($rect->isa('SDL::Rect') or $rect->isa('SDL::Game::Rect')) {
-        _error( "must receive an SDL::Rect-based object" );
+    unless ($rect->isa('SDL::Rect')) {
+        croak "must receive an SDL::Rect-based object";
+    }
+
+    my ($x, $y, $w, $h) = _check_fit($self, $rect);
+    
+    return $self->new ($x, $y, $w, $h);
+}
+
+sub fit_ip {
+    my ($self, $rect) = (@_);
+    
+    unless ($rect->isa('SDL::Rect')) {
+        croak "must receive an SDL::Rect-based object";
     }
 
     my ($x, $y, $w, $h) = _check_fit($self, $rect);
@@ -499,7 +601,7 @@ sub contains {
     my ($self, $rect) = (@_);
     
     unless ($rect->isa('SDL::Rect')) {
-        _error( "must receive an SDL::Rect-based object" );
+        croak "must receive an SDL::Rect-based object";
     }
     
     my $contained = ($self->x <= $rect->x) 
@@ -513,11 +615,11 @@ sub contains {
     return $contained;
 }
 
-sub collide_point {
+sub collidepoint {
     my ($self, $x, $y) = (@_);
 
     unless (defined $x and defined $y) {
-        _error( "must receive (x,y) as arguments" );
+        croak "must receive (x,y) as arguments";
     }
     
     my $inside = $x >= $self->x 
@@ -545,21 +647,21 @@ sub _do_rects_intersect {
 }
 
 
-sub collide_rect {
+sub colliderect {
     my ($self, $rect) = (@_);
 
-    unless ($rect->isa('SDL::Rect') or $rect->isa('SDL::Game::Rect')) {
-        _error( "must receive an SDL::Rect-based object" );
+    unless ($rect->isa('SDL::Rect')) {
+        croak "must receive an SDL::Rect-based object";
     }
     
     return _do_rects_intersect($self, $rect);
 }
 
-sub collide_list {
+sub collidelist {
     my ($self, $rects) = (@_);
 
     unless (defined $rects and ref $rects eq 'ARRAY') {
-        _error( "must receive an array reference of SDL::Rect-based objects" );
+        croak "must receive an array reference of SDL::Rect-based objects";
     }
 
     for(my $i = 0; $i < @{$rects}; $i++) {
@@ -570,11 +672,11 @@ sub collide_list {
     return;
 }
 
-sub collide_list_all {
+sub collidelistall {
     my ($self, $rects) = (@_);
 
     unless (defined $rects and ref $rects eq 'ARRAY') {
-        _error( "must receive an array reference of SDL::Rect-based objects" );
+        croak "must receive an array reference of SDL::Rect-based objects";
     }
 
     my @collisions = ();
@@ -586,16 +688,16 @@ sub collide_list_all {
     return \@collisions;
 }
 
-sub collide_hash {
+sub collidehash {
     my ($self, $rects) = (@_);
 
     unless (defined $rects and ref $rects eq 'HASH') {
-        _error( "must receive an hash reference of SDL::Rect-based objects" );
+        croak "must receive an hash reference of SDL::Rect-based objects";
     }
     
     while ( my ($key, $value) = each %{$rects} ) {
-        unless ($value->isa('SDL::Rect') or $value->isa('SDL::Game::Rect')) {
-            _error( "hash element of key '$key' is not an SDL::Rect-based object" );
+        unless ($value->isa('SDL::Rect')) {
+            croak "hash element of key '$key' is not an SDL::Rect-based object";
         }
         
         if ( _do_rects_intersect($self, $value) ) {
@@ -605,17 +707,17 @@ sub collide_hash {
     return (undef, undef);
 }
 
-sub collide_hash_all {
+sub collidehashall {
     my ($self, $rects) = (@_);
 
     unless (defined $rects and ref $rects eq 'HASH') {
-        _error( "must receive an hash reference of SDL::Rect-based objects" );
+        croak "must receive an hash reference of SDL::Rect-based objects";
     }
     
     my %collisions = ();
     while ( my ($key, $value) = each %{$rects} ) {
         unless ($value->isa('SDL::Rect')) {
-            _error( "hash element of key '$key' is not an SDL::Rect-based object" );
+            croak "hash element of key '$key' is not an SDL::Rect-based object";
         }
         
         if ( _do_rects_intersect($self, $value) ) {
@@ -625,13 +727,8 @@ sub collide_hash_all {
     return \%collisions;
 }
 
-sub _error {
-    require Carp;
-    Carp::croak @_;
-}
 
-
-"all your base are belong to us";
+42;
 __END__
 
 =head1 NAME
@@ -640,40 +737,12 @@ SDL::Game::Rect - SDL::Game object for storing and manipulating rectangular coor
 
 =head1 SYNOPSIS
 
-   my $rect = SDL::Game::Rect->new( 10, 20, 5, 5 );  # top, left, width, height
-
-   my $another_rect = SDL::Game::Rect->new( 10, 30, 5, 8);
-
-   if ( $rect->collide_rect ($another_rect) ) {
-       print "collision!!!\n";
-
-       $rect->move($new_x, $new_y);
-   }
-
-=head1 WARNING
-
-B<< This module is ***EXPERIMENTAL*** >>
-
-It is being designed for the new SDL Perl API, so B<< things may change at any given time >>. In particular, pay attention to the caveat below: that'll definitely go away in the future and will require changes on your account.
-
-=head2 USAGE CAVEAT
-
-SDL Perl uses some intricate XS magic that doesn't allow us to just I<< use base 'SDL::Rect' >>. So, even though we provide the very same accessors (and more! see below), B<< other SDL modules that take a SDL::Rect object as argument won't accept passing an SDL::Game::Rect >> (yet). To work around this we provide the C<< rect() >> method, which returns a vanilla C<< SDL::Rect >> object with the appropriate dimensions. So, for example, if C<< $gamerect >> is a C<< SDL::Game::Rect >> object, then instead of doing something like this will trigger a fatal error:
-
-   $app->update( $gamerect );  # this will fail!
-
-instead, you should do this (for now):
-
-    $app->update( $gamerect->rect ); # ok!
-
-The SDL Perl development team is working to fix this. If you want to help, please join us in the mailing list or in #sdl on I<< irc.perl.org >>.
-
 
 =head1 DESCRIPTION
 
 C<< SDL::Game::Rect >> object are used to store and manipulate rectangular areas. Rect objects are created from a combination of left (or x), top (or y), width (or w) and height (or h) values, just like raw C<< SDL::Rect objects >>.
 
-All C<< SDL::Game::Rect >> methods that change either position or size of a Rect are "in-place". This means they change the Rect whose method was called and return nothing.
+All C<< SDL::Game::Rect >> methods that change either position or size of a Rect return B<a new copy> of the Rect with the affected changes. The original Rect is B<not> modified. If you wish to modify the current Rect object, you can use the equivalent "in-place" methods that do not return but instead affects the original Rect. These "in-place" methods are denoted with the "ip" suffix. Note that changing a Rect's attribute is I<always> an in-place operation.
 
 
 =head2 ATTRIBUTES
@@ -700,15 +769,15 @@ The Rect object has several attributes which can be used to resize, move and ali
 
 =item * right - moves the object right position to match the given coordinate
 
-=item * center_x - moves the object's horizontal center to match the given coordinate
+=item * centerx - moves the object's horizontal center to match the given coordinate
 
-=item * center_y - moves the object's vertical center to match the given coordinate
+=item * centery - moves the object's vertical center to match the given coordinate
 
 =back
 
 Some of the attributes above can be fetched or set in pairs:
 
-  $rect->top_left(10, 15);   # top is now 10, left is now 15
+  $rect->topleft(10, 15);   # top is now 10, left is now 15
 
   my ($width, $height) = $rect->size;
 
@@ -717,23 +786,23 @@ Some of the attributes above can be fetched or set in pairs:
 
 =item * size - gets/sets object's size (width, height)
 
-=item * top_left - gets/sets object's top and left positions
+=item * topleft - gets/sets object's top and left positions
 
-=item * mid_left - gets/sets object's vertical center and left positions
+=item * midleft - gets/sets object's vertical center and left positions
 
-=item * bottom_left - gets/sets object's bottom and left positions
+=item * bottomleft - gets/sets object's bottom and left positions
 
 =item * center - gets/sets object's center (horizontal(x), vertical(y))
 
-=item * top_right - gets/sets object's top and right positions
+=item * topright - gets/sets object's top and right positions
 
-=item * mid_right - gets/sets object's vertical center and right positions
+=item * midright - gets/sets object's vertical center and right positions
 
-=item * bottom_right - gets/sets object's bottom and right positions
+=item * bottomright - gets/sets object's bottom and right positions
 
-=item * mid_top - gets/sets object's horizontal center and top positions
+=item * midtop - gets/sets object's horizontal center and top positions
 
-=item * mid_bottom - gets/sets object's horizontal center and bottom positions
+=item * midbottom - gets/sets object's horizontal center and bottom positions
 
 =back
 
@@ -754,59 +823,89 @@ Returns a new Rect object having the same position and size as the original
 
 =head3 move(x, y)
 
-Moves current Rect by the given offset. The x and y arguments can be any integer value, positive or negative.
+Returns a new Rect that is moved by the given offset. The x and y arguments can be any integer value, positive or negative.
+
+=head3 move_ip(x, y)
+
+Same as C<<move>> above, but moves the current Rect in place and returns nothing.
 
 =head3 inflate(x, y)
 
-Grows or shrinks the rectangle. Rect's size is changed by the given offset. The rectangle remains centered around its current center. Negative values make ita shrinked rectangle instead.
+Grows or shrinks the rectangle. Returns a new Rect with the size changed by the given offset. The rectangle remains centered around its current center. Negative values will return a shrinked rectangle instead.
+
+=head3 inflate_ip(x, y)
+
+Same as C<<inflate>> above, but grows/shrinks the current Rect in place and returns nothing.
 
 =head3 clamp($rect)
 
-Moves original Rect to be completely inside the Rect object passed as an argument. If the current Rect is too large to fit inside the passed Rect, it is centered inside it, but its size is not changed.
+Returns a new Rect moved to be completely inside the Rect object passed as an argument. If the current Rect is too large to fit inside the passed Rect, it is centered inside it, but its size is not changed.
+
+=head3 clamp_ip($rect)
+
+Same as C<<clamp>> above, but moves the current Rect in place and returns nothing.
 
 =head3 clip($rect)
 
-Turns the original Rect into the intersection between it and the Rect object passed as an argument. That is, the original Rect gets cropped to be completely inside the Rect object passed as an argument. If the two rectangles do not overlap to begin with, the Rect bcomes zero-sized, retaining its the original (x,y) coordinates.
+Returns a new Rect with the intersection between the two Rect objects, that is, returns a new Rect cropped to be completely inside the Rect object passed as an argument. If the two rectangles do not overlap to begin with, a Rect with 0 size is returned, in the original Rect's (x,y) coordinates.
+
+=head3 clip_ip($rect)
+
+Same as C<<clip>> above, but crops the current Rect in place and returns nothing. As the original method, the Rect becomes zero-sized if the two rectangles do not overlap to begin with, retaining its (x, y) coordinates.
 
 =head3 union($rect)
 
-=head3 union( $rect1, $rect2, ... )
+Returns a new rectangle that completely covers the area of the current Rect and the one passed as an argument. There may be area inside the new Rect that is not covered by the originals.
 
-Makes the original Rect big enough to completely cover the area of itself and all other Rects passed as an argument. As the Rects can have any given dimensions and positions, there may be area inside the new Rect that is not covered by the originals.
+=head3 union_ip($rect)
+
+Same as C<<union>> above, but resizes the current Rect in place and returns nothing.
+
+=head3 unionall( [$rect1, $rect2, ...] )
+
+Returns the union of one rectangle with a sequence of many rectangles, passed as an ARRAY REF.
+
+=head3 unionall_ip( [$rect1, $rect2, ...] )
+
+Same as C<<unionall>> above, but resizes the current Rect in place and returns nothing.
 
 =head3 fit($rect)
 
-Moves and resizes the original Rect to fit the Rect object passed as an argument. The aspect ratio of the original Rect is preserved, so it may be smaller than the target in either width or height. 
+Returns a new Rect moved and resized to fit the Rect object passed as an argument. The aspect ratio of the original Rect is preserved, so the new rectangle may be smaller than the target in either width or height. 
+
+=head3 fit_ip($rect)
+
+Same as C<<fit>> above, but moves/resizes the current Rect in place and returns nothing.
 
 =head3 normalize
 
-Corrects negative sizes, flipping width/height of the Rect if they have a negative size. No repositioning is made so the rectangle will remain in the same place, but the negative sides will be swapped.
+Corrects negative sizes, flipping width/height of the Rect if they have a negative size. No repositioning is made so the rectangle will remain in the same place, but the negative sides will be swapped. This method returns nothing.
 
 =head3 contains($rect)
 
 Returns true (non-zero) when the argument is completely inside the Rect. Otherwise returns undef.
 
-=head3 collide_point(x, y)
+=head3 collidepoint(x, y)
 
 Returns true (non-zero) if the given point is inside the Rect, otherwise returns undef. A point along the right or bottom edge is not considered to be inside the rectangle.
 
-=head3 collide_rect($rect)
+=head3 colliderect($rect)
 
 Returns true (non-zero) if any portion of either rectangles overlap (except for the top+bottom or left+right edges).
 
-=head3 collide_list( [$rect1, $rect2, ...] )
+=head3 collidelist( [$rect1, $rect2, ...] )
 
 Test whether the rectangle collides with any in a sequence of rectangles, passed as an ARRAY REF. The index of the first collision found is returned. Returns undef if no collisions are found.
 
-=head3 collide_list_all( [$rect1, $rect2, ...] )
+=head3 collidelistall( [$rect1, $rect2, ...] )
 
 Returns an ARRAY REF of all the indices that contain rectangles that collide with the Rect. If no intersecting rectangles are found, an empty list ref is returned. 
 
-=head3 collide_hash( {key1 => $rect1, key2 => $rect2, ...} )
+=head3 collidehash( {key1 => $rect1, key2 => $rect2, ...} )
 
 Receives a HASH REF and returns the a (key, value) list with the key and value of the first hash item that collides with the Rect. If no collisions are found, returns (undef, undef).
 
-=head3 collide_hash_all( {key1 => $rect1, key2 => $rect2, ...} )
+=head3 collidehashall( {key1 => $rect1, key2 => $rect2, ...} )
 
 Returns a HASH REF of all the key and value pairs that intersect with the Rect. If no collisions are found an empty hash ref is returned. 
 
@@ -833,7 +932,7 @@ Many thanks to all SDL_Perl contributors, and to the authors of pygame.rect, in 
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009 The SDL Perl Development Team, all rights reserved.
+Copyright 2009 Breno G. de Oliveira, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
@@ -841,4 +940,4 @@ under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-perl, L<< SDL >>, L<< SDL::Rect >>
+perl, L<SDL>, L<SDL::Rect>, L<SDL::Game>

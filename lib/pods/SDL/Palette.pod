@@ -1,0 +1,35 @@
+=pod
+
+=head1 NAME
+
+SDL::Palette -- Color palette for 8-bit pixel formats 
+
+=head1 CATEGORY
+
+Core, Video, Structure
+
+=head1 DESCRIPTION
+
+Each pixel in an 8-bit surface is an index into the colors field of the C<SDL::Palette> structure store in C<SDL::PixelFormat>. A C<SDL::Palette>
+should never need to be created manually. It is automatically created when SDL allocates a C<SDL::PixelFormat> for a surface. The colors 
+values of a C<SDL::Surface>'s palette can be set with the C<SDL::Video::set_colors>.
+
+=head1 METHODS
+
+=head2 ncolors ( )
+
+Fetches the number of colors in palette
+
+=head2 colors ( index )
+
+Fetches an array of colors in palette
+
+=head2 color_index ( index )
+
+Fetches the SDL_Color at the provide index in palette
+
+=head1 SEE ALSO
+
+L<SDL::Color> L<SDL::Surface>
+
+=cut

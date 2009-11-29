@@ -1,0 +1,128 @@
+=head1 NAME
+
+SDL::Events - Bindings to the Events Category in SDL API
+
+=head2 CATEGORY
+
+Core, Events
+
+=head1 SYNOPSIS
+
+Most likely you just want to know how to get events for you app.
+  use SDL;
+  use SDL::Event;
+  use SDL::Events;
+  
+  SDL::init(SDL_INIT_VIDEO); # Event can only be grabbed in the same thread as this 
+
+  ...
+ 
+  my $event = SDL::Event->new(); # notices 'Event' ne 'Events'
+
+  while( 1 )
+	{
+          SDL::Events::pump_events(); 	 
+       	 while(  SDL::Events::poll_event($event) )
+	 {
+ 		#check by event type
+ 		on_active() if $event->type == SDL_ACTIVEEVENT; 
+		...
+	 }
+	}
+
+=head1 DESCRIPTION
+
+
+=head1 METHODS
+
+=head2 pump_events
+
+Pumps the event loop, gathering events from the input devices.
+
+	pump_events();
+
+pump_events gathers all the pending input information from devices and places it on the event queue. Without calls to pump_events no events would ever be placed on the queue. 
+Often the need for calls to pump_events is hidden from the user since L<poll_event> and L<wait_event> implicitly call pump_events. 
+However, if you are not polling or waiting for events (e.g. you are filtering them), then you must call pump_events to force an event queue update.
+
+
+=head2 peep_events (event, num_events, action, mask) 
+
+Checks the event queue for messages and optionally returns them.  
+
+	my $num_peep_events = SDL::Events::peep_events($event, 127, SDL_PEEKEVENT, SDL_ALLEVENTS);
+
+If action is SDL_ADDEVENT, up to numevents events will be added to the back of the event queue.
+
+If action is SDL_PEEKEVENT, up to numevents events at the front of the event queue, matching mask, will be returned and will not be removed from the queue.
+
+If action is SDL_GETEVENT, up to numevents events at the front of the event queue, matching mask, will be returned and will be removed from the queue.
+
+The mask parameter is a bitwise OR of SDL::Events::SDL_EVENTMASK(event_type), for all event types you are interested in
+
+This function is thread-safe.
+
+You may have to call pump_events before calling this function. Otherwise, the events may not be ready to be filtered when you call peep_events.
+
+Examples of mask:
+
+=over
+
+=item SDL_EVENTMASK (SDL_KEYUP)
+
+=item (SDL_EVENTMASK (SDL_MOUSEBUTTONDOWN) | SDL_EVENTMASK (SDL_MOUSEBUTTONUP))
+    
+=item SDL_ALLEVENTS
+   
+=item SDL_KEYUPMASK
+    
+=item SDL_ALLEVENTS ^ SDL_QUITMASK
+
+=back 
+
+=head3 RETURN
+
+Number of Events actually stored or -1 if there was an error
+
+=head2 poll_event($event)
+
+Polls for currently pending events. 
+
+If $event is not NULL, the next event is removed from the queue and stored in the L<SDL::Event> structure pointed to by $event.
+
+As this function implicitly calls pump_events, you can only call this function in the thread that set the video mode with L<SDL::Video::set_video_mode>. 
+
+=head3 RETURN
+
+Returns 1 if there are any pending events, or 0 if there are none available. 
+
+=head2 push_event($event)
+
+Pushes an event onto the event queue 
+
+The event queue can actually be used as a two way communication channel. Not only can events be read from the queue, but the user can also push their own events onto it. event is a pointer to the event structure you wish to push onto the queue. 
+The event is copied into the queue, and the caller may dispose of the memory pointed to after push_event returns.
+
+Note: Pushing device input events onto the queue doesn't modify the state of the device within SDL. 
+
+This function is thread safe, and can be called from other threads safely.
+
+=head3 RETURN
+
+Returns 0 on success or -1 if the event couldn't be pushed.
+
+=head2 wait_event($event)
+
+Waits indefinitely for the next available $event, returning 0 if there was an error while waiting for events, 1 otherwise.
+
+If $event is not NULL, the next event is removed from the queue and stored in $event.
+
+As this function implicitly calls SDL_PumpEvents, you can only call this function in the thread that  L<SDL::Video::set_video_mode>.  
+
+=head3 RETURN
+
+0 if there was an error while waiting for events, 1 otherwise
+
+=head1 SEE ALSO
+
+L<SDL::Event>, L<SDL::Video>

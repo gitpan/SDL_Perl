@@ -62,19 +62,6 @@ void (*mix_music_finished_cv)();
 #include <SDL_net.h>
 #endif
 
-#ifdef HAVE_SDL_TTF
-#include <SDL_ttf.h>
-#define TEXT_SOLID	1
-#define TEXT_SHADED	2
-#define TEXT_BLENDED	4
-#define UTF8_SOLID	8
-#define UTF8_SHADED	16	
-#define UTF8_BLENDED	32
-#define UNICODE_SOLID	64
-#define UNICODE_SHADED	128
-#define UNICODE_BLENDED	256
-#endif
-
 #ifdef HAVE_SMPEG
 #include <smpeg/smpeg.h>
 #ifdef HAVE_SDL_MIXER
@@ -91,6 +78,10 @@ static int sdl_perl_use_smpeg_audio = 0;
 
 #ifdef HAVE_SDL_SVG
 #include <SDL_svg.h>
+#endif
+
+#ifdef HAVE_SDL_TTF
+#include <SDL_ttf.h>
 #endif
 
 #ifdef USE_THREADS
@@ -118,6 +109,20 @@ extern PerlInterpreter *parent_perl;
 #endif
 
 #endif
+
+void
+windows_force_driver ()
+{
+   const SDL_version *version =  SDL_Linked_Version();
+	if(version->patch == 14)
+	{
+		putenv("SDL_VIDEODRIVER=directx");
+	}
+	else
+	{
+		putenv("SDL_VIDEODRIVER=windib");
+	}
+}
 
 Uint32 
 sdl_perl_timer_callback ( Uint32 interval, void* param )
@@ -251,18 +256,35 @@ XS(boot_SDL_perl)
 MODULE = SDL_perl	PACKAGE = SDL
 PROTOTYPES : DISABLE
 
+
+# workaround as:
+#  extern DECLSPEC void SDLCALL SDL_SetError(const char *fmt, ...);
+void
+set_error_real (fmt, ...)
+	char *fmt
+	CODE:
+		SDL_SetError(fmt, items);
+
 char *
-GetError ()
+get_error ()
 	CODE:
 		RETVAL = SDL_GetError();
 	OUTPUT:
 		RETVAL
 
+void
+clear_error ()
+	CODE:
+		SDL_ClearError();
+
 int
-Init ( flags )
+init ( flags )
 	Uint32 flags
 	CODE:
 		INIT_NS_APPLICATION
+#if defined WINDOWS || WIN32
+		windows_force_driver();
+#endif
 		RETVAL = SDL_Init(flags);
 #ifdef HAVE_TLS_CONTEXT
 		Perl_call_atexit(PERL_GET_CONTEXT, (void*)sdl_perl_atexit,0);
@@ -273,7 +295,7 @@ Init ( flags )
 		RETVAL
 
 int
-InitSubSystem ( flags )
+init_sub_system ( flags )
 	Uint32 flags
 	CODE:
 		RETVAL = SDL_InitSubSystem(flags);
@@ -281,40 +303,77 @@ InitSubSystem ( flags )
 		RETVAL
 
 void
-QuitSubSystem ( flags )
+quit_sub_system ( flags )
 	Uint32 flags
 	CODE:
 		SDL_QuitSubSystem(flags);
 
 void
-Quit ()
+quit ()
 	CODE:
 		QUIT_NS_APPLICATION
 		SDL_Quit();
 
 int
-WasInit ( flags )
+was_init ( flags )
 	Uint32 flags
 	CODE:
 		RETVAL = SDL_WasInit(flags);
 	OUTPUT:
 		RETVAL
 
+SDL_version *
+version ()
+	PREINIT:
+		char * CLASS = "SDL::Version";
+		SDL_version *version;
+	CODE:
+	 	version = (SDL_version *) safemalloc (sizeof(SDL_version));
+		SDL_VERSION(version);
+		RETVAL = version;
+	OUTPUT:
+		RETVAL
+
+SDL_version *
+linked_version ()
+	PREINIT:
+		char * CLASS = "SDL::Version";
+	CODE:
+		RETVAL = (SDL_version *) SDL_Linked_Version();
+	OUTPUT:
+		RETVAL
+
+int
+putenv (variable)
+	char *variable
+	CODE:
+		RETVAL = SDL_putenv(variable);
+	OUTPUT:
+		RETVAL
+
+char*
+getenv (name)
+	char *name
+	CODE:
+		RETVAL = SDL_getenv(name);
+	OUTPUT:
+		RETVAL
+
 void
-Delay ( ms )
+delay ( ms )
 	int ms
 	CODE:
 		SDL_Delay(ms);
 
 Uint32
-GetTicks ()
+get_ticks ()
 	CODE:
 		RETVAL = SDL_GetTicks();
 	OUTPUT:
 		RETVAL
 
 int
-SetTimer ( interval, callback )
+set_timer ( interval, callback )
 	Uint32 interval
 	SDL_TimerCallback callback
 	CODE:
@@ -356,1388 +415,21 @@ RemoveTimer ( id )
 	OUTPUT:
 		RETVAL
 
-SDL_RWops*
-RWFromFile ( file, mode )
-	char* file
-	char * mode
-	CODE:
-		RETVAL = SDL_RWFromFile(file,mode);
-	OUTPUT:
-		RETVAL
-
-SDL_RWops*
-RWFromFP ( fp, autoclose )
-	FILE* fp
-	int autoclose
-	CODE:
-		RETVAL = SDL_RWFromFP(fp,autoclose);
-	OUTPUT:
-		RETVAL
-
-SDL_RWops*
-RWFromMem ( mem, size )
-	char* mem
-	int size
-	CODE:
-		RETVAL = SDL_RWFromMem((void*)mem,size);
-	OUTPUT:
-		RETVAL
-
-SDL_RWops*
-RWFromConstMem ( mem, size )
-	const char* mem
-	int size
-	CODE:
-		RETVAL = SDL_RWFromConstMem((const void*)mem,size);
-	OUTPUT:
-		RETVAL
-
-SDL_RWops*
-AllocRW ()
-	CODE:
-		RETVAL = SDL_AllocRW();
-	OUTPUT:
-		RETVAL
-
-void
-FreeRW ( rw )
-	SDL_RWops* rw
-	CODE:
-		SDL_FreeRW(rw);
-
-int
-RWseek ( rw, off, whence )
-	SDL_RWops* rw
-	int off
-	int whence
-	CODE:
-		RETVAL = SDL_RWseek(rw,off,whence);
-	OUTPUT:
-		RETVAL
-
-int
-RWtell ( rw )
-	SDL_RWops* rw
-	CODE:
-		RETVAL = SDL_RWtell(rw);
-	OUTPUT:
-		RETVAL
-
-int
-RWread ( rw, mem, size, n )
-	SDL_RWops* rw
-	char* mem
-	int size
-	int n
-	CODE:
-		RETVAL = SDL_RWread(rw,mem,size,n);
-	OUTPUT:
-		RETVAL
-
-int
-RWwrite ( rw, mem, size, n )
-	SDL_RWops* rw
-	char* mem
-	int size
-	int n
-	CODE:
-		RETVAL = SDL_RWwrite(rw,mem,size,n);
-	OUTPUT:
-		RETVAL
-
-int
-RWclose ( rw )
-	SDL_RWops* rw
-	CODE:
-		RETVAL = SDL_RWclose(rw);
-	OUTPUT:
-		RETVAL
-
-int
-CDNumDrives ()
-	CODE:
-		RETVAL = SDL_CDNumDrives();
-	OUTPUT:
-		RETVAL
-
-char *
-CDName ( drive )
-	int drive
-	CODE:
-		RETVAL = strdup(SDL_CDName(drive));
-	OUTPUT:
-		RETVAL
-
-SDL_CD *
-CDOpen ( drive )
-	int drive
-	CODE:
-		RETVAL = SDL_CDOpen(drive);
-	OUTPUT:
-		RETVAL
-
-Uint8
-CDTrackId ( track )
-	SDL_CDtrack *track
-	CODE:
-		RETVAL = track->id;
-	OUTPUT:
-		RETVAL
-
-Uint8
-CDTrackType ( track )
-	SDL_CDtrack *track
-	CODE:
-		RETVAL = track->type;
-	OUTPUT:
-		RETVAL
-
-Uint16
-CDTrackLength ( track )
-	SDL_CDtrack *track
-	CODE:
-		RETVAL = track->length;
-	OUTPUT:
-		RETVAL
-
-Uint32
-CDTrackOffset ( track )
-	SDL_CDtrack *track
-	CODE:
-		RETVAL = track->offset;
-	OUTPUT: 
-		RETVAL
-
-Uint32
-CDStatus ( cd )
-	SDL_CD *cd 
-	CODE:
-		RETVAL = SDL_CDStatus(cd);
-	OUTPUT:
-		RETVAL
-
-int
-CDPlayTracks ( cd, start_track, ntracks, start_frame, nframes )
-	SDL_CD *cd
-	int start_track
-	int ntracks
-	int start_frame
-	int nframes
-	CODE:
-		RETVAL = SDL_CDPlayTracks(cd,start_track,start_frame,ntracks,nframes);
-	OUTPUT:
-		RETVAL
-
-int
-CDPlay ( cd, start, length )
-	SDL_CD *cd
-	int start
-	int length
-	CODE:
-		RETVAL = SDL_CDPlay(cd,start,length);
-	OUTPUT:
-		RETVAL
-
-int
-CDPause ( cd )
-	SDL_CD *cd
-	CODE:
-		RETVAL = SDL_CDPause(cd);
-	OUTPUT:
-		RETVAL
-
-int
-CDResume ( cd )
-	SDL_CD *cd
-	CODE:
-		RETVAL = SDL_CDResume(cd);
-	OUTPUT:
-		RETVAL
-
-int
-CDStop ( cd )
-	SDL_CD *cd
-	CODE:
-		RETVAL = SDL_CDStop(cd);
-	OUTPUT:
-		RETVAL
-
-int
-CDEject ( cd )
-	SDL_CD *cd
-	CODE:
-		RETVAL = SDL_CDEject(cd);
-	OUTPUT:
-		RETVAL
-
-void
-CDClose ( cd )
-	SDL_CD *cd
-	CODE:
-		SDL_CDClose(cd);
-	
-int
-CDId ( cd )
-	SDL_CD *cd
-	CODE:
-		RETVAL = cd->id;
-	OUTPUT: 
-		RETVAL
-
-int
-CDNumTracks ( cd )
-	SDL_CD *cd
-	CODE:
-		RETVAL = cd->numtracks;
-	OUTPUT:
-		RETVAL
-
-int
-CDCurTrack ( cd )
-	SDL_CD *cd
-	CODE:
-		RETVAL = cd->cur_track;
-	OUTPUT:
-		RETVAL
-
-int
-CDCurFrame ( cd )
-	SDL_CD *cd
-	CODE:
-		RETVAL = cd->cur_frame;
-	OUTPUT:
-		RETVAL
-
-SDL_CDtrack *
-CDTrack ( cd, number )
-	SDL_CD *cd
-	int number
-	CODE:
-		RETVAL = (SDL_CDtrack *)(cd->track + number);
-	OUTPUT:
-		RETVAL
-
-void
-PumpEvents ()
-	CODE:
-		SDL_PumpEvents();
-
-int
-PushEvent( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = SDL_PushEvent( e );
-	OUTPUT:
-		RETVAL
-
-SDL_Event *
-NewEvent ()
-	CODE:	
-		RETVAL = (SDL_Event *) safemalloc (sizeof(SDL_Event));
-	OUTPUT:
-		RETVAL
-
-void
-FreeEvent ( e )
-	SDL_Event *e
-	CODE:
-		safefree(e);
-
-int
-PollEvent ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = SDL_PollEvent(e);
-	OUTPUT:
-		RETVAL
-
-int
-WaitEvent ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = SDL_WaitEvent(e);
-	OUTPUT:
-		RETVAL
-
-Uint8
-EventState ( type, state )
-	Uint8 type
-	int state
-	CODE:
-		RETVAL = SDL_EventState(type,state);
-	OUTPUT:
-		RETVAL 
-
-Uint8
-EventType ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->type;
-	OUTPUT:
-		RETVAL
-
-Uint8
-SetEventType ( e, type )
-	SDL_Event *e
-	Uint8 type
-	CODE:
-		RETVAL = e->type;
-		e->type = type;
-	OUTPUT:
-		RETVAL
-
-Uint8
-ActiveEventGain ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->active.gain;
-	OUTPUT:	
-		RETVAL
-
-Uint8
-ActiveEventState ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->active.state;
-	OUTPUT:
-		RETVAL
-
-Uint8
-KeyEventState( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->key.state;
-	OUTPUT:
-		RETVAL
-
-int
-KeyEventSym ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->key.keysym.sym;
-	OUTPUT:
-		RETVAL
-
-int 
-KeyEventMod ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->key.keysym.mod;
-	OUTPUT:
-		RETVAL
-
-Uint16
-KeyEventUnicode ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->key.keysym.unicode;
-	OUTPUT:
-		RETVAL
-
-Uint8
-KeyEventScanCode ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->key.keysym.scancode;
-	OUTPUT:
-		RETVAL
-
-Uint8
-MouseMotionState ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->motion.state;
-	OUTPUT:	
-		RETVAL
-
-Uint16
-MouseMotionX ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->motion.x;
-	OUTPUT:
-		RETVAL
-
-Uint16
-MouseMotionY ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->motion.y;
-	OUTPUT:
-		RETVAL
-
-Sint16
-MouseMotionXrel( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->motion.xrel;
-	OUTPUT:
-		RETVAL
-
-Sint16
-MouseMotionYrel ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->motion.yrel;
-	OUTPUT:
-		RETVAL
-
-Uint8
-MouseButtonState ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->button.state;
-	OUTPUT:
-		RETVAL
-
-Uint8
-MouseButton ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->button.button;
-	OUTPUT:
-		RETVAL
-
-Uint16
-MouseButtonX ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->button.x;
-	OUTPUT:
-		RETVAL
-
-Uint16
-MouseButtonY ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->button.y;
-	OUTPUT:
-		RETVAL
-
-SDL_SysWMmsg *
-SysWMEventMsg ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->syswm.msg;
-	OUTPUT:
-		RETVAL
-
-int
-EnableUnicode ( enable )
-	int enable
-	CODE:
-		RETVAL = SDL_EnableUNICODE(enable);
-	OUTPUT:
-		RETVAL
-
-void
-EnableKeyRepeat ( delay, interval )
-	int delay
-	int interval
-	CODE:
-		SDL_EnableKeyRepeat(delay,interval);
-
-Uint32
-GetModState ()
-	CODE:
-		RETVAL = SDL_GetModState();
-	OUTPUT:
-		RETVAL
-
-void
-SetModState ( state )
-	Uint32 state
-	CODE:
-		SDL_SetModState(state);
-
-char *
-GetKeyName ( sym )
-	int sym
-	CODE:
-		RETVAL = SDL_GetKeyName(sym);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface *
-CreateRGBSurface (flags, width, height, depth, Rmask, Gmask, Bmask, Amask )
-	Uint32 flags
-	int width
-	int height
-	int depth
-	Uint32 Rmask
-	Uint32 Gmask
-	Uint32 Bmask
-	Uint32 Amask
-	CODE:
-		RETVAL = SDL_CreateRGBSurface ( flags, width, height,
-				depth, Rmask, Gmask, Bmask, Amask );
-	OUTPUT:	
-		RETVAL
-
-
-SDL_Surface *
-CreateRGBSurfaceFrom (pixels, width, height, depth, pitch, Rmask, Gmask, Bmask, Amask )
-	char *pixels
-	int width
-	int height
-	int depth
-	int pitch
-	Uint32 Rmask
-	Uint32 Gmask
-	Uint32 Bmask
-	Uint32 Amask
-	CODE:
-		Uint8* pixeldata;
-		Uint32 len = pitch * height;
-		New(0,pixeldata,len,Uint8);
-		Copy(pixels,pixeldata,len,Uint8);
-		RETVAL = SDL_CreateRGBSurfaceFrom ( pixeldata, width, height,
-				depth, pitch, Rmask, Gmask, Bmask, Amask );
-	OUTPUT:	
-		RETVAL
 
 #ifdef HAVE_SDL_IMAGE
 
 SDL_Surface *
-IMGLoad ( fname )
-	char *fname
+IMG_Load ( filename )
+	char *filename
 	CODE:
-		RETVAL = IMG_Load(fname);
+		char* CLASS = "SDL::Surface";
+		RETVAL = IMG_Load(filename);
 	OUTPUT:
 		RETVAL
 
 #endif
 
-SDL_Surface*
-SurfaceCopy ( surface )
-	SDL_Surface *surface
-	CODE:
-		Uint8* pixels;
-		Uint32 size = surface->pitch * surface->h;
-		New(0,pixels,size,Uint8);
-		Copy(surface->pixels,pixels,size,Uint8);
-		RETVAL = SDL_CreateRGBSurfaceFrom(pixels,surface->w,surface->h,
-			surface->format->BitsPerPixel, surface->pitch,
-			surface->format->Rmask, surface->format->Gmask,
-			surface->format->Bmask, surface->format->Amask);
-	OUTPUT:
-		RETVAL
-
-void
-FreeSurface ( surface )
-	SDL_Surface *surface
-	CODE:
-		if (surface) {
-			Uint8* pixels = surface->pixels;
-			Uint32 flags = surface->flags;
-			SDL_FreeSurface(surface);
-			if (flags & SDL_PREALLOC)
-				Safefree(pixels);
-		}
-	
-Uint32
-SurfaceFlags ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->flags;
-	OUTPUT:
-		RETVAL
-
-SDL_Palette *
-SurfacePalette ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->palette;
-	OUTPUT:
-		RETVAL
-
-Uint8
-SurfaceBitsPerPixel ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->BitsPerPixel;
-	OUTPUT:
-		RETVAL
-
-Uint8
-SurfaceBytesPerPixel ( surface )
-	SDL_Surface *surface
-	CODE:	
-		RETVAL = surface->format->BytesPerPixel;
-	OUTPUT:
-		RETVAL
-
-Uint8
-SurfaceRshift ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->Rshift;
-	OUTPUT:
-		RETVAL
-
-Uint8
-SurfaceGshift ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->Gshift;
-	OUTPUT:
-		RETVAL
-
-Uint8
-SurfaceBshift ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->Bshift;
-	OUTPUT:
-		RETVAL
-
-Uint8
-SurfaceAshift ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->Ashift;
-	OUTPUT:
-		RETVAL
-
-Uint32
-SurfaceRmask( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->Rmask;
-	OUTPUT:
-		RETVAL
-
-Uint32
-SurfaceGmask ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->Gmask;
-	OUTPUT:
-		RETVAL
-
-Uint32
-SurfaceBmask ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->Bmask;
-	OUTPUT:
-		RETVAL
-
-Uint32
-SurfaceAmask ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->Amask;
-	OUTPUT:
-		RETVAL
-
-Uint32
-SurfaceColorKey ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->colorkey;
-	OUTPUT:
-		RETVAL
-
-Uint32
-SurfaceAlpha( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = surface->format->alpha;
-	OUTPUT:
-		RETVAL
-
-int
-SurfaceW ( surface )
-	SDL_Surface *surface
-	CODE:	
-		RETVAL = surface->w;
-	OUTPUT:
-		RETVAL
-
-int
-SurfaceH ( surface )
-	SDL_Surface *surface
-	CODE:	
-		RETVAL = surface->h;
-	OUTPUT:
-		RETVAL
-
-Uint16
-SurfacePitch ( surface )
-	SDL_Surface *surface
-	CODE:	
-		RETVAL = surface->pitch;
-	OUTPUT:
-		RETVAL
-
-SV*
-SurfacePixels ( surface )
-	SDL_Surface *surface
-	CODE:	
-		RETVAL = newSVpvn(surface->pixels,surface->pitch*surface->h);
-	OUTPUT:
-		RETVAL
-
-SDL_Color*
-SurfacePixel ( surface, x, y, ... )
-	SDL_Surface *surface
-	Sint32 x
-	Sint32 y
-	CODE:
-		SDL_Color* color;
-		int pix,index;
-		Uint8 r,g,b,a;
-		int bpp = surface->format->BytesPerPixel;
-		Uint8* p = (Uint8*)surface->pixels + bpp*x + surface->pitch*y;
-		if ( items < 3 || items > 4 ) 
-			Perl_croak(aTHX_ "usage: SDL::SurfacePixel(surface,x,y,[color])");
-		if ( items == 4) {
-			color = (SDL_Color*)SvIV(ST(3));
-			pix = SDL_MapRGB(surface->format,color->r,color->g,color->b);
-			switch(bpp) {
-				case 1:
-					*(Uint8*)p = pix;
-					break;
-				case 2:
-					*(Uint16*)p = pix;
-					break;
-				case 3:
-					if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
-						p[0] = (pix >> 16) & 0xff;
-						p[1] = (pix >> 8) & 0xff;
-						p[2] = pix & 0xff;
-					} else {
-						p[0] = pix & 0xff;
-						p[1] = (pix >> 8) & 0xff;
-						p[2] = (pix >> 16) & 0xff;
-					}
-					break;
-				case 4:
-					*(Uint32*)p = pix;
-					break;
-			}
-		}
-		RETVAL = (SDL_Color *) safemalloc(sizeof(SDL_Color));
-		switch(bpp) {
-			case 1:
-				index = *(Uint8*)p;
-				memcpy(RETVAL,&surface->format->palette[index],sizeof(SDL_Color));
-				break;
-			case 2:
-				pix = *(Uint16*)p;
-				SDL_GetRGB(pix,surface->format,&r,&g,&b);
-				RETVAL->r = r;
-				RETVAL->g = g;
-				RETVAL->b = b;
-				break;
-			case 3:
-			case 4:
-				pix = *(Uint32*)p;
-				SDL_GetRGB(pix,surface->format,&r,&g,&b);
-				RETVAL->r = r;
-				RETVAL->g = g;
-				RETVAL->b = b;
-				break;
-		}
-	OUTPUT:
-		RETVAL
-
-int
-MUSTLOCK ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = SDL_MUSTLOCK(surface);
-	OUTPUT:
-		RETVAL		
-
-int
-SurfaceLock ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = SDL_LockSurface(surface);
-	OUTPUT:
-		RETVAL
-
-void
-SurfaceUnlock ( surface )
-	SDL_Surface *surface
-	CODE:
-		SDL_UnlockSurface(surface);
-
-SDL_Surface *
-GetVideoSurface ()
-	CODE:
-		RETVAL = SDL_GetVideoSurface();
-	OUTPUT:
-		RETVAL
-
-
-HV *
-VideoInfo ()
-	CODE:
-		HV *hv;
-		SDL_VideoInfo *info;
-		info = (SDL_VideoInfo *) safemalloc ( sizeof(SDL_VideoInfo));
-		memcpy(info,SDL_GetVideoInfo(),sizeof(SDL_VideoInfo));
-		hv = newHV();
-		hv_store(hv,"hw_available",strlen("hw_available"),
-			newSViv(info->hw_available),0);
-		hv_store(hv,"wm_available",strlen("wm_available"),
-			newSViv(info->wm_available),0);
-		hv_store(hv,"blit_hw",strlen("blit_hw"),
-			newSViv(info->blit_hw),0);
-		hv_store(hv,"blit_hw_CC",strlen("blit_hw_CC"),
-			newSViv(info->blit_hw_CC),0);
-		hv_store(hv,"blit_hw_A",strlen("blit_hw_A"),
-			newSViv(info->blit_hw_A),0);
-		hv_store(hv,"blit_sw",strlen("blit_sw"),
-			newSViv(info->blit_sw),0);
-		hv_store(hv,"blit_sw_CC",strlen("blit_sw_CC"),
-			newSViv(info->blit_sw_CC),0);
-		hv_store(hv,"blit_sw_A",strlen("blit_sw_A"),
-			newSViv(info->blit_sw_A),0);
-		hv_store(hv,"blit_fill",strlen("blit_fill"),
-			newSViv(info->blit_fill),0);
-		hv_store(hv,"video_mem",strlen("video_mem"),
-			newSViv(info->video_mem),0);
-		RETVAL = hv;
-	OUTPUT:
-		RETVAL
-
-SDL_Rect *
-NewRect ( x, y, w, h )
-	Sint16 x
-	Sint16 y
-	Uint16 w
-	Uint16 h
-	CODE:
-		RETVAL = (SDL_Rect *) safemalloc (sizeof(SDL_Rect));
-		RETVAL->x = x;
-		RETVAL->y = y;
-		RETVAL->w = w;
-		RETVAL->h = h;
-	OUTPUT:
-		RETVAL
-
-void
-FreeRect ( rect )
-	SDL_Rect *rect
-	CODE:
-		safefree(rect);
-
-Sint16
-RectX ( rect, ... )
-	SDL_Rect *rect
-	CODE:
-		if (items > 1 ) rect->x = SvIV(ST(1)); 
-		RETVAL = rect->x;
-	OUTPUT:
-		RETVAL
-
-Sint16
-RectY ( rect, ... )
-	SDL_Rect *rect
-	CODE:
-		if (items > 1 ) rect->y = SvIV(ST(1)); 
-		RETVAL = rect->y;
-	OUTPUT:
-		RETVAL
-
-Uint16
-RectW ( rect, ... )
-	SDL_Rect *rect
-	CODE:
-		if (items > 1 ) rect->w = SvIV(ST(1)); 
-		RETVAL = rect->w;
-	OUTPUT:
-		RETVAL
-
-Uint16
-RectH ( rect, ... )
-	SDL_Rect *rect
-	CODE:
-		if (items > 1 ) rect->h = SvIV(ST(1)); 
-		RETVAL = rect->h;
-	OUTPUT:
-		RETVAL
-
-AV*
-ListModes ( format, flags )
-	Uint32 flags
-	SDL_PixelFormat *format
-	CODE:
-		SDL_Rect **mode;
-		RETVAL = newAV();
-		mode = SDL_ListModes(format,flags);
-		if (mode == (SDL_Rect**)-1 ) {
-			av_push(RETVAL,newSVpv("all",0));
-		} else if (! mode ) {
-			av_push(RETVAL,newSVpv("none",0));
-		} else {
-			for (;*mode;mode++) {
-				av_push(RETVAL,newSViv(PTR2IV(*mode)));
-			}
-		}
-	OUTPUT:
-		RETVAL
-
-
-SDL_Color *
-NewColor ( r, g, b )
-	Uint8 r
-	Uint8 g
-	Uint8 b
-	CODE:
-		RETVAL = (SDL_Color *) safemalloc(sizeof(SDL_Color));
-		RETVAL->r = r;
-		RETVAL->g = g;
-		RETVAL->b = b;
-	OUTPUT:
-		RETVAL
-
-Uint8
-ColorR ( color, ... )
-	SDL_Color *color
-	CODE:
-		if (items > 1 ) color->r = SvIV(ST(1)); 
-		RETVAL = color->r;
-	OUTPUT:
-		RETVAL
-
-Uint8
-ColorG ( color, ... )
-	SDL_Color *color
-	CODE:
-		if (items > 1 ) color->g = SvIV(ST(1)); 
-		RETVAL = color->g;
-	OUTPUT:
-		RETVAL
-
-Uint8
-ColorB ( color, ... )
-	SDL_Color *color
-	CODE:
-		if (items > 1 ) color->b = SvIV(ST(1)); 
-		RETVAL = color->b;
-	OUTPUT:
-		RETVAL
-
-
-void
-ColorRGB ( color, ... )
- SDL_Color *color
- PPCODE:
- if (items > 1 ) {
- color->r = SvIV(ST(1));
- color->g = SvIV(ST(2));
- color->b = SvIV(ST(3));
- }
- mXPUSHi( color->r );
- mXPUSHi( color->g );
- mXPUSHi( color->b );
- XSRETURN(3);
-
-void
-FreeColor ( color )
-	SDL_Color *color
-	CODE:
-		return; safefree(color);
-
-SDL_Palette *
-NewPalette ( number )
-	int number
-	CODE:
-		RETVAL = (SDL_Palette *)safemalloc(sizeof(SDL_Palette));
-		RETVAL->colors = (SDL_Color *)safemalloc(number * 
-						sizeof(SDL_Color));
-		RETVAL->ncolors = number;
-	OUTPUT:
-		RETVAL
-
-int
-PaletteNColors ( palette, ... )
-	SDL_Palette *palette
-	CODE:
-		if ( items > 1 ) palette->ncolors = SvIV(ST(1));
-		RETVAL = palette->ncolors;
-	OUTPUT:
-		RETVAL
-
-SDL_Color *
-PaletteColors ( palette, index, ... )
-	SDL_Palette *palette
-	int index
-	CODE:
-		if ( items > 2 ) {
-			palette->colors[index].r = SvUV(ST(2)); 
-			palette->colors[index].g = SvUV(ST(3)); 
-			palette->colors[index].b = SvUV(ST(4)); 
-		}
-		RETVAL = (SDL_Color *)(palette->colors + index);
-	OUTPUT:
-		RETVAL
-
-int
-VideoModeOK ( width, height, bpp, flags )
-	int width
-	int height
-	int bpp
-	Uint32 flags
-	CODE:
-		RETVAL = SDL_VideoModeOK(width,height,bpp,flags);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface *
-SetVideoMode ( width, height, bpp, flags )
-	int width
-	int height
-	int bpp
-	Uint32 flags
-	CODE:
-		RETVAL = SDL_SetVideoMode(width,height,bpp,flags);
-	OUTPUT:
-		RETVAL
-
-void
-UpdateRect ( surface, x, y, w ,h )
-	SDL_Surface *surface
-	int x
-	int y
-	int w
-	int h
-	CODE:
-		SDL_UpdateRect(surface,x,y,w,h);
-
-void
-UpdateRects ( surface, ... )
-	SDL_Surface *surface
-	CODE:
-		SDL_Rect *rects, *oldrects, *temp;
-		int num_rects,i;
-		if ( items < 2 ) return;
-		num_rects = items - 1;
-		oldrects = rects;	
-		rects = (SDL_Rect *)safemalloc(sizeof(SDL_Rect)*items);
-		for(i=0;i<num_rects;i++) {
-			temp = (SDL_Rect *)SvIV(ST(i+1));
-			rects[i].x = temp->x;
-			rects[i].y = temp->y;
-			rects[i].w = temp->w;
-			rects[i].h = temp->h;
-		} 
-		SDL_UpdateRects(surface,num_rects,rects);
-		safefree(rects);
-		safefree(oldrects);
-
-int
-Flip ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = SDL_Flip(surface);
-	OUTPUT:
-		RETVAL
-
-int
-SetColors ( surface, start, ... )
-	SDL_Surface *surface
-	int start
-	CODE:
-		SDL_Color *colors,*temp;
-		int i, length;
-		if ( items < 3 ) { RETVAL = 0;	goto all_done; }
-		length = items - 2;
-		colors = (SDL_Color *)safemalloc(sizeof(SDL_Color)*(length+1));
-		for ( i = 0; i < length ; i++ ) {
-			temp = (SDL_Color *)SvIV(ST(i+2));
-			colors[i].r = temp->r;
-			colors[i].g = temp->g;
-			colors[i].b = temp->b;
-		}
-		RETVAL = SDL_SetColors(surface, colors, start, length );
-		safefree(colors);
-all_done:
-	OUTPUT:	
-		RETVAL
-
-Uint32
-MapRGB ( surface, r, g, b )
-	SDL_Surface *surface
-	Uint8 r
-	Uint8 g
-	Uint8 b
-	CODE:
-		RETVAL = SDL_MapRGB(surface->format,r,g,b);
-	OUTPUT:
-		RETVAL
-
-Uint32
-MapRGBA ( surface, r, g, b, a )
-	SDL_Surface *surface
-	Uint8 r
-	Uint8 g
-	Uint8 b
-	Uint8 a
-	CODE:
-		RETVAL = SDL_MapRGBA(surface->format,r,g,b,a);
-	OUTPUT:
-		RETVAL
-
-AV *
-GetRGB ( surface, pixel )
-	SDL_Surface *surface
-	Uint32 pixel
-	CODE:
-		Uint8 r,g,b;
-		SDL_GetRGB(pixel,surface->format,&r,&g,&b);
-		RETVAL = newAV();
-		av_push(RETVAL,newSViv(r));
-		av_push(RETVAL,newSViv(g));
-		av_push(RETVAL,newSViv(b));
-	OUTPUT:
-		RETVAL
-
-AV *
-GetRGBA ( surface, pixel )
-	SDL_Surface *surface
-	Uint32 pixel
-	CODE:
-		Uint8 r,g,b,a;
-		SDL_GetRGBA(pixel,surface->format,&r,&g,&b,&a);
-		RETVAL = newAV();
-		av_push(RETVAL,newSViv(r));
-		av_push(RETVAL,newSViv(g));
-		av_push(RETVAL,newSViv(b));
-		av_push(RETVAL,newSViv(a));
-	OUTPUT:
-		RETVAL
-
-int
-SaveBMP ( surface, filename )
-	SDL_Surface *surface
-	char *filename
-	CODE:
-		RETVAL = SDL_SaveBMP(surface,filename);
-	OUTPUT:
-		RETVAL	
-
-int
-SetColorKey ( surface, flag, key )
-	SDL_Surface *surface
-	Uint32 flag
-	SDL_Color *key
-	CODE:
-		Uint32 pixel = SDL_MapRGB(surface->format,key->r,key->g,key->b);
-		RETVAL = SDL_SetColorKey(surface,flag,pixel);
-	OUTPUT:
-		RETVAL
-
-int
-SetAlpha ( surface, flag, alpha )
-	SDL_Surface *surface
-	Uint32 flag
-	Uint8 alpha
-	CODE:
-		RETVAL = SDL_SetAlpha(surface,flag,alpha);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface *
-DisplayFormat ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = SDL_DisplayFormat(surface);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-DisplayFormatAlpha ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = SDL_DisplayFormatAlpha(surface);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-ConvertRGB ( surface )
-	SDL_Surface * surface
-	CODE:
-		SDL_PixelFormat fmt;
-		fmt.palette = NULL;
-		fmt.BitsPerPixel = 24;
-		fmt.BytesPerPixel = 3;
-		fmt.Rmask = 0x000000ff;
-		fmt.Gmask = 0x0000ff00;
-		fmt.Bmask = 0x00ff0000;
-		fmt.Amask = 0x00000000;
-		fmt.Rloss = 0;
-		fmt.Gloss = 0;
-		fmt.Bloss = 0;
-		fmt.Aloss = 0;
-		fmt.Rshift = 0;
-		fmt.Gshift = 8;
-		fmt.Bshift = 16;
-		fmt.Ashift = 24;
-		fmt.colorkey = 0;
-		fmt.alpha = 0;
-		RETVAL = SDL_ConvertSurface(surface,&fmt,surface->flags);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface* 
-ConvertRGBA ( surface )
-	SDL_Surface * surface
-	CODE:
-		SDL_PixelFormat fmt;
-		fmt.palette = NULL;
-		fmt.BitsPerPixel = 32;
-		fmt.BytesPerPixel = 4;
-		fmt.Rmask = 0x000000ff;
-		fmt.Gmask = 0x0000ff00;
-		fmt.Bmask = 0x00ff0000;
-		fmt.Amask = 0xff000000;
-		fmt.Rloss = 0;
-		fmt.Gloss = 0;
-		fmt.Bloss = 0;
-		fmt.Aloss = 0;
-		fmt.Rshift = 0;
-		fmt.Gshift = 8;
-		fmt.Bshift = 16;
-		fmt.Ashift = 24;
-		fmt.colorkey = 0;
-		fmt.alpha = 0;
-		RETVAL = SDL_ConvertSurface(surface,&fmt,surface->flags);
-	OUTPUT:
-		RETVAL
-
-int
-BlitSurface ( src, src_rect, dest, dest_rect )
-	SDL_Surface *src
-	SDL_Rect *src_rect
-	SDL_Surface *dest
-	SDL_Rect *dest_rect
-	CODE:
-		RETVAL = SDL_BlitSurface(src,src_rect,dest,dest_rect);
-	OUTPUT:
-		RETVAL
-
-int
-FillRect ( dest, dest_rect, color )
-	SDL_Surface *dest
-	SDL_Rect *dest_rect
-	SDL_Color *color
-	CODE:
-		Uint32 pixel = SDL_MapRGB(dest->format,color->r,color->g,color->b);
-		RETVAL = SDL_FillRect(dest,dest_rect,pixel);
-	OUTPUT:
-		RETVAL
-
-Uint8
-GetAppState ()
-	CODE:
-		RETVAL = SDL_GetAppState();
-	OUTPUT:
-		RETVAL
-
-
-void
-WMSetCaption ( title, icon )
-	char *title
-	char *icon
-	CODE:
-		SDL_WM_SetCaption(title,icon);
-
-AV *
-WMGetCaption ()
-	CODE:
-		char *title,*icon;
-		SDL_WM_GetCaption(&title,&icon);
-		RETVAL = newAV();
-		av_push(RETVAL,newSVpv(title,0));
-		av_push(RETVAL,newSVpv(icon,0));
-	OUTPUT:
-		RETVAL
-
-void
-WMSetIcon ( icon )
-	SDL_Surface *icon
-	CODE:
-		SDL_WM_SetIcon(icon,NULL);
-
-void
-WarpMouse ( x, y )
-	Uint16 x
-	Uint16 y
-	CODE:
-		SDL_WarpMouse(x,y);
-
-AV*
-GetMouseState ()
-	CODE:
-		Uint8 mask;
-		int x;
-		int y;
-		mask = SDL_GetMouseState(&x,&y);
-		RETVAL = newAV();
-		av_push(RETVAL,newSViv(mask));
-		av_push(RETVAL,newSViv(x));
-		av_push(RETVAL,newSViv(y));
-	OUTPUT:
-		RETVAL	
-
-AV*
-GetRelativeMouseState ()
-	CODE:
-		Uint8 mask;
-		int x;
-		int y;
-		mask = SDL_GetRelativeMouseState(&x,&y);
-		RETVAL = newAV();
-		av_push(RETVAL,newSViv(mask));
-		av_push(RETVAL,newSViv(x));
-		av_push(RETVAL,newSViv(y));
-	OUTPUT:
-		RETVAL	
-
-SDL_Cursor *
-NewCursor ( data, mask, x ,y )
-	SDL_Surface *data
-	SDL_Surface *mask
-	int x
-	int y
-	CODE:
-		RETVAL = SDL_CreateCursor((Uint8*)data->pixels,
-				(Uint8*)mask->pixels,data->w,data->h,x,y);
-	OUTPUT:
-		RETVAL
-
-void
-FreeCursor ( cursor )
-	SDL_Cursor *cursor
-	CODE:
-		SDL_FreeCursor(cursor);
-
-void
-SetCursor ( cursor )
-	SDL_Cursor *cursor
-	CODE:
-		SDL_SetCursor(cursor);
-
-SDL_Cursor *
-GetCursor ()
-	CODE:
-		RETVAL = SDL_GetCursor();
-	OUTPUT:
-		RETVAL
-
-int
-ShowCursor ( toggle )
-	int toggle
-	CODE:
-		RETVAL = SDL_ShowCursor(toggle);
-	OUTPUT: 
-		RETVAL
+=for comment
 
 SDL_AudioSpec *
 NewAudioSpec ( freq, format, channels, samples )
@@ -1795,70 +487,8 @@ ConvertAudioData ( cvt, data, len )
 	OUTPUT:
 		RETVAL			
 
-int
-OpenAudio ( spec, callback )
-	SDL_AudioSpec *spec
-	SV* callback
-	CODE:
-		spec->userdata = (void*)callback;
-		spec->callback = sdl_perl_audio_callback;
-		RETVAL = SDL_OpenAudio(spec,NULL);
-	OUTPUT:
-		RETVAL
+=cut
 
-Uint32
-GetAudioStatus ()
-	CODE:
-		RETVAL = SDL_GetAudioStatus ();
-	OUTPUT:
-		RETVAL
-
-void
-PauseAudio ( p_on )
-	int p_on
-	CODE:
-		SDL_PauseAudio(p_on);
-	
-void
-LockAudio ()
-	CODE:
-		SDL_LockAudio();
-
-void
-UnlockAudio ()
-	CODE:
-		SDL_UnlockAudio();
-
-void
-CloseAudio ()
-	CODE:
-		SDL_CloseAudio();
-
-void
-FreeWAV ( buf )
-	Uint8 *buf
-	CODE:
-		SDL_FreeWAV(buf);
-
-AV *
-LoadWAV ( filename, spec )
-	char *filename
-	SDL_AudioSpec *spec
-	CODE:
-		SDL_AudioSpec *temp;
-		Uint8 *buf;
-		Uint32 len;
-
-		RETVAL = newAV();
-		temp = SDL_LoadWAV(filename,spec,&buf,&len);
-		if ( ! temp ) goto error;
-		av_push(RETVAL,newSViv(PTR2IV(temp)));
-		av_push(RETVAL,newSViv(PTR2IV(buf)));
-		av_push(RETVAL,newSViv(len));
-error:
-	OUTPUT:
-		RETVAL
-	
 #ifdef HAVE_SDL_MIXER
 
 void
@@ -1906,22 +536,38 @@ MixQuerySpec ()
 Mix_Chunk *
 MixLoadWAV ( filename )
 	char *filename
+	PREINIT:
+		char * CLASS = "SDL::Mixer::MixChunk";
 	CODE:
-		RETVAL = Mix_LoadWAV(filename);
+		Mix_Chunk * mixchunk;
+		mixchunk = Mix_LoadWAV(filename);
+		if (mixchunk == NULL) {
+		  fprintf(stderr, "Could not load %s\n", filename);
+		}
+		RETVAL = mixchunk;
 	OUTPUT:
 		RETVAL
 
 Mix_Music *
-MixLoadMusic ( filename )
+MixLoadMUS ( filename )
 	char *filename
+	PREINIT:
+		char * CLASS = "SDL::Mixer::MixMusic";
 	CODE:
-		RETVAL = Mix_LoadMUS(filename);
+		Mix_Music * mixmusic;
+		mixmusic = Mix_LoadMUS(filename);
+		if (mixmusic == NULL) {
+		  fprintf(stderr, "Could not load %s\n", filename);
+		}
+		RETVAL = mixmusic;
 	OUTPUT:
 		RETVAL
 
 Mix_Chunk *
 MixQuickLoadWAV ( buf )
 	Uint8 *buf
+	PREINIT:
+		char * CLASS = "SDL::Mixer::MixChunk";
 	CODE:
 		RETVAL = Mix_QuickLoad_WAV(buf);
 	OUTPUT:
@@ -2252,6 +898,15 @@ MixPlayingMusic()
 	OUTPUT:
 		RETVAL
 
+int
+MixSetPanning ( channel, left, right )
+	int channel
+	int left
+	int right
+	CODE:
+		RETVAL = Mix_SetPanning(channel, left, right);
+	OUTPUT:
+		RETVAL
 
 void
 MixCloseAudio ()
@@ -2261,297 +916,11 @@ MixCloseAudio ()
 #endif
 
 int
-GLLoadLibrary ( path )
-	char *path
-	CODE:
-		RETVAL = SDL_GL_LoadLibrary(path);
-	OUTPUT:
-		RETVAL
-
-void*
-GLGetProcAddress ( proc )
-	char *proc
-	CODE:
-		RETVAL = SDL_GL_GetProcAddress(proc);
-	OUTPUT:
-		RETVAL
-
-int
-GLSetAttribute ( attr,  value )
-	int        attr
-	int        value
-	CODE:
-		RETVAL = SDL_GL_SetAttribute(attr, value);
-	OUTPUT:
-	        RETVAL
-
-AV *
-GLGetAttribute ( attr )
-	int        attr
-	CODE:
-		int value;
-		RETVAL = newAV();
-		av_push(RETVAL,newSViv(SDL_GL_GetAttribute(attr, &value)));
-		av_push(RETVAL,newSViv(value));
-	OUTPUT:
-	        RETVAL
-
-void
-GLSwapBuffers ()
-	CODE:
-		SDL_GL_SwapBuffers ();
-
-
-int
 BigEndian ()
 	CODE:
 		RETVAL = (SDL_BYTEORDER == SDL_BIG_ENDIAN);
 	OUTPUT:
 		RETVAL
-
-int
-NumJoysticks ()
-	CODE:
-		RETVAL = SDL_NumJoysticks();
-	OUTPUT:
-		RETVAL
-
-char *
-JoystickName ( index )
-	int index
-	CODE:
-		RETVAL = (char*)SDL_JoystickName(index);
-	OUTPUT:
-		RETVAL
-
-SDL_Joystick *
-JoystickOpen ( index ) 
-	int index
-	CODE:
-		RETVAL = SDL_JoystickOpen(index);
-	OUTPUT:
-		RETVAL
-
-int
-JoystickOpened ( index )
-	int index
-	CODE:
-		RETVAL = SDL_JoystickOpened(index);
-	OUTPUT:
-		RETVAL
-
-int
-JoystickIndex ( joystick )
-	SDL_Joystick *joystick
-	CODE:
-		RETVAL = SDL_JoystickIndex(joystick);
-	OUTPUT:
-		RETVAL
-
-int
-JoystickNumAxes ( joystick )
-	SDL_Joystick *joystick
-	CODE:
-		RETVAL = SDL_JoystickNumAxes(joystick);
-	OUTPUT:
-		RETVAL
-
-int
-JoystickNumBalls ( joystick )
-	SDL_Joystick *joystick
-	CODE:
-		RETVAL = SDL_JoystickNumBalls(joystick);
-	OUTPUT:
-		RETVAL
-
-int
-JoystickNumHats ( joystick )
-	SDL_Joystick *joystick
-	CODE:
-		RETVAL = SDL_JoystickNumHats(joystick);
-	OUTPUT:
-		RETVAL
-
-int
-JoystickNumButtons ( joystick )
-	SDL_Joystick *joystick
-	CODE:
-		RETVAL = SDL_JoystickNumButtons(joystick);
-	OUTPUT:
-		RETVAL
-
-void
-JoystickUpdate ()
-	CODE:
-		SDL_JoystickUpdate();
-
-Sint16
-JoystickGetAxis ( joystick, axis )
-	SDL_Joystick *joystick
-	int axis
-	CODE:
-		RETVAL = SDL_JoystickGetAxis(joystick,axis);
-	OUTPUT:
-		RETVAL
-
-Uint8
-JoystickGetHat ( joystick, hat )
-	SDL_Joystick *joystick
-	int hat 
-	CODE:
-		RETVAL = SDL_JoystickGetHat(joystick,hat);
-	OUTPUT:
-		RETVAL
-
-Uint8
-JoystickGetButton ( joystick, button)
-	SDL_Joystick *joystick
-	int button 
-	CODE:
-		RETVAL = SDL_JoystickGetButton(joystick,button);
-	OUTPUT:
-		RETVAL
-
-AV *
-JoystickGetBall ( joystick, ball )
-	SDL_Joystick *joystick
-	int ball 
-	CODE:
-		int success,dx,dy;
-		success = SDL_JoystickGetBall(joystick,ball,&dx,&dy);
-		RETVAL = newAV();
-		av_push(RETVAL,newSViv(success));
-		av_push(RETVAL,newSViv(dx));
-		av_push(RETVAL,newSViv(dy));
-	OUTPUT:
-		RETVAL	
-
-void
-JoystickClose ( joystick )
-	SDL_Joystick *joystick
-	CODE:
-		SDL_JoystickClose(joystick);
-
-Sint16
-JoyAxisEventWhich ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->jaxis.which;
-	OUTPUT:
-		RETVAL
-
-Uint8
-JoyAxisEventAxis ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jaxis.axis;
-        OUTPUT:
-                RETVAL
-
-Sint16
-JoyAxisEventValue ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jaxis.value;
-        OUTPUT:
-                RETVAL
-
-Uint8
-JoyButtonEventWhich ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jbutton.which;
-        OUTPUT:
-                RETVAL
-
-Uint8
-JoyButtonEventButton ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jbutton.button;
-        OUTPUT:
-                RETVAL
-
-Uint8
-JoyButtonEventState ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jbutton.state;
-        OUTPUT:
-                RETVAL
-	
-Uint8
-JoyHatEventWhich ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jhat.which;
-        OUTPUT:
-                RETVAL
-
-Uint8
-JoyHatEventHat ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jhat.hat;
-        OUTPUT:
-                RETVAL
-
-Uint8
-JoyHatEventValue ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jhat.value;
-        OUTPUT:
-                RETVAL
-
-Uint8
-JoyBallEventWhich ( e )
-        SDL_Event *e
-        CODE: 
-                RETVAL = e->jball.which;
-        OUTPUT:
-                RETVAL
-
-Uint8
-JoyBallEventBall ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jball.ball;
-        OUTPUT:
-                RETVAL
-
-Sint16
-JoyBallEventXrel ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jball.xrel;
-        OUTPUT:
-                RETVAL
-
-Sint16
-JoyBallEventYrel ( e )
-        SDL_Event *e
-        CODE:
-                RETVAL = e->jball.yrel;
-        OUTPUT:
-                RETVAL
-
-void
-SetClipRect ( surface, rect )
-	SDL_Surface *surface
-	SDL_Rect *rect
-	CODE:
-		SDL_SetClipRect(surface,rect);
-	
-SDL_Rect*
-GetClipRect ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = (SDL_Rect*) safemalloc(sizeof(SDL_Rect));
-		SDL_GetClipRect(surface,RETVAL);
-	OUTPUT:
-		RETVAL
-
 
 #ifdef HAVE_SDL_NET
 
@@ -2888,544 +1257,11 @@ NetRead32 ( area )
 
 #endif 
 
-#ifdef HAVE_SDL_TTF
-
-int
-TTFInit ()
-	CODE:
-		RETVAL = TTF_Init();
-	OUTPUT:
-		RETVAL
-
-void
-TTFQuit ()
-	CODE:
-		TTF_Quit();
-
-TTF_Font*
-TTFOpenFont ( file, ptsize )
-	char *file
-	int ptsize
-	CODE:
-		RETVAL = TTF_OpenFont(file,ptsize);
-	OUTPUT:
-		RETVAL
-
-int
-TTFGetFontStyle ( font )
-	TTF_Font *font
-	CODE:
-		RETVAL = TTF_GetFontStyle(font);
-	OUTPUT:
-		RETVAL
-
-void
-TTFSetFontStyle ( font, style )
-	TTF_Font *font
-	int style
-	CODE:
-		TTF_SetFontStyle(font,style);
-	
-int
-TTFFontHeight ( font )
-	TTF_Font *font
-	CODE:
-		RETVAL = TTF_FontHeight(font);
-	OUTPUT:
-		RETVAL
-
-int
-TTFFontAscent ( font )
-	TTF_Font *font
-	CODE:
-		RETVAL = TTF_FontAscent(font);
-	OUTPUT:
-		RETVAL
-
-int
-TTFFontDescent ( font )
-	TTF_Font *font
-	CODE:
-		RETVAL = TTF_FontDescent(font);
-	OUTPUT:
-		RETVAL
-
-int
-TTFFontLineSkip ( font )
-	TTF_Font *font
-	CODE:
-		RETVAL = TTF_FontLineSkip(font);
-	OUTPUT:
-		RETVAL
-
-AV*
-TTFGlyphMetrics ( font, ch )
-	TTF_Font *font
-	Uint16 ch
-	CODE:
-		int minx, miny, maxx, maxy, advance;
-		RETVAL = newAV();
-		TTF_GlyphMetrics(font, ch, &minx, &miny, &maxx, &maxy, &advance);
-		av_push(RETVAL,newSViv(minx));
-		av_push(RETVAL,newSViv(miny));
-		av_push(RETVAL,newSViv(maxx));
-		av_push(RETVAL,newSViv(maxy));
-		av_push(RETVAL,newSViv(advance));
-	OUTPUT:
-		RETVAL
-
-AV*
-TTFSizeText ( font, text )
-	TTF_Font *font
-	char *text
-	CODE:
-		int w,h;
-		RETVAL = newAV();
-		if(TTF_SizeText(font,text,&w,&h))
-		{
-			av_push(RETVAL,newSViv(w));
-			av_push(RETVAL,newSViv(h));
-			sv_2mortal((SV*)RETVAL);
-		}
-		else
-		{
-			 printf("TTF error at TTFSizeText: %s \n", TTF_GetError()); 
-			 Perl_croak (aTHX_ "TTF error \n");	
-	
-		}
-		
-	
-	OUTPUT:
-		RETVAL
-
-AV*
-TTFSizeUTF8 ( font, text )
-	TTF_Font *font
-	char *text
-	CODE:
-		int w,h;
-		RETVAL = newAV();
-		if(TTF_SizeUTF8(font,text,&w,&h))
-		{
-			av_push(RETVAL,newSViv(w));
-			av_push(RETVAL,newSViv(h));
-			sv_2mortal((SV*)RETVAL);
-
-		}
-		else
-		{
-			printf("TTF error at TTFSizeUTF8 with : %s \n", TTF_GetError());
-			Perl_croak (aTHX_ "TTF error \n");
-		}
-		
-	OUTPUT:
-		RETVAL
-
-AV*
-TTFSizeUNICODE ( font, text )
-	TTF_Font *font
-	const Uint16 *text
-	CODE:
-		int w,h;
-		RETVAL = newAV();
-		if(TTF_SizeUNICODE(font,text,&w,&h))
-		{
-			av_push(RETVAL,newSViv(w));
-			av_push(RETVAL,newSViv(h));
-			sv_2mortal((SV*)RETVAL);
-
-		}
-		else
-		{
-			printf("TTF error at TTFSizeUNICODE : %s \n", TTF_GetError()); 
-			Perl_croak (aTHX_ "TTF error \n");
-		}
-
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderTextSolid ( font, text, fg )
-	TTF_Font *font
-	char *text
-	SDL_Color *fg
-	CODE:
-		RETVAL = TTF_RenderText_Solid(font,text,*fg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderUTF8Solid ( font, text, fg )
-	TTF_Font *font
-	char *text
-	SDL_Color *fg
-	CODE:
-		RETVAL = TTF_RenderUTF8_Solid(font,text,*fg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderUNICODESolid ( font, text, fg )
-	TTF_Font *font
-	const Uint16 *text
-	SDL_Color *fg
-	CODE:
-		RETVAL = TTF_RenderUNICODE_Solid(font,text,*fg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderGlyphSolid ( font, ch, fg )
-	TTF_Font *font
-	Uint16 ch
-	SDL_Color *fg
-	CODE:
-		RETVAL = TTF_RenderGlyph_Solid(font,ch,*fg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderTextShaded ( font, text, fg, bg )
-	TTF_Font *font
-	char *text
-	SDL_Color *fg
-	SDL_Color *bg
-	CODE:
-		RETVAL = TTF_RenderText_Shaded(font,text,*fg,*bg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderUTF8Shaded( font, text, fg, bg )
-	TTF_Font *font
-	char *text
-	SDL_Color *fg
-	SDL_Color *bg
-	CODE:
-		RETVAL = TTF_RenderUTF8_Shaded(font,text,*fg,*bg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderUNICODEShaded( font, text, fg, bg )
-	TTF_Font *font
-	const Uint16 *text
-	SDL_Color *fg
-	SDL_Color *bg
-	CODE:
-		RETVAL = TTF_RenderUNICODE_Shaded(font,text,*fg,*bg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderGlyphShaded ( font, ch, fg, bg )
-	TTF_Font *font
-	Uint16 ch
-	SDL_Color *fg
-	SDL_Color *bg
-	CODE:
-		RETVAL = TTF_RenderGlyph_Shaded(font,ch,*fg,*bg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderTextBlended( font, text, fg )
-	TTF_Font *font
-	char *text
-	SDL_Color *fg
-	CODE:
-		RETVAL = TTF_RenderText_Blended(font,text,*fg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderUTF8Blended( font, text, fg )
-	TTF_Font *font
-	char *text
-	SDL_Color *fg
-	CODE:
-		RETVAL = TTF_RenderUTF8_Blended(font,text,*fg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderUNICODEBlended( font, text, fg )
-	TTF_Font *font
-	const Uint16 *text
-	SDL_Color *fg
-	CODE:
-		RETVAL = TTF_RenderUNICODE_Blended(font,text,*fg);
-	OUTPUT:
-		RETVAL
-
-SDL_Surface*
-TTFRenderGlyphBlended( font, ch, fg )
-	TTF_Font *font
-	Uint16 ch
-	SDL_Color *fg
-	CODE:
-		RETVAL = TTF_RenderGlyph_Blended(font,ch,*fg);
-	OUTPUT:
-		RETVAL
-
-void
-TTFCloseFont ( font )
-	TTF_Font *font
-	CODE:
-		TTF_CloseFont(font);
-		font=NULL; //to be safe http://sdl.beuc.net/sdl.wiki/SDL_ttf_copy_Functions_Management_TTF_CloseFont
-
-SDL_Surface*
-TTFPutString ( font, mode, surface, x, y, fg, bg, text )
-	TTF_Font *font
-	int mode
-	SDL_Surface *surface
-	int x
-	int y
-	SDL_Color *fg
-	SDL_Color *bg
-	char *text
-	CODE:
-		SDL_Surface *img;
-		SDL_Rect dest;
-		int w,h;
-		dest.x = x;
-		dest.y = y;
-		RETVAL = NULL;
-		switch (mode) {
-			case TEXT_SOLID:
-				img = TTF_RenderText_Solid(font,text,*fg);
-				TTF_SizeText(font,text,&w,&h);
-				dest.w = w;
-				dest.h = h;
-				break;
-			case TEXT_SHADED:
-				img = TTF_RenderText_Shaded(font,text,*fg,*bg);
-				TTF_SizeText(font,text,&w,&h);
-				dest.w = w;
-				dest.h = h;
-				break;
-			case TEXT_BLENDED:
-				img = TTF_RenderText_Blended(font,text,*fg);
-				TTF_SizeText(font,text,&w,&h);
-				dest.w = w;
-				dest.h = h;
-				break;
-			case UTF8_SOLID:
-				img = TTF_RenderUTF8_Solid(font,text,*fg);
-				TTF_SizeUTF8(font,text,&w,&h);
-				dest.w = w;
-				dest.h = h;
-				break;
-			case UTF8_SHADED:
-				img = TTF_RenderUTF8_Shaded(font,text,*fg,*bg);
-				TTF_SizeUTF8(font,text,&w,&h);
-				dest.w = w;
-				dest.h = h;
-				break;
-			case UTF8_BLENDED:
-				img = TTF_RenderUTF8_Blended(font,text,*fg);
-				TTF_SizeUTF8(font,text,&w,&h);
-				dest.w = w;
-				dest.h = h;
-				break;
-			case UNICODE_SOLID:
-				img = TTF_RenderUNICODE_Solid(font,(Uint16*)text,*fg);
-				TTF_SizeUNICODE(font,(Uint16*)text,&w,&h);
-				dest.w = w;
-				dest.h = h;
-				break;
-			case UNICODE_SHADED:
-				img = TTF_RenderUNICODE_Shaded(font,(Uint16*)text,*fg,*bg);
-				TTF_SizeUNICODE(font,(Uint16*)text,&w,&h);
-				dest.w = w;
-				dest.h = h;
-				break;
-			case UNICODE_BLENDED:
-				img = TTF_RenderUNICODE_Blended(font,(Uint16*)text,*fg);
-				TTF_SizeUNICODE(font,(Uint16*)text,&w,&h);
-				dest.w = w;
-				dest.h = h;
-				break;
-			default:
-				img = TTF_RenderText_Shaded(font,text,*fg,*bg);
-				TTF_SizeText(font,text,&w,&h);
-				dest.w = w;
-				dest.h = h;
-		}
-		if ( img && img->format && img->format->palette ) {
-			SDL_Color *c = &img->format->palette->colors[0];
-			Uint32 key = SDL_MapRGB( img->format, c->r, c->g, c->b );
-			SDL_SetColorKey(img,SDL_SRCCOLORKEY,key );
-			if (0 > SDL_BlitSurface(img,NULL,surface,&dest)) {
-				SDL_FreeSurface(img);
-				RETVAL = NULL;	
-			} else {
-				RETVAL = img;
-			}
-		}
-	OUTPUT:
-		RETVAL
-
-#endif
-
-SDL_Overlay*
-CreateYUVOverlay ( width, height, format, display )
-	int width
-	int height
-	Uint32 format
-	SDL_Surface *display
-	CODE:
-		RETVAL = SDL_CreateYUVOverlay ( width, height, format, display );
-	OUTPUT:
-		RETVAL
-
-int
-LockYUVOverlay ( overlay )
-	SDL_Overlay *overlay
-	CODE:
-		RETVAL = SDL_LockYUVOverlay(overlay);
-	OUTPUT:
-		RETVAL
-
-void
-UnlockYUVOverlay ( overlay )
-        SDL_Overlay *overlay
-        CODE:
-                SDL_UnlockYUVOverlay(overlay);
-
-int
-DisplayYUVOverlay ( overlay, dstrect )
-	SDL_Overlay *overlay
-	SDL_Rect *dstrect
-	CODE:
-		RETVAL = SDL_DisplayYUVOverlay ( overlay, dstrect );
-	OUTPUT:
-		RETVAL
-
-void
-FreeYUVOverlay ( overlay )
-        SDL_Overlay *overlay
-        CODE:
-                SDL_FreeYUVOverlay ( overlay );
-
-Uint32
-OverlayFormat ( overlay, ... )
-	SDL_Overlay *overlay
-	CODE:
-		if ( items > 1 ) 
-			overlay->format = SvIV(ST(1));
-		RETVAL = overlay->format;
-	OUTPUT:
-		RETVAL
-
-int 
-OverlayW ( overlay, ... )
-	SDL_Overlay *overlay
-	CODE:
-		if ( items > 1 ) 
-			overlay->w = SvIV(ST(1));
-		RETVAL = overlay->w;
-	OUTPUT:
-		RETVAL
-
-int
-OverlayH ( overlay, ... )
-	SDL_Overlay *overlay
-	CODE:
-		if ( items > 1 )
-			overlay->h = SvIV(ST(1));
-		RETVAL = overlay->h;
-	OUTPUT:
-		RETVAL 
-
-int
-OverlayPlanes ( overlay, ... )
-        SDL_Overlay *overlay
-        CODE:
-                if ( items > 1 )
-                        overlay->planes = SvIV(ST(1));
-                RETVAL = overlay->planes;
-        OUTPUT:
-                RETVAL
-
-Uint32
-OverlayHW ( overlay )
-	SDL_Overlay *overlay
-	CODE:
-		RETVAL = overlay->hw_overlay;
-	OUTPUT:
-		RETVAL
-
-Uint16*
-OverlayPitches ( overlay )
-	SDL_Overlay *overlay
-	CODE:
-		RETVAL = overlay->pitches;
-	OUTPUT:
-		RETVAL
-
-Uint8**
-OverlayPixels ( overlay )
-	SDL_Overlay *overlay
-	CODE:
-		RETVAL = overlay->pixels;
-	OUTPUT:
-		RETVAL
-
-int
-WMToggleFullScreen ( surface )
-	SDL_Surface *surface
-	CODE:
-		RETVAL = SDL_WM_ToggleFullScreen(surface);
-	OUTPUT:
-		RETVAL
-
-Uint32
-WMGrabInput ( mode )
-	Uint32 mode
-	CODE:
-		RETVAL = SDL_WM_GrabInput(mode);
-	OUTPUT:
-		RETVAL
-
-int
-WMIconifyWindow ()
-	CODE:
-		RETVAL = SDL_WM_IconifyWindow();
-	OUTPUT:
-		RETVAL
-
-int
-ResizeEventW ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->resize.w;
-	OUTPUT:
-		RETVAL
-
-int
-ResizeEventH ( e )
-	SDL_Event *e
-	CODE:
-		RETVAL = e->resize.h;
-	OUTPUT:
-		RETVAL
-
 char*
 AudioDriverName ()
 	CODE:
 		char name[32];
 		RETVAL = SDL_AudioDriverName(name,32);
-	OUTPUT:
-		RETVAL
-
-Uint32
-GetKeyState ( k )
-	SDLKey k
-	CODE:
-		if (k >= SDLK_LAST) Perl_croak (aTHX_ "Key out of range");	
-		RETVAL = SDL_GetKeyState(NULL)[k];
 	OUTPUT:
 		RETVAL
 
@@ -3712,6 +1548,8 @@ GFXRotoZoom ( src, angle, zoom, smooth)
 	double angle
 	double zoom
 	int smooth
+	PREINIT:
+		char* CLASS = "SDL::Surface";
 	CODE:
 		RETVAL = rotozoomSurface( src, angle, zoom, smooth);
 	OUTPUT:
@@ -3723,6 +1561,8 @@ GFXZoom ( src, zoomx, zoomy, smooth)
 	double zoomx
 	double zoomy
 	int smooth
+	PREINIT:
+		char* CLASS = "SDL::Surface";
 	CODE:
 		RETVAL = zoomSurface( src, zoomx, zoomy, smooth);
 	OUTPUT:
@@ -4594,6 +2434,64 @@ Sound_Seek ( sample, ms )
 	Uint32 ms
 	CODE:
 		RETVAL = Sound_Seek(sample,ms);
+	OUTPUT:
+		RETVAL
+
+#endif
+
+#ifdef HAVE_SDL_TTF
+
+int
+TTF_Init ()
+	CODE:
+		RETVAL = TTF_Init();
+	OUTPUT:
+		RETVAL
+
+void
+TTF_Quit ()
+	CODE:
+		TTF_Quit();
+
+TTF_Font*
+TTF_OpenFont ( file, ptsize )
+	char *file
+	int ptsize
+	CODE:
+		char* CLASS = "SDL::TTF_Font";
+		RETVAL = TTF_OpenFont(file,ptsize);
+	OUTPUT:
+		RETVAL
+
+AV*
+TTF_SizeText ( font, text )
+	TTF_Font *font
+	char *text
+	CODE:
+		int w,h;
+		RETVAL = newAV();
+		if(TTF_SizeText(font,text,&w,&h))
+		{
+			printf("TTF error at TTFSizeText: %s \n", TTF_GetError());
+			Perl_croak (aTHX_ "TTF error \n");
+		}
+		else
+		{
+			av_push(RETVAL,newSViv(w));
+			av_push(RETVAL,newSViv(h));
+			sv_2mortal((SV*)RETVAL);
+		}
+	OUTPUT:
+		RETVAL
+
+SDL_Surface*
+TTF_RenderText_Blended ( font, text, fg )
+	TTF_Font *font
+	char *text
+	SDL_Color *fg
+	CODE:
+		char* CLASS = "SDL::Surface";
+		RETVAL = TTF_RenderText_Blended(font,text,*fg);
 	OUTPUT:
 		RETVAL
 

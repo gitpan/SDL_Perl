@@ -1,0 +1,16 @@
+=pod
+
+=head1 NAME
+
+SDL::Video - Bindings to the MultiThread category in SDL API
+
+=head2 CATEGORY
+
+Core, MultiThread
+
+=head1 SYNOPSIS
+
+This module is not an object. 
+
+
+=cut

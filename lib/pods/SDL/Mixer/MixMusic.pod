@@ -1,0 +1,15 @@
+=pod
+
+=head1 NAME
+
+SDL::MixMusic -- SDL Bindings for structure SDL_MixMusic
+
+=head1 CATEGORY
+
+Core, Mixer, Structure
+
+=head1 SYNOPSIS
+
+This structure is not directly usable. SDL Perl bindings handle the construction and destruction for you.
+
+=cut

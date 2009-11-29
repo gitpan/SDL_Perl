@@ -82,7 +82,7 @@ sub print {
 	SDL::FreeSurface($self->{-surface}) if ($$self{-surface});
 
 	$$self{-surface} = SDL::TTFPutString($$self{-font},$$self{-mode},
-		$$surface,$x,$y,${$$self{-fg}},${$$self{-bg}},join("",@text));
+		$$surface,$x,$y,$self->{-fg},$self->{-bg},join("",@text));
 
 	croak "Could not print \"", join("",@text), "\" to surface, ",
 		SDL::GetError(), "\n" unless ($$self{-surface});
@@ -179,29 +179,3 @@ croak "Could not initialize True Type Fonts\n"
 	if ( SDL::TTFInit() < 0);
 
 1;
-
-__END__;
-
-=pod
-
-=head1 NAME
-
-SDL::TTFont - a SDL perl extension
-
-=head1 SYNOPSIS
-
-  $font = new TTFont -name => "Utopia.ttf", -size => 18;
-	
-=head1 DESCRIPTION
-
-L<SDL::TTFont> is a module for applying true type fonts to L<SDL::Surface>.
-
-=head1 AUTHOR
-
-David J. Goehrig
-
-=head1 SEE ALSO
-
-L<perl> L<SDL::Surface>
-
-=cut
